@@ -1,4 +1,4 @@
-# VirtualDJ Library Tool
+# DJ Library Manager
 
 ![PowerShell](https://img.shields.io/badge/PowerShell-7.6+-5391FE?logo=powershell)
 ![Platform](https://img.shields.io/badge/Platform-Windows-blue)
@@ -8,7 +8,7 @@
 
 ## Overview
 
-VirtualDJ Library Tool is a professional PowerShell application for analysing, maintaining and repairing VirtualDJ music libraries.
+DJ Library Manager is a professional PowerShell application for analysing, maintaining and repairing VirtualDJ music libraries.
 
 The project is designed to safely inspect, organise and recover large DJ music collections while maintaining full compatibility with VirtualDJ.
 

@@ -1,0 +1,26 @@
+{
+  "Application": {
+    "Name": "VirtualDJ Library Tool",
+    "Version": "1.0.0",
+    "Author": "Simon Jones"
+  },
+
+  "Logging": {
+    "Enabled": true,
+    "LogFolder": "Logs",
+    "LogLevel": "Information"
+  },
+
+  "Reports": {
+    "OutputFolder": "Reports"
+  },
+
+  "Library": {
+    "IndexFolder": "Data"
+  },
+
+  "Display": {
+    "ShowBanner": true,
+    "ShowProgress": true
+  }
+}
