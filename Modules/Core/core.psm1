@@ -3,7 +3,7 @@
 # File:   Core.psm1
 # Version: 1.0.0
 #
-# VirtualDJ Library Tool
+# DJ Library Manager
 # ============================================================================
 
 Set-StrictMode -Version Latest

@@ -13,19 +13,19 @@ GUID = 'b4d6f7de-3c8b-4a95-8b44-7a5e91b84b8e'
 Author = 'Simon Jones'
 
 # Company or vendor.
-CompanyName = 'VirtualDJ Library Tool'
+CompanyName = 'DJ Library Manager'
 
 # Copyright statement.
 Copyright = '(c) 2026 Simon Jones. All rights reserved.'
 
 # Description.
-Description = 'Core framework for the VirtualDJ Library Tool.'
+Description = 'Core framework for DJ Library Manager.'
 
 # Minimum version of PowerShell required.
 PowerShellVersion = '7.0'
 
 # Functions exported from this module.
-FunctionsToExport = @()
+FunctionsToExport = '*'
 
 # Cmdlets exported from this module.
 CmdletsToExport = @()
