@@ -55,7 +55,7 @@ DJ Library Manager
 
         Path = (Resolve-Path $Path).Path
 
-        Database = $xml
+        Xml = $xml
 
         Loaded = Get-Date
 
