@@ -39,6 +39,10 @@ Converts a VirtualDJ Song node into a DJLM media object.
 
         Key = Get-XmlAttribute -Node $scan -Name "Key"
 
+        Duration = [TimeSpan]::FromSeconds(
+            [double](Get-XmlAttribute -Node $infos -Name "SongLength")
+        )
+
         DateFirstSeen = ConvertFrom-UnixTime (
             Get-XmlAttribute -Node $infos -Name "FirstSeen"
         )

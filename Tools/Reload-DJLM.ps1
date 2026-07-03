@@ -25,8 +25,17 @@ foreach ($module in $modules) {
 
 }
 
-Import-Module "$PSScriptRoot\..\Modules\Core" -Force
-Import-Module "$PSScriptRoot\..\Modules\VirtualDJ" -Force
+Get-ChildItem .\Modules -Directory | ForEach-Object {
+
+    $manifest = Join-Path $_.FullName "$($_.Name).psd1"
+
+    if (Test-Path $manifest) {
+
+        Import-Module $manifest -Force
+
+    }
+
+}
 
 Write-Host ""
 Write-Host "Modules Reloaded Successfully." -ForegroundColor Green
