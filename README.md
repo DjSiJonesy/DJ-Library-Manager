@@ -2,52 +2,58 @@
 
 ![PowerShell](https://img.shields.io/badge/PowerShell-7.6+-5391FE?logo=powershell)
 ![Platform](https://img.shields.io/badge/Platform-Windows-blue)
-![Status](https://img.shields.io/badge/Status-In%20Development-orange)
+![Version](https://img.shields.io/badge/Version-0.9.0--alpha-orange)
+![Status](https://img.shields.io/badge/Status-Active%20Development-brightgreen)
 
 ---
 
 ## Overview
 
-DJ Library Manager is a professional PowerShell application for analysing, maintaining and repairing VirtualDJ music libraries.
+DJ Library Manager (DJLM) is a provider-independent PowerShell application for analysing, organising and recovering professional DJ music libraries.
 
-The project is designed to safely inspect, organise and recover large DJ music collections while maintaining full compatibility with VirtualDJ.
+Although currently focused on **VirtualDJ**, the architecture has been designed to support multiple DJ platforms including rekordbox, Serato, Engine DJ and Traktor without changing the core application.
 
-The long-term goal is to provide an intelligent maintenance toolkit capable of:
-
-- Library auditing
-- Missing track detection
-- Duplicate detection
-- Drive analysis
-- Automatic path repair
-- Library health reporting
-- Playlist intelligence
+DJLM helps DJs understand the health of their music collection before safely repairing problems such as missing tracks, moved files and duplicate media.
 
 ---
 
-## Current Status
+## Current Features
 
-**Version**
+### Provider Support
 
-Development (Milestone 1)
+- ✅ VirtualDJ database import
+- ✅ Provider-independent media model
+- 🚧 rekordbox (planned)
+- 🚧 Serato (planned)
+- 🚧 Engine DJ (planned)
 
-Current focus:
+### Library Analysis
 
-- Repository foundation
-- Core framework
-- VirtualDJ database importer
+- ✅ Music library scanning
+- ✅ Duplicate track detection
+- ✅ Missing file detection
+- ✅ Moved file detection
+- ✅ Orphan file detection
+- ✅ Library statistics
+- ✅ Library health analysis
+- ✅ Intelligent matching engine
 
----
+### Dashboard
 
-## Planned Features
+- ✅ Console dashboard
+- ✅ Health score
+- ✅ Library summary
+- ✅ Analysis summary
+- ✅ Recommendations
+- ✅ Dynamic application versioning
 
-- Import VirtualDJ database.xml
-- Scan music library
-- Compare library against VirtualDJ
-- Detect missing tracks
-- Detect duplicate tracks
-- Intelligent confidence matching
-- Automatic repair engine
-- Health reports
+### Application
+
+- ✅ Modular architecture
+- ✅ Application bootstrap
+- ✅ Configuration management
+- ✅ Structured logging
+- ✅ Provider-independent design
 
 ---
 
@@ -55,9 +61,10 @@ Current focus:
 
 ```
 Modules/
+    Analysis
     Core
+    Dashboard
     Library
-    Reports
     Recovery
     VirtualDJ
 
@@ -73,34 +80,114 @@ Tools/
 
 ---
 
-## Requirements
+## Architecture
 
-- Windows 11
-- PowerShell 7.6 or later
-- Visual Studio Code
+DJLM is built around a provider-independent architecture.
+
+```
+                 DJ Library Manager
+
+                        │
+                 Application Core
+                        │
+        ┌───────────────┼───────────────┐
+        ▼               ▼               ▼
+   VirtualDJ      rekordbox       Serato
+        │               │               │
+        └───────────────┼───────────────┘
+                        │
+              Provider Translation
+                        │
+                        ▼
+                 DJLM Media Model
+                        │
+        ┌───────────────┼───────────────┐
+        ▼               ▼               ▼
+     Library       Analysis        Recovery
+                        │
+                        ▼
+                    Dashboard
+```
+
+---
+
+## Running DJLM
+
+Launch the application from the project root:
+
+```powershell
+.\Start.ps1
+```
+
+DJLM will automatically:
+
+1. Load all modules.
+2. Load the application configuration.
+3. Import the VirtualDJ database.
+4. Scan configured music libraries.
+5. Analyse the library.
+6. Calculate library health.
+7. Display the dashboard.
 
 ---
 
 ## Roadmap
 
-### Milestone 1
+### Completed
 
-Project Foundation
+- ✅ Modular architecture
+- ✅ Provider-independent media model
+- ✅ VirtualDJ provider
+- ✅ Library scanning
+- ✅ Analysis engine
+- ✅ Dashboard
+- ✅ Application bootstrap
 
-### Milestone 2
+### In Progress
 
-Classification Engine
+- 🚧 Recovery Engine
+- 🚧 Path repair
+- 🚧 Report generation
 
-### Milestone 3
+### Planned
 
-Matching Engine
+- rekordbox support
+- Serato support
+- Engine DJ support
+- Audio fingerprinting
+- AI-assisted recommendations
+- Plugin architecture
 
-### Milestone 4
+---
 
-Automatic Repair
+## Requirements
+
+- Windows 10/11
+- PowerShell 7.6 or later
+- VirtualDJ (currently supported provider)
+
+---
+
+## Documentation
+
+Additional documentation can be found in the **Docs** folder, including:
+
+- Vision
+- System Architecture
+- Architecture Decision Records (ADRs)
+- Development Roadmap
+- Coding Standards
+
+---
+
+## Contributing
+
+DJ Library Manager is currently under active development.
+
+Feedback, feature suggestions and issue reports are welcome through GitHub Issues.
 
 ---
 
 ## License
 
-To be confirmed.
+License to be confirmed.

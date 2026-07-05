@@ -4,8 +4,6 @@ DJ Library Manager
 Application Bootstrap
 
 Entry point for the DJ Library Manager application.
-
-Protect the music. Respect the DJ.
 ===============================================================================
 #>
 
@@ -16,37 +14,34 @@ Set-StrictMode -Version Latest
 
 $ErrorActionPreference = 'Stop'
 
-Write-Host ""
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host " DJ Library Manager v0.1.0" -ForegroundColor Cyan
-Write-Host " Protect the music. Respect the DJ." -ForegroundColor DarkGray
-Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host ""
-
 try {
 
-    Write-Host "Loading Core Module..." -ForegroundColor Gray
-    Import-Module "$PSScriptRoot\Modules\Core" -Force
+    #
+    # Import all modules
+    #
 
-    Write-Host "Loading VirtualDJ Module..." -ForegroundColor Gray
-    Import-Module "$PSScriptRoot\Modules\VirtualDJ" -Force
+Get-ChildItem "$PSScriptRoot\Modules" -Directory |
+    Where-Object {
+        Test-Path (Join-Path $_.FullName "$($_.Name).psd1")
+    } |
+    Sort-Object Name |
+    ForEach-Object {
+        Import-Module $_.FullName -Force
+    }
 
-    Write-Log "Application started." -Level Information
+    #
+    # Start the application
+    #
 
-    $config = Get-Configuration
-
-    Write-Log "Configuration loaded." -Level Success
-
-    Write-Host ""
-    Write-Host "DJ Library Manager is ready." -ForegroundColor Green
-    Write-Host ""
+    Start-DJLM
 
 }
 catch {
 
     Write-Host ""
-    Write-Host "APPLICATION STARTUP FAILED" -ForegroundColor Red
+    Write-Host "DJ Library Manager failed to start." -ForegroundColor Red
     Write-Host ""
+
     Write-Host $_.Exception.Message -ForegroundColor Yellow
     Write-Host ""
 

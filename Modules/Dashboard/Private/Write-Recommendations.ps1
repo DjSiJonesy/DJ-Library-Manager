@@ -1,5 +1,10 @@
 function Write-Recommendations {
 
+<#
+.SYNOPSIS
+Displays library recommendations.
+#>
+
     [CmdletBinding()]
     param(
 
@@ -8,19 +13,17 @@ function Write-Recommendations {
 
     )
 
-    Write-Section "Recommendations"
+    if (-not $Recommendations -or $Recommendations.Count -eq 0) {
 
-    if (-not $Recommendations) {
-
-        Write-Host "No recommendations."
+        Write-Host "No recommendations. Your library is in excellent health."
 
         return
 
     }
 
-    foreach ($item in $Recommendations) {
+    foreach ($Recommendation in $Recommendations) {
 
-        Write-Host (" • {0}" -f $item)
+        Write-Host (" • {0}" -f $Recommendation)
 
     }
 

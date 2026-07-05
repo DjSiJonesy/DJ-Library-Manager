@@ -1,19 +1,26 @@
 function Write-Banner {
 
+<#
+.SYNOPSIS
+Displays the DJ Library Manager application banner.
+#>
+
     [CmdletBinding()]
     param()
 
-    $line = ("═" * 62)
+    $Version = Get-DJLMVersion
 
-    Write-Host $line
+    $Line = ("═" * 62)
+
+    Write-Host $Line
     Write-Host
     Write-Host "               DJ Library Manager"
     Write-Host
-    Write-Host "                  v0.3.0-alpha"
+    Write-Host "                  v$Version"
     Write-Host
-    Write-Host "         Protect the music. Respect the DJ."
+    Write-Host "   Intelligent Music Management for Professional DJs."
     Write-Host
-    Write-Host $line
+    Write-Host $Line
     Write-Host
 
 }

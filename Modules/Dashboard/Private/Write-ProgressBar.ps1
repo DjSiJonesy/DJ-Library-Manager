@@ -1,5 +1,10 @@
 function Write-ProgressBar {
 
+<#
+.SYNOPSIS
+Displays a text-based progress bar.
+#>
+
     [CmdletBinding()]
     param(
 
@@ -10,14 +15,12 @@ function Write-ProgressBar {
 
     )
 
-    $length = 30
+    $Length = 30
 
-    $filled = [math]::Round(($Percent / 100) * $length)
+    $Filled = [math]::Round(($Percent / 100) * $Length)
 
-    $bar = ("█" * $filled).PadRight($length, "░")
+    $Bar = ("█" * $Filled).PadRight($Length, "░")
 
-    Write-Host $bar
-    Write-Host
-    Write-Host ("{0}%" -f $Percent)
+    Write-Host ("{0} {1}%" -f $Bar, $Percent)
 
 }

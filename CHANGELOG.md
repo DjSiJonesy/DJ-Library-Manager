@@ -10,20 +10,76 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 
 ### Planned
 
-#### Dashboard
-- Redesign console dashboard around `DJLM.LibraryAnalysis`.
-- Add summary health reporting.
-- Improve recommendations display.
-
-#### Reporting
-- Markdown analysis reports.
-- HTML reporting.
-- PDF reporting.
-
 #### Recovery
 - Automatic path repair.
 - Preview mode.
 - Undo support.
+- Relink moved media.
+- Provider database repair.
+
+#### Reporting
+- Markdown analysis reports.
+- HTML reports.
+- PDF reports.
+
+#### Providers
+- rekordbox support.
+- Serato support.
+- Engine DJ support.
+
+#### Future
+- Audio fingerprinting.
+- AI-assisted recommendations.
+- Plugin architecture.
+
+---
+
+## [0.9.0-alpha] - 2026-07-05
+
+### Added
+
+#### Application
+
+- Added `Start-DJLM` application orchestrator.
+- Simplified `Start.ps1` into a lightweight bootstrapper.
+- Added automatic module discovery and loading.
+
+#### Dashboard
+
+- Integrated Library Statistics, Health and Analysis into a single dashboard.
+- Added Library Analysis summary section.
+- Added Files Scanned summary.
+- Added dynamic application version display.
+- Added overall library health status.
+- Improved dashboard presentation.
+
+#### Core
+
+- Added application manifest (`DJLM.psd1`).
+- Added `Get-DJLMVersion`.
+- Introduced application metadata service.
+- Improved application startup workflow.
+
+#### Configuration
+
+- Expanded application configuration for provider support.
+- Added provider configuration structure.
+- Added configurable library paths.
+
+### Changed
+
+- Refactored application startup around `Start-DJLM`.
+- Separated bootstrap logic from application orchestration.
+- Replaced hard-coded version information with dynamic application versioning.
+- Improved Dashboard presentation and readability.
+- Updated configuration structure to support future providers.
+
+### Improved
+
+- Reduced manual startup from multiple commands to a single application entry point.
+- Simplified application initialisation.
+- Improved separation of responsibilities across Core, Dashboard and Provider modules.
+- Established application-level metadata independent of module manifests.
 
 ---
 
@@ -32,6 +88,7 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 ### Added
 
 #### Analysis Module
+
 - Added provider-independent Analysis module.
 - Added duplicate detection engine.
 - Added missing file detection.
@@ -40,6 +97,7 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 - Added library analysis orchestration.
 
 #### Analysis Engine
+
 - Added `Compare-MediaItem`.
 - Added `Get-MatchScore`.
 - Added `Test-StrongMatch`.
@@ -50,11 +108,13 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 - Added `Get-LibraryAnalysis`.
 
 #### Library Module
+
 - Added filesystem scanning.
 - Added `Get-LibraryFiles`.
 - Added standardised Library File objects.
 
 #### VirtualDJ
+
 - Added media duration support.
 - Improved provider-independent media model.
 
@@ -121,9 +181,9 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 
 Planned future capabilities include:
 
-- Additional provider support
-- Dashboard improvements
-- Library repair
-- Audio fingerprinting
-- AI-assisted recommendations
-- Plugin architecture
+- Provider-independent recovery engine.
+- Additional DJ software providers.
+- Audio fingerprinting.
+- AI-assisted recommendations.
+- Plugin architecture.
+- Cross-platform support.

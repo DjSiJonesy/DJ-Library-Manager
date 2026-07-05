@@ -1,8 +1,27 @@
 {
   "Application": {
-    "Name": "VirtualDJ Library Tool",
-    "Version": "1.0.0",
-    "Author": "Simon Jones"
+    "Name": "DJ Library Manager",
+    "Version": "0.9.0-alpha",
+    "Author": "Simon Jones",
+    "Company": "SMSounds Limited"
+  },
+
+  "Providers": {
+    "Default": "VirtualDJ",
+
+    "VirtualDJ": {
+      "DatabasePath": "C:\\Users\\Simon\\AppData\\Local\\VirtualDJ\\database.xml"
+    }
+  },
+
+  "Library": {
+    "Paths": [
+      "C:\\Users\\Simon\\Music"
+    ],
+
+    "Recurse": true,
+
+    "IndexFolder": "Data"
   },
 
   "Logging": {
@@ -13,10 +32,6 @@
 
   "Reports": {
     "OutputFolder": "Reports"
-  },
-
-  "Library": {
-    "IndexFolder": "Data"
   },
 
   "Display": {
