@@ -10,24 +10,37 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 
 ### Planned
 
-#### Recovery
-- Automatic path repair.
-- Preview mode.
+#### Discovery
+
+- Automatic detection of installed DJ software.
+- Automatic discovery of provider databases.
+- Automatic discovery of music libraries.
+- Automatic drive detection and classification.
+- Provider configuration wizard.
+- Environment discovery for future GUI.
+
+#### Organisation
+
+- Rule-based library organisation.
+- Library organisation planning.
+- Preview file moves.
+- Automatic folder creation.
 - Undo support.
-- Relink moved media.
-- Provider database repair.
 
 #### Reporting
-- Markdown analysis reports.
+
+- Markdown reports.
 - HTML reports.
 - PDF reports.
 
 #### Providers
+
 - rekordbox support.
 - Serato support.
 - Engine DJ support.
 
 #### Future
+
 - Audio fingerprinting.
 - AI-assisted recommendations.
 - Plugin architecture.
@@ -43,6 +56,7 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 - Added `Start-DJLM` application orchestrator.
 - Simplified `Start.ps1` into a lightweight bootstrapper.
 - Added automatic module discovery and loading.
+- Added dynamic application versioning via `DJLM.psd1`.
 
 #### Dashboard
 
@@ -50,36 +64,78 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 - Added Library Analysis summary section.
 - Added Files Scanned summary.
 - Added dynamic application version display.
-- Added overall library health status.
-- Improved dashboard presentation.
+- Added overall library health score and status.
+- Improved dashboard presentation and formatting.
+
+#### Recovery Module
+
+- Added provider-independent Recovery module.
+- Added `Get-RecoveryPlan`.
+- Added `Show-RecoveryPlan`.
+- Added `Approve-RecoveryPlan`.
+- Added `Invoke-RecoveryPlan`.
+- Added `Repair-MovedFiles`.
+- Added Recovery Plan domain model.
+- Added Recovery Action domain model.
+- Added recovery preview workflow.
+- Added recovery approval workflow.
+- Added recovery execution orchestration.
+
+#### VirtualDJ
+
+- Added `Save-VirtualDJDatabase`.
+- Added `Update-VirtualDJMediaPath`.
+- Added provider write support.
+- Added in-memory database update workflow.
+- Added structured provider update result objects.
+- Added optional database backup support.
 
 #### Core
 
 - Added application manifest (`DJLM.psd1`).
 - Added `Get-DJLMVersion`.
+- Added `Get-ProviderConfiguration`.
 - Introduced application metadata service.
+- Moved shared console helper functions into the Core module.
 - Improved application startup workflow.
 
 #### Configuration
 
-- Expanded application configuration for provider support.
+- Expanded application configuration for multi-provider support.
 - Added provider configuration structure.
 - Added configurable library paths.
+- Added recovery configuration.
+- Added organisation configuration.
+
+#### Documentation
+
+- Added ADR-007 Recovery Architecture.
+- Added ADR-008 Library Organisation.
 
 ### Changed
 
 - Refactored application startup around `Start-DJLM`.
 - Separated bootstrap logic from application orchestration.
 - Replaced hard-coded version information with dynamic application versioning.
+- Refactored shared console helper functions into the Core module.
+- Updated configuration structure to support multiple DJ providers.
 - Improved Dashboard presentation and readability.
-- Updated configuration structure to support future providers.
+- Recovery workflow now follows:
+  - Analyse
+  - Plan
+  - Approve
+  - Execute
+  - Save
 
 ### Improved
 
 - Reduced manual startup from multiple commands to a single application entry point.
 - Simplified application initialisation.
-- Improved separation of responsibilities across Core, Dashboard and Provider modules.
+- Improved separation of responsibilities across Core, Dashboard, Recovery and Provider modules.
 - Established application-level metadata independent of module manifests.
+- Introduced the first complete end-to-end recovery pipeline.
+- Introduced safe provider write support using in-memory updates before persistence.
+- Strengthened provider-independent architecture.
 
 ---
 
@@ -174,16 +230,3 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 - Corrected module exports.
 - Improved Strict Mode compatibility.
 - Improved module loading.
-
----
-
-## Future
-
-Planned future capabilities include:
-
-- Provider-independent recovery engine.
-- Additional DJ software providers.
-- Audio fingerprinting.
-- AI-assisted recommendations.
-- Plugin architecture.
-- Cross-platform support.
