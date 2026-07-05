@@ -1,18 +1,25 @@
 function Import-VirtualDJDatabase {
+
 <#
 .SYNOPSIS
 Imports a VirtualDJ database.xml file.
 
 .DESCRIPTION
-Loads a VirtualDJ database.xml file and returns the XML document.
-This is the foundation of all VirtualDJ analysis within DJ Library
-Manager.
+Loads a VirtualDJ database.xml file and returns a VirtualDJ
+database object.
+
+If no path is supplied, the configured database path from
+Settings.json is used.
 
 .PARAMETER Path
-Path to the VirtualDJ database.xml file.
+Optional path to the VirtualDJ database.xml file.
 
 .EXAMPLE
-$db = Import-VirtualDJDatabase -Path "D:\VirtualDJ\database.xml"
+$db = Import-VirtualDJDatabase
+
+.EXAMPLE
+$db = Import-VirtualDJDatabase `
+    -Path "D:\VirtualDJ\database.xml"
 
 .NOTES
 DJ Library Manager
@@ -21,13 +28,30 @@ DJ Library Manager
     [CmdletBinding()]
     param(
 
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$Path
+        [string]
+        $Path
 
     )
 
-    Write-Log "Importing VirtualDJ database..."
+    #
+    # Use configured path if one wasn't supplied
+    #
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+
+        $Configuration = Get-Configuration
+
+        if (-not $Configuration.VirtualDJ.DatabasePath) {
+
+            throw "VirtualDJ.DatabasePath is not configured in Settings.json."
+
+        }
+
+        $Path = $Configuration.VirtualDJ.DatabasePath
+
+    }
+
+    Write-Log "Importing VirtualDJ database..." -Level Information
 
     if (-not (Test-Path $Path)) {
 
@@ -52,6 +76,8 @@ DJ Library Manager
     Write-Log "VirtualDJ database loaded." -Level Success
 
     return [PSCustomObject]@{
+
+        PSTypeName = 'DJLM.VirtualDJDatabase'
 
         Path = (Resolve-Path $Path).Path
 

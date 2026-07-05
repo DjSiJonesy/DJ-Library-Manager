@@ -6,36 +6,67 @@
     "Company": "SMSounds Limited"
   },
 
-  "Providers": {
-    "Default": "VirtualDJ",
-
-    "VirtualDJ": {
-      "DatabasePath": "C:\\Users\\Simon\\AppData\\Local\\VirtualDJ\\database.xml"
-    }
-  },
-
-  "Library": {
-    "Paths": [
-      "C:\\Users\\Simon\\Music"
-    ],
-
-    "Recurse": true,
-
-    "IndexFolder": "Data"
-  },
-
   "Logging": {
     "Enabled": true,
     "LogFolder": "Logs",
     "LogLevel": "Information"
   },
 
+  "Display": {
+    "ShowBanner": true,
+    "ShowProgress": true
+  },
+
+  "Library": {
+    "Path": "C:\\Users\\Simon\\Music",
+    "IndexFolder": "Data",
+    "Recurse": true,
+    "CreateIndex": true
+  },
+
   "Reports": {
     "OutputFolder": "Reports"
   },
 
-  "Display": {
-    "ShowBanner": true,
-    "ShowProgress": true
+  "Recovery": {
+    "RequireApproval": true,
+    "CreateBackups": true,
+    "VerifyChanges": true
+  },
+
+  "Organisation": {
+    "Enabled": true,
+    "PreviewOnly": true,
+    "CreateUndoLog": true,
+    "DefaultRoot": "C:\\Users\\Simon\\Music\\DJ_Library"
+  },
+
+  "Providers": {
+
+    "VirtualDJ": {
+      "Enabled": true,
+      "DatabasePath": "C:\\Users\\Simon\\AppData\\Local\\VirtualDJ\\database.xml",
+      "BackupOnSave": true
+    },
+
+    "rekordbox": {
+      "Enabled": false,
+      "DatabasePath": "",
+      "BackupOnSave": true
+    },
+
+    "Serato": {
+      "Enabled": false,
+      "LibraryPath": "",
+      "BackupOnSave": true
+    },
+
+    "EngineDJ": {
+      "Enabled": false,
+      "DatabasePath": "",
+      "BackupOnSave": true
+    }
+
   }
+
 }

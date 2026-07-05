@@ -2,22 +2,33 @@ function Repair-MovedFiles {
 
 <#
 .SYNOPSIS
-Previews moved file repairs.
+Processes approved moved file recovery actions.
 
 .DESCRIPTION
-Displays the approved RepairMovedFile recovery actions.
+Processes approved RepairMovedFile recovery actions.
 
-No modifications are made to either the provider database or
-the filesystem.
+When no provider database is supplied, a preview of the
+planned repairs is displayed.
 
-This command exists to allow users to review proposed repairs
-before execution support is introduced.
+When a provider database is supplied, the provider database
+is updated in memory only.
+
+Saving the updated database is the responsibility of the
+caller.
 
 .PARAMETER Plan
 A DJLM.RecoveryPlan object.
 
+.PARAMETER Database
+A provider database object returned by the provider module.
+
 .EXAMPLE
-Repair-MovedFiles -Plan $plan
+Repair-MovedFiles -Plan $Plan
+
+.EXAMPLE
+Repair-MovedFiles `
+    -Plan $Plan `
+    -Database $Database
 
 .NOTES
 DJ Library Manager
@@ -27,22 +38,21 @@ DJ Library Manager
     param(
 
         [Parameter(Mandatory)]
-        $Plan
+        $Plan,
+
+        $Database
 
     )
 
-    Write-Log "Previewing moved file repairs..." -Level Information
+    $Actions = $Plan.Actions | Where-Object {
 
-    $actions = $Plan.Actions |
-        Where-Object {
+        $_.Type -eq 'RepairMovedFile' -and
+        $_.Approved -and
+        -not $_.Executed
 
-            $_.Type -eq 'RepairMovedFile' -and
-            $_.Approved -and
-            -not $_.Executed
+    }
 
-        }
-
-    if (-not $actions) {
+    if (-not $Actions) {
 
         Write-Host
         Write-Host "No approved moved file repairs."
@@ -52,20 +62,84 @@ DJ Library Manager
 
     }
 
-    Write-Section "Moved File Repair Preview"
+    #
+    # Preview Mode
+    #
 
-    foreach ($action in $actions) {
+    if (-not $Database) {
 
-        Write-Host "Confidence : $($action.Confidence)%"
-        Write-Host "From       : $($action.Source)"
-        Write-Host "To         : $($action.Target)"
+        Write-Log "Previewing moved file repairs..." -Level Information
+
+        Write-Section "Moved File Repair Preview"
+
+        foreach ($Action in $Actions) {
+
+            Write-Host ("Confidence : {0}%" -f $Action.Confidence)
+            Write-Host ("From       : {0}" -f $Action.Source)
+            Write-Host ("To         : {0}" -f $Action.Target)
+            Write-Host
+
+        }
+
+        Write-Host ("Total Repairs : {0}" -f $Actions.Count)
         Write-Host
+
+        Write-Log "Preview complete." -Level Success
+
+        return
 
     }
 
-    Write-Host ("Total Repairs : {0}" -f $actions.Count)
-    Write-Host
+    #
+    # Update Provider Database
+    #
 
-    Write-Log "Preview complete." -Level Success
+    Write-Log "Applying moved file repairs..." -Level Information
+
+    $Updated = 0
+    $Failed  = 0
+
+    foreach ($Action in $Actions) {
+
+        $Result = Update-VirtualDJMediaPath `
+            -Database $Database `
+            -OldPath $Action.Source `
+            -NewPath $Action.Target
+
+        if ($Result.Success) {
+
+            $Action.Executed = $true
+            $Action.ExecutedDate = Get-Date
+
+            $Updated++
+
+        }
+        else {
+
+            $Failed++
+
+        }
+
+    }
+
+    Write-Log "$Updated moved file(s) updated." -Level Success
+
+    if ($Failed -gt 0) {
+
+        Write-Log "$Failed moved file(s) could not be updated." -Level Warning
+
+    }
+
+    return [PSCustomObject]@{
+
+        PSTypeName = 'DJLM.RepairResult'
+
+        Updated = $Updated
+
+        Failed = $Failed
+
+        Total = $Actions.Count
+
+    }
 
 }
