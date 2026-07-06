@@ -1,0 +1,19 @@
+function {{FunctionName}} {
+
+<#
+.SYNOPSIS
+{{Synopsis}}
+
+.DESCRIPTION
+{{Description}}
+
+.NOTES
+DJ Library Manager
+#>
+
+    [CmdletBinding()]
+    param(
+
+    )
+
+}
