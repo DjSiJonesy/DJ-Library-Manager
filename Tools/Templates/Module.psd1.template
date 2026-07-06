@@ -1,0 +1,47 @@
+@{
+
+# ============================================================================
+# Module Manifest
+# ============================================================================
+RootModule        = '{{ModuleName}}.psm1'
+ModuleVersion     = '1.0.0'
+GUID              = '{{GUID}}'
+
+Author            = 'Simon Jones'
+CompanyName       = 'SM Sounds'
+Copyright         = '(c) Simon Jones. All rights reserved.'
+
+Description       = '{{ModuleName}} module for DJ Library Manager.'
+
+PowerShellVersion = '7.0'
+
+# ============================================================================
+# Functions
+# ============================================================================
+FunctionsToExport = '*'
+CmdletsToExport   = @()
+VariablesToExport = @()
+AliasesToExport   = @()
+
+# ============================================================================
+# Private Data
+# ============================================================================
+PrivateData = @{
+
+    PSData = @{
+
+        Tags = @(
+            'DJ',
+            'Library',
+            'PowerShell'
+        )
+
+        ProjectUri = ''
+        LicenseUri = ''
+        ReleaseNotes = ''
+
+    }
+
+}
+
+}
