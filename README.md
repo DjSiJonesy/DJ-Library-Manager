@@ -7,27 +7,52 @@
 
 ---
 
-## Overview
+# Overview
 
 DJ Library Manager (DJLM) is a provider-independent PowerShell application for analysing, organising and recovering professional DJ music libraries.
 
-Although currently focused on **VirtualDJ**, the architecture has been designed to support multiple DJ platforms including rekordbox, Serato, Engine DJ and Traktor without changing the core application.
+DJLM has been designed from the ground up to support multiple DJ applications through a common provider architecture.
 
-DJLM helps DJs understand the health of their music collection before safely repairing problems such as missing tracks, moved files and duplicate media.
+Currently, VirtualDJ is fully supported, with provider modules already in place for rekordbox, Serato, Engine DJ and Traktor.
+
+The aim is to allow DJs to analyse, maintain and repair their music libraries regardless of which DJ software they use.
 
 ---
 
-## Current Features
+# Design Principles
 
-### Provider Support
+DJ Library Manager is built around a small number of core principles.
 
-- ✅ VirtualDJ database import
+- Provider-independent architecture
+- Common DJLM media model
+- Modular PowerShell design
+- Safe, non-destructive operations
+- Extensible provider framework
+- Consistent developer tooling
+
+---
+
+# Current Features
+
+## Provider Support
+
+### Implemented
+
+- ✅ VirtualDJ provider
 - ✅ Provider-independent media model
-- 🚧 rekordbox (planned)
-- 🚧 Serato (planned)
-- 🚧 Engine DJ (planned)
+- ✅ Provider discovery
+- ✅ Database discovery
 
-### Library Analysis
+### Scaffolded
+
+- ✅ Rekordbox
+- ✅ Serato
+- ✅ Engine DJ
+- ✅ Traktor
+
+---
+
+## Library Analysis
 
 - ✅ Music library scanning
 - ✅ Duplicate track detection
@@ -38,156 +63,203 @@ DJLM helps DJs understand the health of their music collection before safely rep
 - ✅ Library health analysis
 - ✅ Intelligent matching engine
 
-### Dashboard
+---
+
+## Recovery
+
+- 🚧 Recovery engine
+- 🚧 Path repair
+- 🚧 Database updates
+
+---
+
+## Dashboard
 
 - ✅ Console dashboard
-- ✅ Health score
-- ✅ Library summary
+- ✅ Library health score
+- ✅ Library statistics
 - ✅ Analysis summary
 - ✅ Recommendations
 - ✅ Dynamic application versioning
 
-### Application
+---
+
+## Application
 
 - ✅ Modular architecture
-- ✅ Application bootstrap
 - ✅ Configuration management
 - ✅ Structured logging
-- ✅ Provider-independent design
+- ✅ Provider discovery
+- ✅ Database discovery
+- ✅ Developer scaffolding tools
 
 ---
 
-## Project Structure
+# Project Structure
 
 ```
-Modules/
-    Analysis
-    Core
-    Dashboard
-    Library
-    Recovery
-    VirtualDJ
+Modules
+│
+├── Analysis
+├── Core
+├── Dashboard
+├── Discovery
+├── EngineDJ
+├── Library
+├── Recovery
+├── Rekordbox
+├── Serato
+├── Traktor
+└── VirtualDJ
 
-Config/
-Data/
-Docs/
-Logs/
-Reports/
-Samples/
-Tests/
-Tools/
-```
+Config
+Data
+Docs
+Logs
+Reports
+Samples
+Tests
 
----
-
-## Architecture
-
-DJLM is built around a provider-independent architecture.
-
-```
-                 DJ Library Manager
-
-                        │
-                 Application Core
-                        │
-        ┌───────────────┼───────────────┐
-        ▼               ▼               ▼
-   VirtualDJ      rekordbox       Serato
-        │               │               │
-        └───────────────┼───────────────┘
-                        │
-              Provider Translation
-                        │
-                        ▼
-                 DJLM Media Model
-                        │
-        ┌───────────────┼───────────────┐
-        ▼               ▼               ▼
-     Library       Analysis        Recovery
-                        │
-                        ▼
-                    Dashboard
+Tools
+├── Reload-DJLM.ps1
+├── New-DJLMModule.ps1
+├── New-DJLMFunction.ps1
+└── Templates
 ```
 
 ---
 
-## Running DJLM
+# Architecture
 
-Launch the application from the project root:
+```
+                     DJ Library Manager
+
+                           │
+                    Application Core
+                           │
+     ┌───────────────┬───────────────┬───────────────┐
+     ▼               ▼               ▼
+ Discovery        Providers       Library Services
+                      │
+     ┌──────────┬──────────┬──────────┬──────────┬──────────┐
+     ▼          ▼          ▼          ▼          ▼
+ VirtualDJ  Rekordbox   Serato    EngineDJ   Traktor
+                      │
+                      ▼
+          Provider Translation Layer
+                      │
+                      ▼
+               DJLMMediaItem[]
+                      │
+          ┌───────────┼───────────┐
+          ▼           ▼           ▼
+      Analysis    Recovery    Dashboard
+
+---
+
+# Running DJLM
+
+Launch the application from the project root.
 
 ```powershell
 .\Start.ps1
 ```
 
-DJLM will automatically:
+DJLM automatically:
 
-1. Load all modules.
-2. Load the application configuration.
-3. Import the VirtualDJ database.
-4. Scan configured music libraries.
-5. Analyse the library.
-6. Calculate library health.
-7. Display the dashboard.
+1. Loads all modules.
+2. Loads the application configuration.
+3. Discovers installed DJ software.
+4. Discovers available provider databases.
+5. Imports provider databases.
+6. Scans configured music libraries.
+7. Performs library analysis.
+8. Calculates library health.
+9. Displays the dashboard.
 
 ---
 
-## Roadmap
+# Roadmap
 
-### Completed
+## Completed
 
 - ✅ Modular architecture
-- ✅ Provider-independent media model
+- ✅ Provider-independent architecture
+- ✅ Common media model
 - ✅ VirtualDJ provider
+- ✅ Provider discovery
+- ✅ Database discovery
 - ✅ Library scanning
 - ✅ Analysis engine
-- ✅ Dashboard
-- ✅ Application bootstrap
+- ✅ Console dashboard
+- ✅ Developer scaffolding tools
 
-### In Progress
+---
 
-- 🚧 Recovery Engine
+## In Progress
+
+- 🚧 Rekordbox provider implementation
+- 🚧 Serato provider implementation
+- 🚧 Engine DJ provider implementation
+- 🚧 Traktor provider implementation
+- 🚧 Recovery engine
 - 🚧 Path repair
-- 🚧 Report generation
 
-### Planned
+---
 
-- rekordbox support
-- Serato support
-- Engine DJ support
+## Planned
+
+- Report generation
 - Audio fingerprinting
 - AI-assisted recommendations
 - Plugin architecture
+- Cross-provider synchronisation
+- Graphical user interface
 
 ---
 
-## Requirements
+# Requirements
 
-- Windows 10/11
+- Windows 10 or Windows 11
 - PowerShell 7.6 or later
-- VirtualDJ (currently supported provider)
+- One or more supported DJ applications
 
 ---
 
-## Documentation
+# Documentation
 
-Additional documentation can be found in the **Docs** folder, including:
+Additional documentation is available in the **Docs** folder, including:
 
 - Vision
-- System Architecture
+- Architecture
+- Domain Model
 - Architecture Decision Records (ADRs)
 - Development Roadmap
 - Coding Standards
 
 ---
 
-## Contributing
+# Developer Tools
 
-DJ Library Manager is currently under active development.
+DJLM includes built-in developer tooling to simplify development.
 
-Feedback, feature suggestions and issue reports are welcome through GitHub Issues.
+- Module scaffolding
+- Function scaffolding
+- Automatic module reloading
+- Reusable project templates
+
+These tools ensure all modules follow a consistent structure and coding standard.
 
 ---
 
-## License
+# Contributing
+
+DJ Library Manager is currently under active development.
+
+Feedback, feature requests and issue reports are welcome.
+
+---
+
+# License
 
 License to be confirmed.
