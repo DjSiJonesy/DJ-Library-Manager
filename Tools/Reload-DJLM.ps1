@@ -14,29 +14,57 @@ Write-Host ""
 Write-Host "Reloading DJ Library Manager..." -ForegroundColor Cyan
 Write-Host ""
 
-$modules = @(
-    'VirtualDJ',
-    'Core'
-)
+#
+# Remove all DJLM modules
+#
 
-foreach ($module in $modules) {
+Get-Module |
+    Where-Object {
+        $_.Name -in @(
+            'Core',
+            'VirtualDJ',
+            'Library',
+            'Analysis',
+            'Dashboard',
+            'Recovery',
+            'Discovery'
+        )
+    } |
+    Remove-Module -Force -ErrorAction SilentlyContinue
 
-    Remove-Module $module -ErrorAction SilentlyContinue
+#
+# Import every module manifest
+#
 
-}
+Get-ChildItem .\Modules -Directory |
+    Sort-Object Name |
+    ForEach-Object {
 
-Get-ChildItem .\Modules -Directory | ForEach-Object {
+        $Manifest = Join-Path $_.FullName "$($_.Name).psd1"
 
-    $manifest = Join-Path $_.FullName "$($_.Name).psd1"
+        if (Test-Path $Manifest) {
 
-    if (Test-Path $manifest) {
+            Import-Module $Manifest -Force
 
-        Import-Module $manifest -Force
+        }
 
     }
-
-}
 
 Write-Host ""
 Write-Host "Modules Reloaded Successfully." -ForegroundColor Green
 Write-Host ""
+
+Get-Module |
+    Where-Object {
+        $_.Name -in @(
+            'Analysis',
+            'Core',
+            'Dashboard',
+            'Discovery',
+            'Library',
+            'Recovery',
+            'VirtualDJ'
+        )
+    } |
+    Sort-Object Name |
+    Format-Table Name, Version

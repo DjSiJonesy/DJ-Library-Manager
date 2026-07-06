@@ -65,8 +65,15 @@
       "Enabled": false,
       "DatabasePath": "",
       "BackupOnSave": true
-    }
+    },
 
+    "Traktor": {
+      "Enabled": false,
+      "Executable": "Traktor.exe",
+      "DatabasePath": "",
+      "BackupOnSave": true
+    }
+    
   }
 
 }

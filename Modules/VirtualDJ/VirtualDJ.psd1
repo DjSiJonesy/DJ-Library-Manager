@@ -2,7 +2,7 @@
 
 RootModule = 'VirtualDJ.psm1'
 
-ModuleVersion = '0.1.0'
+ModuleVersion = '1.0.0'
 
 GUID = '7d76b88f-1b34-49f0-90ef-20cbeb8dc7e2'
 
