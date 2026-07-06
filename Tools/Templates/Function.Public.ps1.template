@@ -12,8 +12,6 @@ DJ Library Manager
 #>
 
     [CmdletBinding()]
-    param(
-
-    )
+    param()
 
 }

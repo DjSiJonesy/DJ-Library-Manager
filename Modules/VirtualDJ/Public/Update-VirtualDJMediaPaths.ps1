@@ -1,4 +1,4 @@
-function Update-VirtualDJMediaPath {
+function Update-VirtualDJMediaPaths {
 
 <#
 .SYNOPSIS
@@ -24,7 +24,7 @@ The existing media path.
 The replacement media path.
 
 .EXAMPLE
-Update-VirtualDJMediaPath `
+Update-VirtualDJMediaPaths `
     -Database $db `
     -OldPath "D:\Music\Old.mp3" `
     -NewPath "G:\DJ Library\Active\Old.mp3"

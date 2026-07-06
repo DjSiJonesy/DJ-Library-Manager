@@ -101,7 +101,7 @@ DJ Library Manager
 
     foreach ($Action in $Actions) {
 
-        $Result = Update-VirtualDJMediaPath `
+        $Result = Update-VirtualDJMediaPaths `
             -Database $Database `
             -OldPath $Action.Source `
             -NewPath $Action.Target
