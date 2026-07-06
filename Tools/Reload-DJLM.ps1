@@ -9,46 +9,61 @@ Reloads all DJLM modules after code changes.
 #>
 
 Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
 Write-Host ""
 Write-Host "Reloading DJ Library Manager..." -ForegroundColor Cyan
 Write-Host ""
 
 #
-# Remove all DJLM modules
+# Discover all module manifests
 #
 
-Get-Module |
-    Where-Object {
-        $_.Name -in @(
-            'Core',
-            'VirtualDJ',
-            'Library',
-            'Analysis',
-            'Dashboard',
-            'Recovery',
-            'Discovery'
-        )
-    } |
-    Remove-Module -Force -ErrorAction SilentlyContinue
+$ModuleManifests = Get-ChildItem `
+    -Path .\Modules `
+    -Directory |
+ForEach-Object {
 
-#
-# Import every module manifest
-#
+    $Manifest = Join-Path $_.FullName "$($_.Name).psd1"
 
-Get-ChildItem .\Modules -Directory |
-    Sort-Object Name |
-    ForEach-Object {
+    if (Test-Path $Manifest) {
 
-        $Manifest = Join-Path $_.FullName "$($_.Name).psd1"
-
-        if (Test-Path $Manifest) {
-
-            Import-Module $Manifest -Force
-
-        }
+        Get-Item $Manifest
 
     }
+
+}
+
+#
+# Remove loaded DJLM modules
+#
+
+foreach ($Manifest in $ModuleManifests) {
+
+    $ModuleName = $Manifest.BaseName
+
+    if (Get-Module -Name $ModuleName) {
+
+        Remove-Module `
+            -Name $ModuleName `
+            -Force `
+            -ErrorAction SilentlyContinue
+
+    }
+
+}
+
+#
+# Import modules
+#
+
+foreach ($Manifest in ($ModuleManifests | Sort-Object BaseName)) {
+
+    Import-Module `
+        -Name $Manifest.FullName `
+        -Force
+
+}
 
 Write-Host ""
 Write-Host "Modules Reloaded Successfully." -ForegroundColor Green
@@ -56,15 +71,9 @@ Write-Host ""
 
 Get-Module |
     Where-Object {
-        $_.Name -in @(
-            'Analysis',
-            'Core',
-            'Dashboard',
-            'Discovery',
-            'Library',
-            'Recovery',
-            'VirtualDJ'
-        )
+
+        $_.Name -in $ModuleManifests.BaseName
+
     } |
     Sort-Object Name |
     Format-Table Name, Version
