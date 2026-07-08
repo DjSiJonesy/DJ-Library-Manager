@@ -17,6 +17,7 @@ DJ Library Manager
     param(
 
         [Parameter(Mandatory)]
+        [System.Data.DataRow]
         $Row
 
     )
@@ -27,30 +28,32 @@ DJ Library Manager
 
         MediaType = 'Unknown'
 
-        FilePath = Join-Path `
-            $Row.FolderPath `
-            $Row.FileNameL
+        FilePath = ($Row.FolderPath -replace '/', '\')
 
         FileSize = [long]$Row.FileSize
 
-        Artist = $Row.Artist
+        #
+        # These will be populated once the SQL joins are added.
+        #
 
-        Title = $Row.Title
+            Artist = $Row.Artist
 
-        Album = $Row.Album
+            Title = $Row.Title
 
-        Genre = $Row.Genre
+            Album = $Row.Album
 
-        Year = $Row.ReleaseYear
+            Genre = $Row.Genre
 
-        BPM = if ($null -ne $Row.BPM) {
+            Year = $Row.ReleaseYear
+
+            BPM = if ($null -ne $Row.BPM) {
             [double]$Row.BPM / 100
         }
         else {
             $null
         }
 
-        Key = $Row.MusicalKey
+            Key = $Row.MusicalKey
 
         Duration = [TimeSpan]::FromSeconds(
             [double]$Row.Length
