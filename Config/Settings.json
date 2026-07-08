@@ -50,8 +50,9 @@
     },
 
     "rekordbox": {
-      "Enabled": false,
-      "DatabasePath": "",
+      "Enabled": true,
+      "DatabasePath": "C:\\Users\\Simon\\AppData\\Roaming\\Pioneer\\rekordbox\\master.db",
+      "SqlCipherKey": "402fd482c38817c35ffa8ffb8c7d93143b749e7d315df7a81732a1ff43608497",
       "BackupOnSave": true
     },
 
