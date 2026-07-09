@@ -2,54 +2,36 @@ function Update-VirtualDJMediaPaths {
 
 <#
 .SYNOPSIS
-Updates the path of a media item within a VirtualDJ database.
+Updates media file paths in a VirtualDJ database.
 
 .DESCRIPTION
-Searches the imported VirtualDJ database for a Song element
-whose FilePath matches the supplied path.
-
-If found, the FilePath attribute is updated in memory.
-
-The database is NOT written to disk. Call
-Save-VirtualDJDatabase to persist the changes.
+Updates the location of media files after they have been
+moved on disk.
 
 .PARAMETER Database
 A VirtualDJ database object returned by
 Import-VirtualDJDatabase.
 
-.PARAMETER OldPath
-The existing media path.
-
-.PARAMETER NewPath
-The replacement media path.
-
-.EXAMPLE
-Update-VirtualDJMediaPaths `
-    -Database $db `
-    -OldPath "D:\Music\Old.mp3" `
-    -NewPath "G:\DJ Library\Active\Old.mp3"
+.PARAMETER MovedFiles
+Collection returned by Find-MovedFiles.
 
 .NOTES
 DJ Library Manager
 #>
 
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
 
         [Parameter(Mandatory)]
         $Database,
 
         [Parameter(Mandatory)]
-        [string]
-        $OldPath,
-
-        [Parameter(Mandatory)]
-        [string]
-        $NewPath
+        [object[]]
+        $MovedFiles
 
     )
 
-    Write-Log "Updating VirtualDJ media path..." -Level Information
+    Write-Log "Updating VirtualDJ media paths..." -Level Information
 
     if ($null -eq $Database.Xml) {
 
@@ -57,58 +39,46 @@ DJ Library Manager
 
     }
 
-    #
-    # Locate the matching Song node
-    #
+    $updated = 0
 
-    $song = $Database.Xml.SelectSingleNode(
-        "//Song[@FilePath=`"$OldPath`"]"
-    )
+    foreach ($Move in $MovedFiles) {
 
-    if ($null -eq $song) {
+        $OldPath = $Move.Original.FilePath
+        $NewPath = $Move.NewFile.FilePath
 
-        Write-Log "Media path not found: $OldPath" -Level Warning
+        if (-not $PSCmdlet.ShouldProcess($OldPath, "Update VirtualDJ media path")) {
 
-        return [PSCustomObject]@{
-
-            PSTypeName = 'DJLM.ProviderUpdateResult'
-
-            Success = $false
-
-            Updated = $false
-
-            OldPath = $OldPath
-
-            NewPath = $NewPath
-
-            Message = "Media path not found."
+            continue
 
         }
 
+        #
+        # Locate the matching Song node
+        #
+
+        $Song = $Database.Xml.SelectSingleNode(
+            "//Song[@FilePath=`"$OldPath`"]"
+        )
+
+        if ($null -eq $Song) {
+
+            Write-Log "Media path not found: $OldPath" -Level Warning
+            continue
+
+        }
+
+        #
+        # Update FilePath
+        #
+
+        $Song.SetAttribute("FilePath", $NewPath)
+
+        $updated++
+
     }
 
-    #
-    # Update the FilePath attribute
-    #
+    Write-Log "Updated $updated VirtualDJ media path(s)." -Level Success
 
-    $song.SetAttribute("FilePath", $NewPath)
-
-    Write-Log "Media path updated." -Level Success
-
-    return [PSCustomObject]@{
-
-        PSTypeName = 'DJLM.ProviderUpdateResult'
-
-        Success = $true
-
-        Updated = $true
-
-        OldPath = $OldPath
-
-        NewPath = $NewPath
-
-        Message = "Media path updated successfully."
-
-    }
+    return $updated
 
 }

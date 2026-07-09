@@ -8,11 +8,14 @@ Scans the file system for supported media files.
 Returns a collection of library file objects from one or more
 folders, or from all fixed/removable drives.
 
+If no parameters are supplied, the configured Library.Path
+from Settings.json is scanned.
+
 .NOTES
 DJ Library Manager
 #>
 
-    [CmdletBinding(DefaultParameterSetName = 'Path')]
+    [CmdletBinding(DefaultParameterSetName = 'Configured')]
     param(
 
         [Parameter(
@@ -52,7 +55,6 @@ DJ Library Manager
         '.wma'
         '.aif'
         '.aiff'
-
         '.mp4'
         '.avi'
         '.mkv'
@@ -60,7 +62,6 @@ DJ Library Manager
         '.wmv'
         '.mpeg'
         '.mpg'
-
         '.cdg'
         '.zip'
     ) | ForEach-Object {
@@ -73,22 +74,47 @@ DJ Library Manager
     # Resolve scan locations
     #
 
-    $ScanPaths = @()
+    switch ($PSCmdlet.ParameterSetName) {
 
-    if ($PSCmdlet.ParameterSetName -eq 'AllDrives') {
+        'Configured' {
 
-        $ScanPaths = Get-PSDrive -PSProvider FileSystem |
-            Where-Object {
+            $Configuration = Get-Configuration
 
-                $_.Root -and (Test-Path $_.Root)
+            if ([string]::IsNullOrWhiteSpace($Configuration.Library.Path)) {
 
-            } |
-            Select-Object -ExpandProperty Root
+                throw "Library.Path is not configured in Settings.json."
 
-    }
-    else {
+            }
 
-        $ScanPaths = $Path
+            $ScanPaths = @($Configuration.Library.Path)
+
+            #
+            # Use configured recursion unless explicitly specified
+            #
+
+            if (-not $PSBoundParameters.ContainsKey('Recurse')) {
+
+                $Recurse = [bool]$Configuration.Library.Recurse
+
+            }
+
+        }
+
+        'Path' {
+
+            $ScanPaths = $Path
+
+        }
+
+        'AllDrives' {
+
+            $ScanPaths = Get-PSDrive -PSProvider FileSystem |
+                Where-Object {
+                    $_.Root -and (Test-Path $_.Root)
+                } |
+                Select-Object -ExpandProperty Root
+
+        }
 
     }
 
@@ -124,17 +150,12 @@ DJ Library Manager
 
                     [PSCustomObject]@{
 
-                        FilePath = $File.FullName
-
-                        FileName = $File.Name
-
-                        Directory = $File.DirectoryName
-
-                        Extension = $File.Extension
-
-                        FileSize = $File.Length
-
-                        LastModified = $File.LastWriteTime
+                        FilePath      = $File.FullName
+                        FileName      = $File.Name
+                        Directory     = $File.DirectoryName
+                        Extension     = $File.Extension
+                        FileSize      = $File.Length
+                        LastModified  = $File.LastWriteTime
 
                     }
 

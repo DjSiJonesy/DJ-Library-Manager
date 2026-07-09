@@ -230,3 +230,26 @@ The format follows **Keep a Changelog** and the project adheres to **Semantic Ve
 - Corrected module exports.
 - Improved Strict Mode compatibility.
 - Improved module loading.
+
+## [0.9.0-alpha] - 2026-07-09
+
+### Added
+- Added provider service layer within the Core module.
+- Added generic `Save-Database` dispatcher.
+- Added generic `Update-MediaPaths` dispatcher.
+- Added Rekordbox media path update support.
+- Added bulk Rekordbox media path update support.
+- Added provider-independent Recovery execution.
+
+### Changed
+- Refactored Recovery module to remove provider-specific dependencies.
+- Refactored VirtualDJ media path updates to use the provider-independent interface.
+- Standardised provider configuration under `Providers.*`.
+- Restored automatic library scanning using `Library.Path` from configuration.
+- Moved Dashboard rendering helpers back into the Dashboard module.
+
+### Fixed
+- Corrected Rekordbox media type detection.
+- Corrected VirtualDJ configuration loading.
+- Corrected Dashboard helper loading.
+- Improved Recovery execution tracking.

@@ -5,8 +5,8 @@ function Import-VirtualDJDatabase {
 Imports a VirtualDJ database.xml file.
 
 .DESCRIPTION
-Loads a VirtualDJ database.xml file and returns a VirtualDJ
-database object.
+Loads the configured VirtualDJ database and returns a
+DJ Library Manager VirtualDJ database object.
 
 If no path is supplied, the configured database path from
 Settings.json is used.
@@ -33,21 +33,21 @@ DJ Library Manager
 
     )
 
+    $Configuration = Get-Configuration
+
     #
     # Use configured path if one wasn't supplied
     #
 
     if ([string]::IsNullOrWhiteSpace($Path)) {
 
-        $Configuration = Get-Configuration
+        if (-not $Configuration.Providers.VirtualDJ.DatabasePath) {
 
-        if (-not $Configuration.VirtualDJ.DatabasePath) {
-
-            throw "VirtualDJ.DatabasePath is not configured in Settings.json."
+            throw "Providers.VirtualDJ.DatabasePath is not configured in Settings.json."
 
         }
 
-        $Path = $Configuration.VirtualDJ.DatabasePath
+        $Path = $Configuration.Providers.VirtualDJ.DatabasePath
 
     }
 

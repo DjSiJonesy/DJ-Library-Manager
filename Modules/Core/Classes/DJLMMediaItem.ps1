@@ -2,6 +2,7 @@ class DJLMMediaItem {
 
     # Source Information
     [string]$Provider
+    [string]$NativeId
     [string]$MediaType
 
     # File Information
@@ -23,8 +24,8 @@ class DJLMMediaItem {
     [TimeSpan]$Duration
 
     # Library Information
-    [datetime]$DateAdded
-    [datetime]$LastModified
+    [datetime]$DateFirstSeen
+    [datetime]$DateLastModified
 
     # DJLM
     [hashtable]$Properties

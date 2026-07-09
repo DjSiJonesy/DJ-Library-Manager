@@ -22,38 +22,38 @@ DJ Library Manager
 
     )
 
+    $filePath = $Row.FolderPath -replace '/', '\'
+
     [PSCustomObject]@{
 
         Provider = 'Rekordbox'
 
-        MediaType = 'Unknown'
+        NativeId = $Row.ID
 
-        FilePath = ($Row.FolderPath -replace '/', '\')
+        MediaType = Get-MediaType -Path $filePath
+
+        FilePath = $filePath
 
         FileSize = [long]$Row.FileSize
 
-        #
-        # These will be populated once the SQL joins are added.
-        #
+        Artist = $Row.Artist
 
-            Artist = $Row.Artist
+        Title = $Row.Title
 
-            Title = $Row.Title
+        Album = $Row.Album
 
-            Album = $Row.Album
+        Genre = $Row.Genre
 
-            Genre = $Row.Genre
+        Year = $Row.ReleaseYear
 
-            Year = $Row.ReleaseYear
-
-            BPM = if ($null -ne $Row.BPM) {
+        BPM = if ($null -ne $Row.BPM) {
             [double]$Row.BPM / 100
         }
         else {
             $null
         }
 
-            Key = $Row.MusicalKey
+        Key = $Row.MusicalKey
 
         Duration = [TimeSpan]::FromSeconds(
             [double]$Row.Length

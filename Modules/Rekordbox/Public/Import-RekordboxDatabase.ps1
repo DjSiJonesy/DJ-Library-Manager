@@ -31,13 +31,13 @@ DJ Library Manager
 
     if ([string]::IsNullOrWhiteSpace($Path)) {
 
-        if (-not $configuration.Providers.rekordbox.DatabasePath) {
+        if (-not $configuration.Providers.Rekordbox.DatabasePath) {
 
-            throw "Providers.rekordbox.DatabasePath is not configured in Settings.json."
+            throw "Providers.Rekordbox.DatabasePath is not configured in Settings.json."
 
         }
 
-        $Path = $configuration.Providers.rekordbox.DatabasePath
+        $Path = $configuration.Providers.Rekordbox.DatabasePath
 
     }
 
@@ -45,7 +45,7 @@ DJ Library Manager
 
     $connection = Open-RekordboxDatabase `
         -Path $Path `
-        -SqlCipherKey $configuration.Providers.rekordbox.SqlCipherKey
+        -SqlCipherKey $configuration.Providers.Rekordbox.SqlCipherKey
 
     if ($null -eq $connection) {
 

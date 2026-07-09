@@ -1,4 +1,4 @@
-function Write-Object {
+function Write-DashboardObject {
 
 <#
 .SYNOPSIS

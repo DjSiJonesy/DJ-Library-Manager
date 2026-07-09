@@ -2,39 +2,52 @@
 
 ## Overview
 
-DJ Library Manager (DJLM) is built around a provider-independent architecture.
+DJ Library Manager (DJLM) is built around a provider-independent architecture that separates provider-specific database implementations from the remainder of the application.
 
-Each supported DJ application is implemented as an isolated provider module responsible for reading and writing its native database format.
+Each supported DJ application is implemented as an isolated provider module responsible only for interacting with its native database format.
 
-The remainder of the application (Library, Analysis, Recovery and Dashboard) operates exclusively on the common `DJLMMediaItem` model and has no knowledge of provider-specific storage technologies.
+Once provider data has been translated into the common `DJLMMediaItem` model, the remainder of the application operates entirely independently of the originating DJ software.
 
-This separation allows new providers to be added without modifying the core application.
+A Provider Service Layer within the Core module provides a common set of services that allow higher-level modules to perform provider operations without containing provider-specific logic.
+
+This architecture enables new providers to be added with minimal impact on the rest of the application.
 
 ---
 
 # Architecture
 
 ```
-                   DJ Library Manager
+                         DJ Library Manager
 
-                           │
-                  Provider Selection
-                           │
-      ┌────────────────────┼────────────────────┐
-      ▼                    ▼                    ▼
- VirtualDJ           Rekordbox             Future Providers
-    XML              SQLCipher SQLite
-      │                    │
-      └────────────────────┴────────────────────┐
-                                                │
-                                   Provider Translation
-                                                │
-                                                ▼
-                                      DJLMMediaItem[]
-                                                │
-         ┌──────────────────┬───────────────────┬──────────────────┐
-         ▼                  ▼                   ▼                  ▼
-      Library           Analysis            Recovery          Dashboard
+                                │
+                         Application Core
+                                │
+          ┌─────────────────────┼─────────────────────┐
+          ▼                     ▼                     ▼
+     Discovery             Provider Modules     Library Services
+                                   │
+        ┌──────────────┬───────────┼───────────┬──────────────┐
+        ▼              ▼           ▼           ▼              ▼
+   VirtualDJ      Rekordbox     Serato     Engine DJ      Traktor
+        │              │
+        │              │
+        └──────────────┴──────────────────────────────┐
+                                                      │
+                                          Provider Translation
+                                                      │
+                                                      ▼
+                                            DJLMMediaItem[]
+                                                      │
+                     ┌────────────────────────────────┼────────────────────────────────┐
+                     ▼                                ▼                                ▼
+                 Analysis                         Recovery                       Dashboard
+                                                      │
+                                                      ▼
+                                           Core Provider Services
+                                                      │
+                                   ┌──────────────────┴──────────────────┐
+                                   ▼                                     ▼
+                           Save-Database                     Update-MediaPaths
 ```
 
 ---
@@ -45,9 +58,9 @@ The provider architecture has been designed to:
 
 - Support multiple DJ applications.
 - Isolate provider-specific implementations.
-- Provide a common public API.
+- Provide a consistent public provider interface.
 - Return a common media model.
-- Minimise duplicated logic.
+- Centralise provider-independent operations.
 - Hide storage implementation details.
 - Allow providers to evolve independently.
 
@@ -55,19 +68,19 @@ The provider architecture has been designed to:
 
 # Supported Providers
 
-| Provider | Status | Storage |
-|----------|--------|---------|
-| VirtualDJ | ✅ Implemented | XML |
-| Rekordbox | ✅ Implemented | SQLCipher (SQLite) |
-| Serato | 🚧 Planned | Database / Crates |
-| Engine DJ | 🚧 Planned | SQLite |
-| Traktor | 🚧 Planned | XML |
+| Provider | Read | Analyse | Recovery | Write | Storage |
+|----------|:----:|:-------:|:--------:|:-----:|---------|
+| VirtualDJ | ✅ | ✅ | ✅ | ✅ | XML |
+| Rekordbox | ✅ | ✅ | ✅ | ✅ | SQLCipher (SQLite) |
+| Serato | 🚧 | 🚧 | 🚧 | 🚧 | Proprietary |
+| Engine DJ | 🚧 | 🚧 | 🚧 | 🚧 | SQLite |
+| Traktor | 🚧 | 🚧 | 🚧 | 🚧 | XML |
 
 ---
 
 # Public Provider Contract
 
-Every provider should expose the same public interface.
+Every provider exposes a consistent public interface.
 
 | Function | Purpose |
 |----------|---------|
@@ -77,14 +90,31 @@ Every provider should expose the same public interface.
 | Save-<Provider>Database | Persists provider changes. |
 | Update-<Provider>MediaPaths | Updates media locations within the provider database. |
 
-Optional developer utilities may also be provided.
+Developer utilities may also be provided where appropriate.
 
 Examples include:
 
-- Get-<Provider>Tables
 - Get-<Provider>Schema
+- Get-<Provider>Tables
 
-These utilities are intended for development and diagnostics rather than normal application use.
+These utilities are intended for diagnostics and development rather than normal application operation.
+
+---
+
+# Core Provider Services
+
+Provider-independent operations are implemented within the Core module.
+
+These services determine the appropriate provider implementation based on the supplied provider database object.
+
+Current services include:
+
+| Function | Purpose |
+|----------|---------|
+| Save-Database | Dispatches database save operations to the appropriate provider. |
+| Update-MediaPaths | Dispatches media path updates to the appropriate provider. |
+
+Higher-level modules interact only with these services and never directly with provider-specific implementations.
 
 ---
 
@@ -92,44 +122,22 @@ These utilities are intended for development and diagnostics rather than normal 
 
 Providers are responsible for:
 
-- Opening databases.
+- Opening provider databases.
 - Reading provider records.
 - Writing provider changes.
-- Translating provider records into `DJLMMediaItem` objects.
+- Translating provider records into `DJLMMediaItem`.
 - Updating media paths.
-- Managing provider-specific resources.
+- Managing provider resources.
 - Logging provider operations.
 
 Providers are **not** responsible for:
 
 - Library scanning.
-- Duplicate detection.
 - Library analysis.
-- Recovery decisions.
+- Recovery planning.
 - Dashboard presentation.
 - User interaction.
-
----
-
-# Private Provider Functions
-
-Private helper functions encapsulate provider-specific implementation details.
-
-Examples:
-
-### VirtualDJ
-
-- ConvertTo-DJLMMediaItem
-- Get-XmlAttribute
-- Get-XmlChildNode
-
-### Rekordbox
-
-- ConvertTo-DJLMMediaItem
-- Open-RekordboxDatabase
-- Invoke-RekordboxQuery
-
-Private functions are never exported from the provider module.
+- Cross-provider workflows.
 
 ---
 
@@ -159,39 +167,43 @@ Library
 Analysis
         │
         ▼
-Recovery
+Recovery Plan
         │
         ▼
-Dashboard
+Core Provider Services
+        │
+        ▼
+Provider Update
+        │
+        ▼
+Save Database
 ```
 
-Regardless of the underlying storage technology, every provider produces the same collection of `DJLMMediaItem` objects.
+Regardless of storage technology, every provider produces and consumes the same provider-independent model.
 
 ---
 
-# Storage Technologies
+# Provider Database Objects
 
-Different providers use different storage technologies.
+Each provider returns a provider-specific database object.
 
-| Provider | Storage Technology |
-|----------|--------------------|
-| VirtualDJ | XML |
-| Rekordbox | SQLCipher SQLite |
-| Serato | Proprietary database / crate files |
-| Engine DJ | SQLite |
-| Traktor | XML |
+Examples:
 
-Storage implementation details remain isolated within each provider.
+- DJLM.VirtualDJDatabase
+- DJLM.RekordboxDatabase
+
+These encapsulate provider-specific resources such as XML documents, SQL connections or other native objects.
 
 ---
 
 # Common Media Model
 
-Every provider returns the same provider-independent media object.
+Every provider translates native records into the common `DJLMMediaItem` model.
 
 Typical properties include:
 
 - Provider
+- ProviderId
 - MediaType
 - FilePath
 - FileSize
@@ -203,31 +215,35 @@ Typical properties include:
 - BPM
 - Key
 - Duration
-- DateFirstSeen
-- DateLastModified
+- DateAdded
+- LastModified
+- Properties
 
-The remainder of DJLM operates exclusively on this model.
+Once translated, all subsequent processing is completely provider-independent.
 
 ---
 
-# Provider Database Objects
+# Storage Technologies
 
-Each provider returns its own database object.
+Provider storage implementations remain completely isolated.
 
-Examples:
+| Provider | Storage |
+|----------|---------|
+| VirtualDJ | XML |
+| Rekordbox | SQLCipher SQLite |
+| Serato | Proprietary database / crate files |
+| Engine DJ | SQLite |
+| Traktor | XML |
 
-- DJLM.VirtualDJDatabase
-- DJLM.RekordboxDatabase
-
-These objects encapsulate provider-specific resources such as XML documents or SQL database connections.
+No other module needs knowledge of these storage technologies.
 
 ---
 
 # Infrastructure
 
-Some providers require supporting infrastructure.
+Some providers require additional infrastructure.
 
-For example, the Rekordbox provider uses a small C# helper library to encapsulate SQLCipher database access.
+For example, the Rekordbox provider uses a C# helper library to encapsulate SQLCipher database access.
 
 Responsibilities include:
 
@@ -236,7 +252,7 @@ Responsibilities include:
 - Managing database connections.
 - Isolating native library interaction.
 
-PowerShell providers consume this infrastructure rather than implementing low-level database access themselves.
+This keeps PowerShell providers focused solely on provider behaviour.
 
 ---
 
@@ -249,11 +265,12 @@ Every provider should successfully complete the following validation checklist.
 - ✅ Translate to `DJLMMediaItem`
 - ✅ Provider statistics
 - ✅ Library analysis
+- ✅ Recovery plan generation
 - ✅ Dashboard integration
-- ⏳ Save database
-- ⏳ Update media paths
+- ✅ Update media paths
+- ✅ Save database
 
-This ensures all providers behave consistently regardless of their underlying storage implementation.
+This validation ensures consistent behaviour regardless of storage technology.
 
 ---
 
@@ -264,9 +281,9 @@ Providers should:
 - Validate configuration.
 - Validate database existence.
 - Throw meaningful exceptions.
-- Never silently ignore failures.
 - Log significant operations.
 - Dispose of provider resources correctly.
+- Never silently ignore failures.
 
 ---
 
@@ -278,10 +295,11 @@ When implementing a provider:
 2. Keep provider-specific logic isolated.
 3. Return only `DJLMMediaItem` objects.
 4. Hide storage implementation details.
-5. Keep the public API consistent.
+5. Maintain a consistent public API.
 6. Use private helper functions where appropriate.
 7. Prefer readability over optimisation.
 8. Avoid duplicating logic between providers.
+9. Keep provider-independent logic within Core services.
 
 ---
 
@@ -290,24 +308,25 @@ When implementing a provider:
 Potential future enhancements include:
 
 - Automatic provider discovery.
-- Plugin provider architecture.
+- Plugin-based provider architecture.
 - Shared SQL provider infrastructure.
 - Shared XML provider infrastructure.
-- Automatic SQLCipher key discovery.
-- Cross-provider synchronisation.
 - Provider capability reporting.
+- Cross-provider synchronisation.
 
 ---
 
 # Summary
 
-DJLM uses a provider-independent architecture in which each provider is responsible only for interacting with its native database format.
+DJ Library Manager uses a provider-independent architecture that cleanly separates provider-specific database implementations from the remainder of the application.
 
-Once provider data has been translated into the common `DJLMMediaItem` model, every subsequent module operates independently of the source application.
+Providers are responsible only for interacting with their native storage technologies and translating data to and from the common `DJLMMediaItem` model.
 
-This architecture has now been validated using two fundamentally different storage technologies:
+Provider-independent operations are centralised within the Core Provider Services layer, allowing Analysis, Recovery and Dashboard modules to remain completely unaware of provider-specific implementations.
+
+This architecture has been validated against two fundamentally different storage technologies:
 
 - VirtualDJ (XML)
 - Rekordbox (SQLCipher SQLite)
 
-This provides a scalable foundation for adding additional providers while keeping the core application unchanged.
+It provides a scalable foundation for supporting additional DJ applications while keeping the core application stable, maintainable and provider-independent.

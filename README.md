@@ -11,23 +11,24 @@
 
 DJ Library Manager (DJLM) is a provider-independent PowerShell application for analysing, organising and recovering professional DJ music libraries.
 
-DJLM has been designed from the ground up to support multiple DJ applications through a common provider architecture.
+Built around a common provider architecture, DJLM provides a consistent interface for multiple DJ applications while keeping provider-specific code isolated.
 
-Currently, VirtualDJ is fully supported, with provider modules already in place for rekordbox, Serato, Engine DJ and Traktor.
+VirtualDJ and Rekordbox are fully supported providers, with Serato, Engine DJ and Traktor already scaffolded and ready for implementation.
 
-The aim is to allow DJs to analyse, maintain and repair their music libraries regardless of which DJ software they use.
+The long-term goal is to provide a single toolkit capable of analysing, repairing and managing professional DJ music libraries regardless of the software used.
 
 ---
 
 # Design Principles
 
-DJ Library Manager is built around a small number of core principles.
+DJ Library Manager is built around a number of core architectural principles.
 
 - Provider-independent architecture
 - Common DJLM media model
 - Modular PowerShell design
 - Safe, non-destructive operations
 - Extensible provider framework
+- Provider service layer
 - Consistent developer tooling
 
 ---
@@ -36,19 +37,13 @@ DJ Library Manager is built around a small number of core principles.
 
 ## Provider Support
 
-### Implemented
-
-- ✅ VirtualDJ provider
-- ✅ Provider-independent media model
-- ✅ Provider discovery
-- ✅ Database discovery
-
-### Scaffolded
-
-- ✅ Rekordbox
-- ✅ Serato
-- ✅ Engine DJ
-- ✅ Traktor
+| Provider | Read | Analyse | Recovery | Write |
+|----------|:----:|:-------:|:--------:|:-----:|
+| VirtualDJ | ✅ | ✅ | ✅ | ✅ |
+| Rekordbox | ✅ | ✅ | ✅ | ✅ |
+| Serato | 🚧 | 🚧 | 🚧 | 🚧 |
+| Engine DJ | 🚧 | 🚧 | 🚧 | 🚧 |
+| Traktor | 🚧 | 🚧 | 🚧 | 🚧 |
 
 ---
 
@@ -67,9 +62,13 @@ DJ Library Manager is built around a small number of core principles.
 
 ## Recovery
 
-- 🚧 Recovery engine
-- 🚧 Path repair
-- 🚧 Database updates
+- ✅ Recovery plan generation
+- ✅ Provider-independent recovery engine
+- ✅ Path repair
+- ✅ Database updates
+- 🚧 Missing file recovery
+- 🚧 Duplicate resolution
+- 🚧 Orphan import
 
 ---
 
@@ -91,6 +90,8 @@ DJ Library Manager is built around a small number of core principles.
 - ✅ Structured logging
 - ✅ Provider discovery
 - ✅ Database discovery
+- ✅ Provider service layer
+- ✅ Provider-independent database operations
 - ✅ Developer scaffolding tools
 
 ---
@@ -132,28 +133,37 @@ Tools
 # Architecture
 
 ```
-                     DJ Library Manager
+                    DJ Library Manager
 
                            │
-                    Application Core
+                     Application Core
                            │
-     ┌───────────────┬───────────────┬───────────────┐
-     ▼               ▼               ▼
- Discovery        Providers       Library Services
-                      │
+     ┌──────────────┬──────────────┬──────────────┐
+     ▼              ▼              ▼
+ Discovery      Provider       Library Services
+                 Modules
+                     │
      ┌──────────┬──────────┬──────────┬──────────┬──────────┐
      ▼          ▼          ▼          ▼          ▼
  VirtualDJ  Rekordbox   Serato    EngineDJ   Traktor
-                      │
-                      ▼
+                     │
+                     ▼
           Provider Translation Layer
-                      │
-                      ▼
+                     │
+                     ▼
                DJLMMediaItem[]
-                      │
-          ┌───────────┼───────────┐
-          ▼           ▼           ▼
-      Analysis    Recovery    Dashboard
+                     │
+          ┌──────────┼──────────┐
+          ▼          ▼          ▼
+      Analysis   Recovery   Dashboard
+                     │
+                     ▼
+          Core Provider Services
+                     │
+          ┌──────────┴──────────┐
+          ▼                     ▼
+     Save-Database      Update-MediaPaths
+```
 
 ---
 
@@ -175,7 +185,8 @@ DJLM automatically:
 6. Scans configured music libraries.
 7. Performs library analysis.
 8. Calculates library health.
-9. Displays the dashboard.
+9. Generates recovery recommendations.
+10. Displays the dashboard.
 
 ---
 
@@ -186,11 +197,14 @@ DJLM automatically:
 - ✅ Modular architecture
 - ✅ Provider-independent architecture
 - ✅ Common media model
+- ✅ Provider service layer
 - ✅ VirtualDJ provider
+- ✅ Rekordbox provider
 - ✅ Provider discovery
 - ✅ Database discovery
 - ✅ Library scanning
 - ✅ Analysis engine
+- ✅ Recovery engine
 - ✅ Console dashboard
 - ✅ Developer scaffolding tools
 
@@ -198,22 +212,23 @@ DJLM automatically:
 
 ## In Progress
 
-- 🚧 Rekordbox provider implementation
-- 🚧 Serato provider implementation
-- 🚧 Engine DJ provider implementation
-- 🚧 Traktor provider implementation
-- 🚧 Recovery engine
-- 🚧 Path repair
+- 🚧 Serato provider
+- 🚧 Engine DJ provider
+- 🚧 Traktor provider
+- 🚧 Advanced recovery actions
 
 ---
 
 ## Planned
 
+- Library organisation
+- Metadata repair
+- Artwork management
+- Audio quality analysis
 - Report generation
-- Audio fingerprinting
-- AI-assisted recommendations
-- Plugin architecture
+- Smart collections
 - Cross-provider synchronisation
+- Plugin architecture
 - Graphical user interface
 
 ---
@@ -233,6 +248,7 @@ Additional documentation is available in the **Docs** folder, including:
 - Vision
 - Architecture
 - Domain Model
+- Provider Architecture
 - Architecture Decision Records (ADRs)
 - Development Roadmap
 - Coding Standards

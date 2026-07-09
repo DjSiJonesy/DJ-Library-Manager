@@ -22,14 +22,6 @@ A DJLM.RecoveryPlan object.
 .PARAMETER Database
 A provider database object returned by the provider module.
 
-.EXAMPLE
-Repair-MovedFiles -Plan $Plan
-
-.EXAMPLE
-Repair-MovedFiles `
-    -Plan $Plan `
-    -Database $Database
-
 .NOTES
 DJ Library Manager
 #>
@@ -91,34 +83,66 @@ DJ Library Manager
     }
 
     #
-    # Update Provider Database
+    # Build provider update collection
     #
+
+    $MovedFiles = foreach ($Action in $Actions) {
+
+        $Action.Reference
+
+    }
 
     Write-Log "Applying moved file repairs..." -Level Information
 
-    $Updated = 0
-    $Failed  = 0
+    try {
 
-    foreach ($Action in $Actions) {
-
-        $Result = Update-VirtualDJMediaPaths `
+        $Updated = Update-MediaPaths `
             -Database $Database `
-            -OldPath $Action.Source `
-            -NewPath $Action.Target
+            -MovedFiles $MovedFiles
 
-        if ($Result.Success) {
+    }
+    catch {
+
+        Write-Log $_.Exception.Message -Level Error
+
+        return [PSCustomObject]@{
+
+            PSTypeName = 'DJLM.RepairResult'
+
+            Updated = 0
+
+            Failed = $Actions.Count
+
+            Total = $Actions.Count
+
+        }
+
+    }
+
+    #
+    # Only mark actions as executed if the provider
+    # reports the expected number of updates.
+    #
+
+    if ($Updated -eq $Actions.Count) {
+
+        foreach ($Action in $Actions) {
 
             $Action.Executed = $true
             $Action.ExecutedDate = Get-Date
 
-            $Updated++
-
         }
-        else {
 
-            $Failed++
+        $Failed = 0
 
-        }
+    }
+    else {
+
+        $Failed = $Actions.Count - $Updated
+
+        Write-Log (
+            "Expected to update $($Actions.Count) item(s) but provider updated $Updated."
+        ) -Level Warning
 
     }
 
@@ -126,7 +150,7 @@ DJ Library Manager
 
     if ($Failed -gt 0) {
 
-        Write-Log "$Failed moved file(s) could not be updated." -Level Warning
+        Write-Log "$Failed moved file(s) failed to update." -Level Warning
 
     }
 

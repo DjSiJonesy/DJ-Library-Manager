@@ -19,6 +19,8 @@ Converts a VirtualDJ Song node into a DJLM media object.
 
         Provider = "VirtualDJ"
 
+        NativeId = $null
+
         MediaType = "Unknown"
 
         FilePath = Get-XmlAttribute -Node $Song -Name "FilePath"

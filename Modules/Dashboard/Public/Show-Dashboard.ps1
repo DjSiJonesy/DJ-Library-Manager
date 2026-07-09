@@ -47,7 +47,7 @@ Displays the DJ Library Manager dashboard.
 
     }
 
-    Write-Object -InputObject $Summary
+    Write-DashboardObject -InputObject $Summary
 
     #
     # Library Health
@@ -67,7 +67,7 @@ Displays the DJ Library Manager dashboard.
 
     }
 
-    Write-Object -InputObject $HealthSummary
+    Write-DashboardObject -InputObject $HealthSummary
 
     Write-HealthScore `
         -Score $HealthScore.OverallScore
@@ -87,7 +87,7 @@ Displays the DJ Library Manager dashboard.
 
     }
 
-    Write-Object -InputObject $AnalysisSummary
+    Write-DashboardObject -InputObject $AnalysisSummary
 
     #
     # Recommendations

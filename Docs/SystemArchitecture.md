@@ -28,7 +28,7 @@ Every architectural decision should reinforce one or more of these principles.
 # High Level Architecture
 
 ```text
-                           DJ Library Manager
+                            DJ Library Manager
 
                                   │
                            Application Bootstrap
@@ -44,29 +44,30 @@ Every architectural decision should reinforce one or more of these principles.
                                  │
                              Core Module
                                  │
-       ┌──────────────┬──────────┼──────────────┬──────────────┐
-       ▼              ▼          ▼              ▼              ▼
-  VirtualDJ      rekordbox    Serato      Engine DJ     Future Providers
-       │              │          │              │
-       └──────────────┴──────────┴──────────────┘
-                      │
-                      ▼
-          Provider Translation Layer
-                      │
-                      ▼
-              DJLM Domain Model
-                      │
-          ┌───────────┼───────────────┐
-          ▼           ▼               ▼
-      Library      Analysis       Recovery
-          │           │
-          │           ▼
-          │    DJLM.LibraryAnalysis
-          │           │
-          └───────────┼───────────────┐
-                      ▼               ▼
-                 Reporting      Dashboard / GUI
-```
+                  ┌──────────────┴──────────────┐
+                  ▼                             ▼
+          Provider Services              Provider Modules
+                                                │
+        ┌──────────────┬──────────┬─────────────┼──────────────┐
+        ▼              ▼          ▼             ▼              ▼
+   VirtualDJ      Rekordbox    Serato      Engine DJ      Traktor
+        │              │
+        └──────────────┴──────────────────────────────┐
+                                                      │
+                                          Provider Translation
+                                                      │
+                                                      ▼
+                                              DJLM Domain Model
+                                                      │
+                ┌─────────────────────────────────────┼────────────────────────────────────┐
+                ▼                                     ▼                                    ▼
+            Library                              Analysis                             Recovery
+                                                                                │
+                                                                                ▼
+                                                                      Provider Services
+                                                                                │
+                                                                                ▼
+                                                                       Provider Updates
 
 ---
 
@@ -75,6 +76,7 @@ Every architectural decision should reinforce one or more of these principles.
 The normal execution flow through the application is:
 
 ```text
+
 Import Provider Database
           │
           ▼
@@ -83,20 +85,23 @@ Translate Provider Data
           ▼
 DJLM Media Objects
           │
-          ├──────────────────────────────┐
-          ▼                              ▼
-Get-LibraryFiles                 Analysis Engine
-          │                              │
-          └──────────────┬───────────────┘
-                         ▼
-               Get-LibraryAnalysis
-                         │
-                         ▼
-              DJLM.LibraryAnalysis
-                         │
-                         ▼
-              Dashboard / Reports
-```
+          ▼
+Library Scan
+          │
+          ▼
+Analysis Engine
+          │
+          ▼
+Recovery Plan
+          │
+          ▼
+Provider Services
+          │
+          ▼
+Provider Database
+          │
+          ▼
+Dashboard / Reports
 
 ---
 
@@ -113,6 +118,7 @@ Responsibilities include:
 - Environment
 - Shared utilities
 - Application startup
+- Provider services
 
 The Core module contains no provider-specific logic.
 
@@ -125,7 +131,7 @@ Provider modules understand the native formats used by DJ software.
 Examples include:
 
 - VirtualDJ
-- rekordbox
+- Rekordbox
 - Serato
 - Engine DJ
 - Traktor
@@ -133,8 +139,10 @@ Examples include:
 Responsibilities include:
 
 - Reading provider databases
+- Writing provider databases
 - Parsing native formats
 - Translating provider data into DJLM media objects
+- Updating provider media paths
 
 Provider modules never perform analysis.
 
@@ -182,10 +190,11 @@ Responsible for safe repair operations.
 
 Examples include:
 
-- Path repair
-- Missing file recovery
-- Drive migration
-- Undo support
+- Recovery plan generation
+- Recovery execution
+- Preview mode
+- Approval workflow
+- Undo support (future)
 
 Recovery modules consume analysis results and apply safe, auditable modifications.
 
@@ -234,6 +243,9 @@ Current domain objects include:
 - Library Analysis
 - Duplicate Match
 - Moved File Match
+- Recovery Plan
+- Recovery Action
+- Provider Database
 
 Provider-specific objects never leave their own module.
 
@@ -244,25 +256,23 @@ Provider-specific objects never leave their own module.
 Modules may only depend upon lower-level modules.
 
 ```text
-Dashboard / GUI
-        │
-        ▼
-Reporting
-        │
-        ▼
-Recovery
-        │
-        ▼
-Analysis
-        │
-        ▼
-Library
-        │
-        ▼
-Provider Modules
-        │
-        ▼
-Core
+                Dashboard
+                    │
+                Reporting
+                    │
+                Recovery
+                    │
+                Analysis
+                    │
+                Library
+                    │
+        ┌───────────┴───────────┐
+        ▼                       ▼
+Core Provider Services     Provider Modules
+            │                     │
+            └───────────┬─────────┘
+                        ▼
+                      Core
 ```
 
 The Core module depends on nothing.
@@ -308,12 +318,10 @@ These capabilities should be implemented by extending existing modules rather th
 
 # Summary
 
-The architecture of DJ Library Manager is centred around a provider-independent domain model.
+DJ Library Manager is built around a provider-independent domain model and a provider service layer.
 
-Providers translate native data into standard DJLM objects.
+Provider modules are responsible only for interacting with native database formats and translating data to and from the common DJLMMediaItem model.
 
-Business logic operates exclusively on those objects.
+Analysis, Recovery and Dashboard modules operate exclusively on provider-independent domain objects and interact with provider implementations only through the Core Provider Services.
 
-Presentation modules consume completed analysis results without knowledge of the underlying providers or analysis algorithms.
-
-This separation enables the application to grow through additional providers, analysis engines and repair capabilities while maintaining a clean, modular and testable architecture.
+This architecture enables new providers and new application features to be added with minimal impact on the remainder of the system while maintaining a clean, modular and testable design.

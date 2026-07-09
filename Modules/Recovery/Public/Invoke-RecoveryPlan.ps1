@@ -22,21 +22,6 @@ provider database.
 
 Without -Commit, only preview operations are performed.
 
-.EXAMPLE
-Invoke-RecoveryPlan `
-    -Plan $Plan
-
-.EXAMPLE
-Invoke-RecoveryPlan `
-    -Plan $Plan `
-    -Database $Database
-
-.EXAMPLE
-Invoke-RecoveryPlan `
-    -Plan $Plan `
-    -Database $Database `
-    -Commit
-
 .NOTES
 DJ Library Manager
 #>
@@ -74,7 +59,7 @@ DJ Library Manager
     }
 
     #
-    # Update provider database in memory
+    # Update provider database
     #
 
     Repair-MovedFiles `
@@ -87,7 +72,7 @@ DJ Library Manager
 
     if ($Commit) {
 
-        Save-VirtualDJDatabase `
+        Save-Database `
             -Database $Database `
             -Backup
 
