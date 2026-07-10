@@ -1,14 +1,23 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d"
-        x:Class="DJLibraryManager.UI.Views.MainWindow"
-        Title="DJ Library Manager"
-        Width="900"
-        Height="650"
-        MinWidth="800"
-        MinHeight="600">
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    x:Class="DJLibraryManager.UI.Views.MainWindow"
+    x:DataType="vm:MainViewModel"
+    mc:Ignorable="d"
+    Width="900"
+    Height="650"
+    MinWidth="800"
+    MinHeight="600"
+    Title="DJ Library Manager"
+
+    Background="{DynamicResource Brush.Background}">
+
+    <Design.DataContext>
+        <vm:MainViewModel/>
+    </Design.DataContext>
 
     <Grid Margin="30">
 
@@ -16,6 +25,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="25"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="25"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -25,36 +35,62 @@
 
             <TextBlock
                 Text="DJ Library Manager"
-                FontSize="32"
-                FontWeight="Bold"/>
+                FontSize="34"
+                FontWeight="Bold"
+                Foreground="{DynamicResource Brush.Text}"/>
 
             <TextBlock
-                Margin="0,6,0,0"
+                Margin="0,4,0,0"
                 Text="by SMSounds"
-                FontSize="16"/>
+                FontSize="16"
+                Foreground="{DynamicResource Brush.Accent}"/>
 
         </StackPanel>
 
-        <!-- Main Panel -->
+        <!-- Main Card -->
 
-        <Border Grid.Row="2"
-                BorderThickness="1"
-                CornerRadius="8"
-                Padding="25">
+        <Border
+            Grid.Row="2"
+            Background="{DynamicResource Brush.Panel}"
+            BorderBrush="{DynamicResource Brush.PanelBorder}"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="24">
 
             <StackPanel Spacing="18">
 
                 <TextBlock
                     Text="Startup Discovery"
                     FontSize="24"
-                    FontWeight="Bold"/>
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource Brush.Text}"/>
 
                 <TextBlock
-                    Text="DJ Library Manager will automatically discover installed DJ software and available music folders before analysing your library."
-                    TextWrapping="Wrap"/>
+                    Text="The application will automatically discover installed DJ software and music libraries before beginning analysis."
+                    TextWrapping="Wrap"
+                    Foreground="{DynamicResource Brush.TextSecondary}"/>
+
+                <TextBlock
+                    Margin="0,12,0,0"
+                    Text="Installed DJ Software"
+                    FontWeight="Bold"
+                    FontSize="18"
+                    Foreground="{DynamicResource Brush.Text}"/>
+
+                <ItemsControl ItemsSource="{Binding InstalledProviders}"/>
+
+                <TextBlock
+                    Margin="0,12,0,0"
+                    Text="Music Locations"
+                    FontWeight="Bold"
+                    FontSize="18"
+                    Foreground="{DynamicResource Brush.Text}"/>
+
+                <ItemsControl ItemsSource="{Binding MusicLocations}"/>
 
                 <Button
                     Width="220"
+                    Margin="0,20,0,0"
                     HorizontalAlignment="Left"
                     Content="Analyse Library"/>
 
@@ -65,10 +101,10 @@
         <!-- Footer -->
 
         <TextBlock
-            Grid.Row="3"
+            Grid.Row="4"
             HorizontalAlignment="Right"
-            Margin="0,20,0,0"
-            Text="Version 1.0"/>
+            Text="{Binding StatusText}"
+            Foreground="{DynamicResource Brush.TextSecondary}"/>
 
     </Grid>
 

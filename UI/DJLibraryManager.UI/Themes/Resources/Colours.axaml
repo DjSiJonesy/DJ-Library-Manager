@@ -1,0 +1,75 @@
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ========================================================= -->
+    <!-- DJ Library Manager Colour Palette                         -->
+    <!-- ========================================================= -->
+
+    <!-- Backgrounds -->
+
+    <Color x:Key="Colour.Background">#2B2B2B</Color>
+    <Color x:Key="Colour.Panel">#343434</Color>
+    <Color x:Key="Colour.PanelBorder">#555555</Color>
+
+    <!-- Branding -->
+
+    <Color x:Key="Colour.Accent">#AB58FA</Color>
+    <Color x:Key="Colour.AccentHover">#BE7BFF</Color>
+
+    <!-- Text -->
+
+    <Color x:Key="Colour.Text">#FFFFFF</Color>
+    <Color x:Key="Colour.TextSecondary">#CFCFCF</Color>
+
+    <!-- Status -->
+
+    <Color x:Key="Colour.Success">#43A047</Color>
+    <Color x:Key="Colour.Warning">#FB8C00</Color>
+    <Color x:Key="Colour.Error">#E53935</Color>
+
+    <!-- ========================================================= -->
+    <!-- Brushes                                                   -->
+    <!-- ========================================================= -->
+
+    <SolidColorBrush
+        x:Key="Brush.Background"
+        Color="{StaticResource Colour.Background}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Panel"
+        Color="{StaticResource Colour.Panel}" />
+
+    <SolidColorBrush
+        x:Key="Brush.PanelBorder"
+        Color="{StaticResource Colour.PanelBorder}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Accent"
+        Color="{StaticResource Colour.Accent}" />
+
+    <SolidColorBrush
+        x:Key="Brush.AccentHover"
+        Color="{StaticResource Colour.AccentHover}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Text"
+        Color="{StaticResource Colour.Text}" />
+
+    <SolidColorBrush
+        x:Key="Brush.TextSecondary"
+        Color="{StaticResource Colour.TextSecondary}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Success"
+        Color="{StaticResource Colour.Success}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Warning"
+        Color="{StaticResource Colour.Warning}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Error"
+        Color="{StaticResource Colour.Error}" />
+
+</ResourceDictionary>
