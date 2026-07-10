@@ -1,0 +1,75 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="DJLibraryManager.UI.Views.MainWindow"
+        Title="DJ Library Manager"
+        Width="900"
+        Height="650"
+        MinWidth="800"
+        MinHeight="600">
+
+    <Grid Margin="30">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+
+        <StackPanel Grid.Row="0">
+
+            <TextBlock
+                Text="DJ Library Manager"
+                FontSize="32"
+                FontWeight="Bold"/>
+
+            <TextBlock
+                Margin="0,6,0,0"
+                Text="by SMSounds"
+                FontSize="16"/>
+
+        </StackPanel>
+
+        <!-- Main Panel -->
+
+        <Border Grid.Row="2"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="25">
+
+            <StackPanel Spacing="18">
+
+                <TextBlock
+                    Text="Startup Discovery"
+                    FontSize="24"
+                    FontWeight="Bold"/>
+
+                <TextBlock
+                    Text="DJ Library Manager will automatically discover installed DJ software and available music folders before analysing your library."
+                    TextWrapping="Wrap"/>
+
+                <Button
+                    Width="220"
+                    HorizontalAlignment="Left"
+                    Content="Analyse Library"/>
+
+            </StackPanel>
+
+        </Border>
+
+        <!-- Footer -->
+
+        <TextBlock
+            Grid.Row="3"
+            HorizontalAlignment="Right"
+            Margin="0,20,0,0"
+            Text="Version 1.0"/>
+
+    </Grid>
+
+</Window>
