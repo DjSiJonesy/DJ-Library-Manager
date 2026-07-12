@@ -4,6 +4,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    xmlns:cards="using:DJLibraryManager.UI.Controls.Cards"
     x:Class="DJLibraryManager.UI.Views.MainWindow"
     x:DataType="vm:MainViewModel"
     mc:Ignorable="d"
@@ -12,7 +13,6 @@
     MinWidth="800"
     MinHeight="600"
     Title="DJ Library Manager"
-
     Background="{DynamicResource Brush.Background}">
 
     <Design.DataContext>
@@ -34,16 +34,13 @@
         <StackPanel Grid.Row="0">
 
             <TextBlock
-                Text="DJ Library Manager"
-                FontSize="34"
-                FontWeight="Bold"
-                Foreground="{DynamicResource Brush.Text}"/>
+                Classes="display"
+                Text="DJ Library Manager"/>
 
             <TextBlock
+                Classes="subheading"
                 Margin="0,4,0,0"
-                Text="by SMSounds"
-                FontSize="16"
-                Foreground="{DynamicResource Brush.Accent}"/>
+                Text="by SMSounds"/>
 
         </StackPanel>
 
@@ -51,48 +48,79 @@
 
         <Border
             Grid.Row="2"
-            Background="{DynamicResource Brush.Panel}"
-            BorderBrush="{DynamicResource Brush.PanelBorder}"
-            BorderThickness="1"
-            CornerRadius="8"
-            Padding="24">
+            Classes="card">
 
             <StackPanel Spacing="18">
 
                 <TextBlock
-                    Text="Startup Discovery"
-                    FontSize="24"
-                    FontWeight="SemiBold"
-                    Foreground="{DynamicResource Brush.Text}"/>
+                    Classes="heading"
+                    Text="Startup Discovery"/>
 
                 <TextBlock
-                    Text="The application will automatically discover installed DJ software and music libraries before beginning analysis."
-                    TextWrapping="Wrap"
-                    Foreground="{DynamicResource Brush.TextSecondary}"/>
+                    Classes="body"
+                    Text="The application will automatically discover installed DJ software and music libraries before beginning analysis."/>
+
+<!-- Installed DJ Software -->
+
+<TextBlock
+    Classes="section"
+    Margin="0,12,0,0"
+    Text="Installed DJ Software"/>
+
+<ItemsControl ItemsSource="{Binding InstalledProviders}">
+
+    <ItemsControl.ItemsPanel>
+
+        <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal"/>
+        </ItemsPanelTemplate>
+
+    </ItemsControl.ItemsPanel>
+
+    <ItemsControl.ItemTemplate>
+
+        <DataTemplate>
+
+            <cards:ProviderCard
+            ProviderName="{Binding Name}"
+            Status="{Binding Status}" />
+
+        </DataTemplate>
+
+    </ItemsControl.ItemTemplate>
+
+</ItemsControl>
+
+                <!-- Music Locations -->
 
                 <TextBlock
+                    Classes="section"
                     Margin="0,12,0,0"
-                    Text="Installed DJ Software"
-                    FontWeight="Bold"
-                    FontSize="18"
-                    Foreground="{DynamicResource Brush.Text}"/>
+                    Text="Music Locations"/>
 
-                <ItemsControl ItemsSource="{Binding InstalledProviders}"/>
+                <ItemsControl ItemsSource="{Binding MusicLocations}">
 
-                <TextBlock
-                    Margin="0,12,0,0"
-                    Text="Music Locations"
-                    FontWeight="Bold"
-                    FontSize="18"
-                    Foreground="{DynamicResource Brush.Text}"/>
+                    <ItemsControl.ItemTemplate>
 
-                <ItemsControl ItemsSource="{Binding MusicLocations}"/>
+                        <DataTemplate>
+
+                            <TextBlock
+                                Classes="listitem"
+                                Text="{Binding}"/>
+
+                        </DataTemplate>
+
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+                <!-- Analyse Button -->
 
                 <Button
-                    Width="220"
-                    Margin="0,20,0,0"
+                    Theme="{StaticResource DJLM.PrimaryButton}"
                     HorizontalAlignment="Left"
                     Content="Analyse Library"/>
+ 
 
             </StackPanel>
 
@@ -101,10 +129,10 @@
         <!-- Footer -->
 
         <TextBlock
+            Classes="caption"
             Grid.Row="4"
             HorizontalAlignment="Right"
-            Text="{Binding StatusText}"
-            Foreground="{DynamicResource Brush.TextSecondary}"/>
+            Text="{Binding StatusText}"/>
 
     </Grid>
 

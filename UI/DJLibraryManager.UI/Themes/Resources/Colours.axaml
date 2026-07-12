@@ -10,26 +10,46 @@
 
     <Color x:Key="Colour.Background">#2B2B2B</Color>
     <Color x:Key="Colour.Panel">#343434</Color>
-    <Color x:Key="Colour.PanelBorder">#555555</Color>
+    <Color x:Key="Colour.Panel.Border">#555555</Color>
 
     <!-- Branding -->
 
     <Color x:Key="Colour.Accent">#AB58FA</Color>
-    <Color x:Key="Colour.AccentHover">#BE7BFF</Color>
+    <Color x:Key="Colour.Accent.Hover">#BE7BFF</Color>
 
     <!-- Text -->
 
     <Color x:Key="Colour.Text">#FFFFFF</Color>
-    <Color x:Key="Colour.TextSecondary">#CFCFCF</Color>
+    <Color x:Key="Colour.Text.Secondary">#CFCFCF</Color>
 
     <!-- Status -->
 
-    <Color x:Key="Colour.Success">#43A047</Color>
-    <Color x:Key="Colour.Warning">#FB8C00</Color>
-    <Color x:Key="Colour.Error">#E53935</Color>
+    <Color x:Key="Colour.Status.Success">#43A047</Color>
+    <Color x:Key="Colour.Status.Warning">#FB8C00</Color>
+    <Color x:Key="Colour.Status.Error">#E53935</Color>
 
     <!-- ========================================================= -->
-    <!-- Brushes                                                   -->
+    <!-- Button Colours                                             -->
+    <!-- ========================================================= -->
+
+    <Color x:Key="Colour.Button.Background">#3A3A3A</Color>
+    <Color x:Key="Colour.Button.Border">#555555</Color>
+    <Color x:Key="Colour.Button.Foreground">#FFFFFF</Color>
+
+    <Color x:Key="Colour.Button.Hover.Background">#3A3A3A</Color>
+    <Color x:Key="Colour.Button.Hover.Border">#AB58FA</Color>
+    <Color x:Key="Colour.Button.Hover.Foreground">#FFFFFF</Color>
+
+    <Color x:Key="Colour.Button.Pressed.Background">#AB58FA</Color>
+    <Color x:Key="Colour.Button.Pressed.Border">#AB58FA</Color>
+    <Color x:Key="Colour.Button.Pressed.Foreground">#FFFFFF</Color>
+
+    <Color x:Key="Colour.Button.Disabled.Background">#555555</Color>
+    <Color x:Key="Colour.Button.Disabled.Border">#444444</Color>
+    <Color x:Key="Colour.Button.Disabled.Foreground">#AAAAAA</Color>
+
+    <!-- ========================================================= -->
+    <!-- Brushes                                                    -->
     <!-- ========================================================= -->
 
     <SolidColorBrush
@@ -41,35 +61,87 @@
         Color="{StaticResource Colour.Panel}" />
 
     <SolidColorBrush
-        x:Key="Brush.PanelBorder"
-        Color="{StaticResource Colour.PanelBorder}" />
+        x:Key="Brush.Panel.Border"
+        Color="{StaticResource Colour.Panel.Border}" />
 
     <SolidColorBrush
         x:Key="Brush.Accent"
         Color="{StaticResource Colour.Accent}" />
 
     <SolidColorBrush
-        x:Key="Brush.AccentHover"
-        Color="{StaticResource Colour.AccentHover}" />
+        x:Key="Brush.Accent.Hover"
+        Color="{StaticResource Colour.Accent.Hover}" />
 
     <SolidColorBrush
         x:Key="Brush.Text"
         Color="{StaticResource Colour.Text}" />
 
     <SolidColorBrush
-        x:Key="Brush.TextSecondary"
-        Color="{StaticResource Colour.TextSecondary}" />
+        x:Key="Brush.Text.Secondary"
+        Color="{StaticResource Colour.Text.Secondary}" />
 
     <SolidColorBrush
-        x:Key="Brush.Success"
-        Color="{StaticResource Colour.Success}" />
+        x:Key="Brush.Status.Success"
+        Color="{StaticResource Colour.Status.Success}" />
 
     <SolidColorBrush
-        x:Key="Brush.Warning"
-        Color="{StaticResource Colour.Warning}" />
+        x:Key="Brush.Status.Warning"
+        Color="{StaticResource Colour.Status.Warning}" />
 
     <SolidColorBrush
-        x:Key="Brush.Error"
-        Color="{StaticResource Colour.Error}" />
+        x:Key="Brush.Status.Error"
+        Color="{StaticResource Colour.Status.Error}" />
+
+    <!-- ========================================================= -->
+    <!-- Button Brushes                                             -->
+    <!-- ========================================================= -->
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Background"
+        Color="{StaticResource Colour.Button.Background}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Border"
+        Color="{StaticResource Colour.Button.Border}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Foreground"
+        Color="{StaticResource Colour.Button.Foreground}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Hover.Background"
+        Color="{StaticResource Colour.Button.Hover.Background}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Hover.Border"
+        Color="{StaticResource Colour.Button.Hover.Border}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Hover.Foreground"
+        Color="{StaticResource Colour.Button.Hover.Foreground}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Pressed.Background"
+        Color="{StaticResource Colour.Button.Pressed.Background}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Pressed.Border"
+        Color="{StaticResource Colour.Button.Pressed.Border}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Pressed.Foreground"
+        Color="{StaticResource Colour.Button.Pressed.Foreground}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Disabled.Background"
+        Color="{StaticResource Colour.Button.Disabled.Background}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Disabled.Border"
+        Color="{StaticResource Colour.Button.Disabled.Border}" />
+
+    <SolidColorBrush
+        x:Key="Brush.Button.Disabled.Foreground"
+        Color="{StaticResource Colour.Button.Disabled.Foreground}" />
 
 </ResourceDictionary>

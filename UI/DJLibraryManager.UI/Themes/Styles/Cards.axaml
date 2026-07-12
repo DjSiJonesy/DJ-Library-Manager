@@ -1,32 +1,24 @@
-<ResourceDictionary
+<Styles
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ========================================================= -->
-    <!-- DJLM Card Style                                           -->
-    <!-- ========================================================= -->
-
-    <Style x:Key="DJLM.Card"
-           Selector="Border">
+    <Style Selector="Border.card">
 
         <Setter Property="Background"
-                Value="{DynamicResource Brush.Panel}" />
+                Value="{DynamicResource Brush.Panel}"/>
 
         <Setter Property="BorderBrush"
-                Value="{DynamicResource Brush.PanelBorder}" />
+                Value="{DynamicResource Brush.Panel.Border}"/>
 
         <Setter Property="BorderThickness"
-                Value="1" />
+                Value="1"/>
 
         <Setter Property="CornerRadius"
-                Value="10" />
+                Value="10"/>
 
         <Setter Property="Padding"
-                Value="24" />
-
-        <Setter Property="Margin"
-                Value="0" />
+                Value="24"/>
 
     </Style>
 
-</ResourceDictionary>
+</Styles>

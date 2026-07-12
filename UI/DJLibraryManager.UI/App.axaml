@@ -20,6 +20,8 @@
     <Application.Styles>
 
         <FluentTheme/>
+        <StyleInclude Source="avares://DJLibraryManager.UI/Themes/Styles/Typography.axaml"/>
+        <StyleInclude Source="avares://DJLibraryManager.UI/Themes/Styles/Cards.axaml"/>
 
     </Application.Styles>
 

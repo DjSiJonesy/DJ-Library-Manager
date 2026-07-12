@@ -6,6 +6,8 @@
 
         <ResourceInclude Source="avares://DJLibraryManager.UI/Themes/Resources/Colours.axaml"/>
 
+        <ResourceInclude Source="avares://DJLibraryManager.UI/Themes/Templates/Buttons.axaml"/>
+
     </ResourceDictionary.MergedDictionaries>
 
 </ResourceDictionary>

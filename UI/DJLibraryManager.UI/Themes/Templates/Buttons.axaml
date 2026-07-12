@@ -1,0 +1,116 @@
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ControlTheme
+        x:Key="DJLM.PrimaryButton"
+        TargetType="Button">
+
+        <!-- Default Properties -->
+
+        <Setter Property="MinWidth" Value="240"/>
+        <Setter Property="Height" Value="46"/>
+
+        <Setter Property="CornerRadius" Value="8"/>
+
+        <Setter Property="Padding" Value="24,12"/>
+
+        <Setter Property="FontWeight" Value="Bold"/>
+
+        <Setter Property="Foreground"
+                Value="{DynamicResource Brush.Button.Foreground}"/>
+
+        <Setter Property="Background"
+                Value="{DynamicResource Brush.Button.Background}"/>
+
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource Brush.Button.Border}"/>
+
+        <Setter Property="BorderThickness"
+                Value="1"/>
+
+        <Setter Property="HorizontalContentAlignment"
+                Value="Center"/>
+
+        <Setter Property="VerticalContentAlignment"
+                Value="Center"/>
+
+        <!-- Template -->
+
+        <Setter Property="Template">
+
+            <ControlTemplate>
+
+                <ContentPresenter
+                    x:Name="PART_ContentPresenter"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    Padding="{TemplateBinding Padding}"
+                    Content="{TemplateBinding Content}"
+                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                    HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                    VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+
+            </ControlTemplate>
+
+        </Setter>
+
+        <!-- Hover -->
+
+        <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+
+            <Setter Property="Background"
+                    Value="{DynamicResource Brush.Button.Hover.Background}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource Brush.Button.Hover.Border}"/>
+
+            <Setter Property="Foreground"
+                    Value="{DynamicResource Brush.Button.Hover.Foreground}"/>
+            
+            <Setter Property="Cursor" Value="Hand"/>
+
+        </Style>
+
+        <!-- Pressed -->
+
+        <Style Selector="^:pressed">
+
+            <Setter Property="RenderTransform"
+                    Value="scale(0.98)"/>
+
+        </Style>
+
+        <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+
+            <Setter Property="Background"
+                    Value="{DynamicResource Brush.Button.Pressed.Background}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource Brush.Button.Pressed.Border}"/>
+
+            <Setter Property="Foreground"
+                    Value="{DynamicResource Brush.Button.Pressed.Foreground}"/>
+
+        </Style>
+
+        <!-- Disabled -->
+
+        <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
+
+            <Setter Property="Background"
+                    Value="{DynamicResource Brush.Button.Disabled.Background}"/>
+
+            <Setter Property="BorderBrush"
+                    Value="{DynamicResource Brush.Button.Disabled.Border}"/>
+
+            <Setter Property="Foreground"
+                    Value="{DynamicResource Brush.Button.Disabled.Foreground}"/>
+
+        </Style>
+
+    </ControlTheme>
+
+</ResourceDictionary>
