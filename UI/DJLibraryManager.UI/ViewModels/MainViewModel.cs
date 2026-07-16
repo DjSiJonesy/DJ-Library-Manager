@@ -31,7 +31,37 @@ public partial class MainViewModel : ViewModelBase
             Version = "",
             ProviderLogo = new Bitmap(
                 AssetLoader.Open(
-                    new Uri("avares://DJLibraryManager.UI/Assets/Providers/Rekordbox.png")))
+                    new Uri("avares://DJLibraryManager.UI/Assets/Providers/Rekordbox2.png")))
+        },
+
+        new ProviderInfo
+        {
+            Name = "Serato",
+            Installed = false,
+            Version = "",
+            ProviderLogo = new Bitmap(
+                AssetLoader.Open(
+                    new Uri("avares://DJLibraryManager.UI/Assets/Providers/Serato4.png")))
+        },
+
+        new ProviderInfo
+        {
+            Name = "Traktor",
+            Installed = false,
+            Version = "",
+            ProviderLogo = new Bitmap(
+                AssetLoader.Open(
+                    new Uri("avares://DJLibraryManager.UI/Assets/Providers/Traktor.jpeg")))
+        },
+
+        new ProviderInfo
+        {
+            Name = "EngineDJ",
+            Installed = false,
+            Version = "",
+            ProviderLogo = new Bitmap(
+                AssetLoader.Open(
+                    new Uri("avares://DJLibraryManager.UI/Assets/Providers/EngineDJ.png")))
         }
     };
 

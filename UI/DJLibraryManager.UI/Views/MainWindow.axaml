@@ -8,10 +8,10 @@
     x:Class="DJLibraryManager.UI.Views.MainWindow"
     x:DataType="vm:MainViewModel"
     mc:Ignorable="d"
-    Width="900"
-    Height="650"
-    MinWidth="800"
-    MinHeight="600"
+    Width="1005"
+    Height="800"
+    MinWidth="1010"
+    MinHeight="750"
     Title="DJ Library Manager"
     Background="{DynamicResource Brush.Background}">
 
@@ -23,9 +23,9 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="25"/>
+            <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="25"/>
+            <RowDefinition Height="15"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -47,91 +47,129 @@
         <!-- Main Card -->
 
         <Border
-            Grid.Row="2"
-            Classes="card">
+    Grid.Row="2"
+    Classes="card"
+    Padding="30">
 
-            <StackPanel Spacing="18">
+    <Grid>
 
-                <TextBlock
-                    Classes="heading"
-                    Text="Startup Discovery"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
-                <TextBlock
-                    Classes="body"
-                    Text="The application will automatically discover installed DJ software and music libraries before beginning analysis."/>
+        <!-- Main Content -->
 
-<!-- Installed DJ Software -->
+        <StackPanel
+            Grid.Row="0"
+            Spacing="14">
 
-<TextBlock
-    Classes="section"
-    Margin="0,12,0,0"
-    Text="Installed DJ Software"/>
+            <TextBlock
+                Classes="heading"
+                Text="Startup Discovery"/>
 
-<ItemsControl ItemsSource="{Binding InstalledProviders}">
+            <TextBlock
+                Classes="body"
+                Text="The application will automatically discover installed DJ software and music libraries before beginning analysis."/>
 
-    <ItemsControl.ItemsPanel>
+            <!-- Installed Providers -->
 
-        <ItemsPanelTemplate>
-            <WrapPanel Orientation="Horizontal"/>
-        </ItemsPanelTemplate>
+            <TextBlock
+                Classes="section"
+                Margin="0,8,0,0"
+                Text="Installed DJ Software"/>
 
-    </ItemsControl.ItemsPanel>
+            <ItemsControl ItemsSource="{Binding InstalledProviders}">
 
-    <ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
 
-        <DataTemplate>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
 
-            <cards:ProviderCard
-            ProviderName="{Binding Name}"
-            ProviderLogo="{Binding ProviderLogo}"
-            Status="{Binding Status}" />
+                </ItemsControl.ItemsPanel>
 
-        </DataTemplate>
+                <ItemsControl.ItemTemplate>
 
-    </ItemsControl.ItemTemplate>
+                    <DataTemplate>
 
-</ItemsControl>
+                        <cards:ProviderCard
+                            ProviderName="{Binding Name}"
+                            ProviderLogo="{Binding ProviderLogo}"
+                            Status="{Binding Status}"/>
 
-                <!-- Music Locations -->
+                    </DataTemplate>
 
-                <TextBlock
-                    Classes="section"
-                    Margin="0,12,0,0"
-                    Text="Music Locations"/>
+                </ItemsControl.ItemTemplate>
 
-                <ItemsControl ItemsSource="{Binding MusicLocations}">
+            </ItemsControl>
 
-                    <ItemsControl.ItemTemplate>
+            <!-- Music Locations -->
 
-                        <DataTemplate>
+            <TextBlock
+                Classes="section"
+                Margin="0,8,0,0"
+                Text="Music Locations"/>
+
+            <ItemsControl
+                Margin="12,0,0,0"
+                ItemsSource="{Binding MusicLocations}">
+
+                <ItemsControl.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Grid
+                            ColumnDefinitions="Auto,*"
+                            ColumnSpacing="8">
+
+                           <TextBlock
+                                Grid.Column="0"
+                                FontSize="16"
+                                VerticalAlignment="Center"
+                                Text="📁"/>
 
                             <TextBlock
+                                Grid.Column="1"
                                 Classes="listitem"
+                                VerticalAlignment="Center"
                                 Text="{Binding}"/>
 
-                        </DataTemplate>
+                        </Grid>
 
-                    </ItemsControl.ItemTemplate>
+                    </DataTemplate>
 
-                </ItemsControl>
+                </ItemsControl.ItemTemplate>
 
-                <!-- Analyse Button -->
+            </ItemsControl>
 
-                <Button
-                    Theme="{StaticResource DJLM.PrimaryButton}"
-                    HorizontalAlignment="Left"
-                    Content="Analyse Library"/>
- 
+        </StackPanel>
 
-            </StackPanel>
+        <!-- Footer -->
+
+        <Border
+            Grid.Row="1"
+            Margin="0,24,0,0"
+            BorderThickness="1,0,0,0"
+            BorderBrush="{DynamicResource Brush.Border}"
+            Padding="0,20,0,0">
+
+            <Button
+                Theme="{StaticResource DJLM.PrimaryButton}"
+                HorizontalAlignment="Left"
+                Content="Analyse Library"/>
 
         </Border>
+
+    </Grid>
+
+</Border>
 
         <!-- Footer -->
 
         <TextBlock
-            Classes="caption"
             Grid.Row="4"
+            Classes="caption"
             HorizontalAlignment="Right"
             Text="{Binding StatusText}"/>
 
