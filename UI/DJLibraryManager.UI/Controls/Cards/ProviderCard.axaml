@@ -16,31 +16,25 @@
             VerticalAlignment="Center"
             Spacing="10">
 
-            <!-- Provider Name -->
-
             <TextBlock
                 Classes="section"
                 HorizontalAlignment="Center"
                 Text="{Binding ProviderName,
-                               RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}"/>
-
-            <!-- Provider Logo -->
+                               RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
 
             <Image
                 Width="100"
                 Height="60"
                 Stretch="Uniform"
                 HorizontalAlignment="Center"
-                Source="{Binding LogoPath,
-                                 RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}"/>
-
-            <!-- Status -->
+                Source="{Binding ProviderLogo,
+                                 RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
 
             <TextBlock
                 HorizontalAlignment="Center"
                 Foreground="{DynamicResource Brush.Accent}"
                 Text="{Binding Status,
-                               RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}"/>
+                               RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
 
         </StackPanel>
 

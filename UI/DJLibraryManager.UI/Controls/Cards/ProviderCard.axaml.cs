@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media.Imaging;
 
 namespace DJLibraryManager.UI.Controls.Cards;
 
@@ -16,6 +17,9 @@ public partial class ProviderCard : UserControl
     public static readonly StyledProperty<string> StatusProperty =
         AvaloniaProperty.Register<ProviderCard, string>(nameof(Status));
 
+    public static readonly StyledProperty<Bitmap?> ProviderLogoProperty =
+        AvaloniaProperty.Register<ProviderCard, Bitmap?>(nameof(ProviderLogo));
+
     public string ProviderName
     {
         get => GetValue(ProviderNameProperty);
@@ -28,18 +32,9 @@ public partial class ProviderCard : UserControl
         set => SetValue(StatusProperty, value);
     }
 
-    /// <summary>
-    /// Returns the logo for the provider.
-    /// </summary>
-    public string LogoPath =>
-        ProviderName switch
-        {
-            "VirtualDJ" => "/Assets/Providers/VirtualDJ.png",
-            "Rekordbox" => "/Assets/Providers/Rekordbox.png",
-            "Serato" => "/Assets/Providers/Serato.png",
-            "Engine DJ" => "/Assets/Providers/EngineDJ.png",
-            "Traktor" => "/Assets/Providers/Traktor.png",
-            "djay" => "/Assets/Providers/djay.png",
-            _ => "/Assets/Providers/Unknown.png"
-        };
+    public Bitmap? ProviderLogo
+    {
+        get => GetValue(ProviderLogoProperty);
+        set => SetValue(ProviderLogoProperty, value);
+    }
 }

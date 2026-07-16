@@ -1,4 +1,6 @@
-﻿namespace DJLibraryManager.UI.Models;
+﻿using Avalonia.Media.Imaging;
+
+namespace DJLibraryManager.UI.Models;
 
 public class ProviderInfo
 {
@@ -7,6 +9,11 @@ public class ProviderInfo
     public bool Installed { get; set; }
 
     public string Version { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Logo displayed by the ProviderCard.
+    /// </summary>
+    public Bitmap? ProviderLogo { get; set; }
 
     public string Status => Installed
         ? "✓ Installed"
