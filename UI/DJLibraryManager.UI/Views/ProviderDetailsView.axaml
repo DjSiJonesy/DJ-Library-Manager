@@ -1,0 +1,25 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    x:Class="DJLibraryManager.UI.Views.ProviderDetailsView"
+    x:DataType="vm:ProviderDetailsViewModel"
+    mc:Ignorable="d">
+
+    <Design.DataContext>
+        <vm:ProviderDetailsViewModel/>
+    </Design.DataContext>
+
+    <Grid Margin="30">
+
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontSize="24"
+            Text="Provider Details"/>
+
+    </Grid>
+
+</UserControl>

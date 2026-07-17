@@ -20,6 +20,11 @@ public partial class ProviderCard : UserControl
     public static readonly StyledProperty<Bitmap?> ProviderLogoProperty =
         AvaloniaProperty.Register<ProviderCard, Bitmap?>(nameof(ProviderLogo));
 
+    public static readonly StyledProperty<bool> InstalledProperty =
+        AvaloniaProperty.Register<ProviderCard, bool>(
+            nameof(Installed),
+            true);
+
     public string ProviderName
     {
         get => GetValue(ProviderNameProperty);
@@ -36,5 +41,11 @@ public partial class ProviderCard : UserControl
     {
         get => GetValue(ProviderLogoProperty);
         set => SetValue(ProviderLogoProperty, value);
+    }
+
+    public bool Installed
+    {
+        get => GetValue(InstalledProperty);
+        set => SetValue(InstalledProperty, value);
     }
 }

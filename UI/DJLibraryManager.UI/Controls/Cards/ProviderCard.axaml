@@ -5,6 +5,20 @@
     x:Class="DJLibraryManager.UI.Controls.Cards.ProviderCard"
     x:DataType="cards:ProviderCard">
 
+    <UserControl.Styles>
+
+        <!-- Grey-out the card contents when the provider is not installed -->
+        <Style Selector="cards|ProviderCard[Installed=False] StackPanel">
+            <Setter Property="Opacity" Value="0.45"/>
+        </Style>
+
+        <!-- Grey status text when not installed -->
+        <Style Selector="cards|ProviderCard[Installed=False] TextBlock.status">
+            <Setter Property="Foreground" Value="#808080"/>
+        </Style>
+
+    </UserControl.Styles>
+
     <Border
         Classes="card"
         Width="160"
@@ -22,15 +36,24 @@
                 Text="{Binding ProviderName,
                                RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
 
-            <Image
-                Width="100"
-                Height="60"
-                Stretch="Uniform"
-                HorizontalAlignment="Center"
-                Source="{Binding ProviderLogo,
-                                 RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
+            <Border
+                Width="68"
+                Height="68"
+                CornerRadius="8"
+                ClipToBounds="True"
+                BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="1"
+                HorizontalAlignment="Center">
+
+                <Image
+                    Stretch="Uniform"
+                    Source="{Binding ProviderLogo,
+                                     RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
+
+            </Border>
 
             <TextBlock
+                Classes="status"
                 HorizontalAlignment="Center"
                 Foreground="{DynamicResource Brush.Accent}"
                 Text="{Binding Status,

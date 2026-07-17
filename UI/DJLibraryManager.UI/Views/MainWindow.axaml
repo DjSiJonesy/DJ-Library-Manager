@@ -96,7 +96,8 @@
                         <cards:ProviderCard
                             ProviderName="{Binding Name}"
                             ProviderLogo="{Binding ProviderLogo}"
-                            Status="{Binding Status}"/>
+                            Status="{Binding Status}"
+                            Installed="{Binding Installed}"/>
 
                     </DataTemplate>
 
