@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -33,6 +32,9 @@ public partial class MainViewModel : ViewModelBase
     };
 
     [ObservableProperty]
+    private ProviderInfo? selectedProvider;
+
+    [ObservableProperty]
     private bool isBusy;
 
     [ObservableProperty]
@@ -46,6 +48,16 @@ public partial class MainViewModel : ViewModelBase
         {
             InstalledProviders.Add(CreateProvider(provider));
         }
+    }
+
+    partial void OnSelectedProviderChanged(ProviderInfo? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        StatusText = $"Selected {value.Name}";
     }
 
     private static ProviderInfo CreateProvider(ProviderDiscoveryResult provider)
@@ -66,6 +78,10 @@ public partial class MainViewModel : ViewModelBase
             Name = provider.Name,
             Installed = provider.Installed,
             Version = provider.Version,
+            InstallPath = provider.InstallPath,
+            ExecutablePath = provider.ExecutablePath,
+            DatabasePath = provider.DatabasePath,
+            SettingsPath = provider.SettingsPath,
             ProviderLogo = logo
         };
     }

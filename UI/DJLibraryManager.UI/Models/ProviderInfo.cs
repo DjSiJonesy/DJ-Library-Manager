@@ -3,33 +3,52 @@
 namespace DJLibraryManager.UI.Models;
 
 /// <summary>
-/// Represents a discovered DJ provider and its installation status.
+/// Represents a DJ software provider displayed by the UI.
 /// </summary>
 public class ProviderInfo
 {
     /// <summary>
-    /// Display name of the provider.
+    /// Provider display name.
     /// </summary>
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Indicates whether the provider is installed on this computer.
+    /// Indicates whether the provider is installed.
     /// </summary>
     public bool Installed { get; set; }
 
     /// <summary>
-    /// Detected provider version.
-    /// Empty if the provider is not installed or the version is unknown.
+    /// Installed application version.
     /// </summary>
     public string Version { get; set; } = string.Empty;
 
     /// <summary>
-    /// Logo displayed by the ProviderCard.
+    /// Installation folder.
+    /// </summary>
+    public string? InstallPath { get; set; }
+
+    /// <summary>
+    /// Full path to the provider executable.
+    /// </summary>
+    public string? ExecutablePath { get; set; }
+
+    /// <summary>
+    /// Provider database path.
+    /// </summary>
+    public string? DatabasePath { get; set; }
+
+    /// <summary>
+    /// Provider settings folder.
+    /// </summary>
+    public string? SettingsPath { get; set; }
+
+    /// <summary>
+    /// Provider logo displayed by the dashboard.
     /// </summary>
     public Bitmap? ProviderLogo { get; set; }
 
     /// <summary>
-    /// Status text displayed on the ProviderCard.
+    /// Friendly installation status.
     /// </summary>
     public string Status => Installed
         ? "✓ Installed"

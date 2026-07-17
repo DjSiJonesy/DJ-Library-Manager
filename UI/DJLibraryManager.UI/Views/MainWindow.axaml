@@ -74,36 +74,64 @@
 
             <!-- Installed Providers -->
 
-            <TextBlock
-                Classes="section"
-                Margin="0,8,0,0"
-                Text="Installed DJ Software"/>
+            <!-- Installed Providers -->
 
-            <ItemsControl ItemsSource="{Binding InstalledProviders}">
+<TextBlock
+    Classes="section"
+    Margin="0,8,0,0"
+    Text="Installed DJ Software"/>
 
-                <ItemsControl.ItemsPanel>
+<ListBox
+    BorderThickness="0"
+    Background="Transparent"
+    ItemsSource="{Binding InstalledProviders}"
+    SelectedItem="{Binding SelectedProvider, Mode=TwoWay}">
 
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal"/>
-                    </ItemsPanelTemplate>
+    <ListBox.Styles>
 
-                </ItemsControl.ItemsPanel>
+        <Style Selector="ListBox">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
 
-                <ItemsControl.ItemTemplate>
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
 
-                    <DataTemplate>
+        <Style Selector="ListBoxItem:pointerover /template/ Border#SelectionIndicator">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
 
-                        <cards:ProviderCard
-                            ProviderName="{Binding Name}"
-                            ProviderLogo="{Binding ProviderLogo}"
-                            Status="{Binding Status}"
-                            Installed="{Binding Installed}"/>
+        <Style Selector="ListBoxItem:selected /template/ Border#SelectionIndicator">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
 
-                    </DataTemplate>
+    </ListBox.Styles>
 
-                </ItemsControl.ItemTemplate>
+    <ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal"/>
+        </ItemsPanelTemplate>
+    </ListBox.ItemsPanel>
 
-            </ItemsControl>
+    <ListBox.ItemTemplate>
+
+        <DataTemplate>
+
+            <cards:ProviderCard
+                ProviderName="{Binding Name}"
+                ProviderLogo="{Binding ProviderLogo}"
+                Status="{Binding Status}"
+                Installed="{Binding Installed}"/>
+
+        </DataTemplate>
+
+    </ListBox.ItemTemplate>
+
+</ListBox>
 
             <!-- Music Locations -->
 
