@@ -108,18 +108,18 @@
                         <Button
                             Theme="{StaticResource DJLM.SecondaryButton}"
                             HorizontalAlignment="Stretch"
+                            Content="💻 Open Installation Folder"/>
+
+                        <Button
+                            Theme="{StaticResource DJLM.SecondaryButton}"
+                            HorizontalAlignment="Stretch"
                             Content="📂 Open Database Folder"/>
 
                         <Button
                             Theme="{StaticResource DJLM.SecondaryButton}"
                             HorizontalAlignment="Stretch"
                             Content="⚙️ Open Settings Folder"/>
-
-                        <Button
-                            Theme="{StaticResource DJLM.SecondaryButton}"
-                            HorizontalAlignment="Stretch"
-                            Content="💻 Open Installation Folder"/>
-
+                                                
                     </StackPanel>
 
                 </Border>

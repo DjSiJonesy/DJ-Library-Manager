@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 using DJLibraryManager.UI.Models;
 
@@ -11,7 +12,7 @@ public class EngineDJDetector : IProviderDetector
 {
     public ProviderDiscoveryResult Discover()
     {
-        return FindInstalledApplication.Find(
+        var result = FindInstalledApplication.Find(
             providerName: "EngineDJ",
             executables:
             [
@@ -19,13 +20,39 @@ public class EngineDJDetector : IProviderDetector
             ],
             installPaths:
             [
-                System.IO.Path.Combine(
+                Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                     "Engine DJ"),
 
-                System.IO.Path.Combine(
+                Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
                     "Engine DJ")
             ]);
+
+        // If Engine DJ isn't installed there's nothing else to discover.
+        if (!result.Installed)
+        {
+            return result;
+        }
+
+        var libraryFolder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyMusic),
+            "Engine Library");
+
+        if (Directory.Exists(libraryFolder))
+        {
+            result.SettingsPath = libraryFolder;
+
+            var databaseFolder = Path.Combine(
+                libraryFolder,
+                "Database2");
+
+            if (Directory.Exists(databaseFolder))
+            {
+                result.DatabasePath = databaseFolder;
+            }
+        }
+
+        return result;
     }
 }
