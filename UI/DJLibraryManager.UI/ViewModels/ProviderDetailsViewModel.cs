@@ -72,4 +72,18 @@ public partial class ProviderDetailsViewModel : ViewModelBase
 
         FolderLauncher.Open(folder);
     }
+
+    [RelayCommand]
+    private void OpenDatabaseFolder()
+    {
+        Console.WriteLine($"DatabasePath = '{Provider.DatabasePath}'");
+
+        FolderLauncher.Open(Provider.DatabasePath);
+    }
+
+    [RelayCommand]
+    private void OpenSettingsFolder()
+    {
+        FolderLauncher.Open(Provider.SettingsPath);
+    }
 }

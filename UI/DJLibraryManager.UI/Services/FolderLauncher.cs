@@ -25,21 +25,40 @@ public static class FolderLauncher
             return false;
         }
 
-        if (!Directory.Exists(path))
-        {
-            return false;
-        }
-
         try
         {
-            Process.Start(new ProcessStartInfo
+            // If the path is already a directory, open it.
+            if (Directory.Exists(path))
             {
-                FileName = "explorer.exe",
-                Arguments = $"\"{path}\"",
-                UseShellExecute = true
-            });
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"\"{path}\"",
+                    UseShellExecute = true
+                });
 
-            return true;
+                return true;
+            }
+
+            // If the path is a file, open the containing folder.
+            if (File.Exists(path))
+            {
+                var folder = Path.GetDirectoryName(path);
+
+                if (!string.IsNullOrWhiteSpace(folder) && Directory.Exists(folder))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "explorer.exe",
+                        Arguments = $"\"{folder}\"",
+                        UseShellExecute = true
+                    });
+
+                    return true;
+                }
+            }
+
+            return false;
         }
         catch
         {
