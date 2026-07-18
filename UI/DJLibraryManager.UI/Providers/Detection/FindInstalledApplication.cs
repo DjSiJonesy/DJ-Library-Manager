@@ -1,7 +1,10 @@
-﻿using DJLibraryManager.UI.Models;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+
+using DJLibraryManager.UI.Models;
 
 namespace DJLibraryManager.UI.Providers.Detection;
 
@@ -15,6 +18,8 @@ public static class FindInstalledApplication
         string[] executables,
         string[] installPaths)
     {
+        var candidates = new List<(string File, Version Version, string VersionText)>();
+
         foreach (var installPath in installPaths)
         {
             if (!Directory.Exists(installPath))
@@ -24,40 +29,51 @@ public static class FindInstalledApplication
 
             foreach (var executable in executables)
             {
-                var file = Directory
-                    .EnumerateFiles(
-                        installPath,
-                        executable,
-                        SearchOption.AllDirectories)
-                    .FirstOrDefault();
-
-                if (file is null)
+                foreach (var file in Directory.EnumerateFiles(
+                    installPath,
+                    executable,
+                    SearchOption.AllDirectories))
                 {
-                    continue;
+                    string versionText = string.Empty;
+                    Version version = new(0, 0, 0, 0);
+
+                    try
+                    {
+                        versionText = FileVersionInfo
+                            .GetVersionInfo(file)
+                            .ProductVersion ?? string.Empty;
+
+                        Version.TryParse(versionText, out var parsedVersion);
+
+                        if (parsedVersion is not null)
+                        {
+                            version = parsedVersion;
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore version lookup failures.
+                    }
+
+                    candidates.Add((file, version, versionText));
                 }
-
-                string version = string.Empty;
-
-                try
-                {
-                    version = FileVersionInfo
-                        .GetVersionInfo(file)
-                        .ProductVersion ?? string.Empty;
-                }
-                catch
-                {
-                    // Ignore version lookup failures.
-                }
-
-                return new ProviderDiscoveryResult
-                {
-                    Name = providerName,
-                    Installed = true,
-                    InstallPath = Path.GetDirectoryName(file),
-                    ExecutablePath = file,
-                    Version = version
-                };
             }
+        }
+
+        var bestMatch = candidates
+            .OrderByDescending(c => c.Version)
+            .FirstOrDefault();
+
+        if (bestMatch.File is not null)
+        {
+            return new ProviderDiscoveryResult
+            {
+                Name = providerName,
+                Installed = true,
+                InstallPath = Path.GetDirectoryName(bestMatch.File),
+                ExecutablePath = bestMatch.File,
+                Version = bestMatch.VersionText
+            };
         }
 
         return new ProviderDiscoveryResult
