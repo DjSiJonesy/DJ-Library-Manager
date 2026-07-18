@@ -11,35 +11,48 @@
     <UserControl.Styles>
 
         <Style Selector="Border.card">
-            <Setter Property="Opacity" Value="1"/>
-        </Style>
-
-        <Style Selector="Border.card:pointerover">
+            <Setter Property="Background"
+                    Value="{DynamicResource Brush.Panel}" />
             <Setter Property="BorderBrush"
-                    Value="#ab58fa"/>
-        </Style>
-
-        <Style Selector="Button:disabled Border.card">
-            <Setter Property="Opacity"
-                    Value="0.45"/>
+                    Value="{DynamicResource Brush.Panel.Border}" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
         </Style>
 
     </UserControl.Styles>
 
     <Button
         Background="Transparent"
+        BorderBrush="Transparent"
         BorderThickness="0"
         Padding="0"
-        Cursor="Hand"
-        IsEnabled="{Binding Installed}"
+        Cursor="{Binding CardCursor}"
         Command="{Binding OpenCommand}"
         CommandParameter="{Binding Name}">
 
-        <Border
-            Classes="card"
-            Width="160"
-            Height="160"
-            Margin="0,0,15,15">
+        <Button.Template>
+
+            <ControlTemplate>
+
+                <ContentPresenter
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    BorderThickness="0"
+                    Content="{TemplateBinding Content}" />
+
+            </ControlTemplate>
+
+        </Button.Template>
+
+            <Border
+                x:Name="CardBorder"
+                Classes="card"
+                Width="160"
+                Height="160"
+                Margin="0,0,15,15"
+                Opacity="{Binding CardOpacity}"
+                PointerEntered="CardBorder_PointerEntered"
+                PointerExited="CardBorder_PointerExited">
 
             <StackPanel
                 HorizontalAlignment="Center"

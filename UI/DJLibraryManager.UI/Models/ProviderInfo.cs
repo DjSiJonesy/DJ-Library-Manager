@@ -1,6 +1,6 @@
-﻿using System.Windows.Input;
-
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
+using System.Windows.Input;
+using Avalonia.Input;
 
 namespace DJLibraryManager.UI.Models;
 
@@ -53,6 +53,24 @@ public class ProviderInfo
     /// Command executed when the provider card is clicked.
     /// </summary>
     public ICommand? OpenCommand { get; set; }
+
+    /// <summary>
+    /// Opacity used when displaying the provider card.
+    /// </summary>
+    public double CardOpacity => Installed ? 1.0 : 0.45;
+
+    /// <summary>
+    /// Cursor displayed when hovering over the provider card.
+    /// </summary>
+    public Cursor CardCursor =>
+        Installed
+            ? new Cursor(StandardCursorType.Hand)
+            : new Cursor(StandardCursorType.Arrow);
+
+    /// <summary>
+    /// Indicates whether the card should display hover effects.
+    /// </summary>
+    public bool CanHover => Installed;
 
     /// <summary>
     /// Friendly installation status.

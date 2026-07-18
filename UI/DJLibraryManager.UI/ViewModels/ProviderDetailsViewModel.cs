@@ -50,10 +50,11 @@ public partial class ProviderDetailsViewModel : ViewModelBase
     public Avalonia.Media.Imaging.Bitmap? ProviderLogo =>
         Provider.ProviderLogo;
 
+    public event EventHandler? GoBackRequested;
+
     [RelayCommand]
     private void GoBack()
     {
-        // Navigation will be implemented next.
-        // This placeholder allows the application to build successfully.
+        GoBackRequested?.Invoke(this, EventArgs.Empty);
     }
 }

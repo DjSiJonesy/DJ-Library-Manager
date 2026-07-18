@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using System;
 
 namespace DJLibraryManager.UI.ViewModels;
 
@@ -25,16 +26,25 @@ public partial class MainViewModel : ViewModelBase
     {
         Dashboard = new DashboardViewModel();
 
-        // Display the dashboard when the application starts.
         CurrentView = Dashboard;
 
-        // Listen for navigation requests from the dashboard.
         Dashboard.ProviderSelected += Dashboard_ProviderSelected;
     }
 
     private void Dashboard_ProviderSelected(object? sender, ProviderSelectedEventArgs e)
     {
-        CurrentView = new ProviderDetailsViewModel(e.Provider, Dashboard);
+        var details = new ProviderDetailsViewModel(e.Provider, Dashboard);
+
+        details.GoBackRequested += Details_GoBackRequested;
+
+        CurrentView = details;
+
         StatusText = $"Viewing {e.Provider.Name}";
+    }
+
+    private void Details_GoBackRequested(object? sender, EventArgs e)
+    {
+        CurrentView = Dashboard;
+        StatusText = "Ready";
     }
 }
