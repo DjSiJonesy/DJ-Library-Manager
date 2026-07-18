@@ -1,88 +1,40 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-
 using CommunityToolkit.Mvvm.ComponentModel;
-
-using DJLibraryManager.UI.Models;
-using DJLibraryManager.UI.Services;
 
 namespace DJLibraryManager.UI.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private static readonly Dictionary<string, string> ProviderLogos = new()
-    {
-        ["VirtualDJ"] = "VirtualDJ.png",
-        ["Rekordbox"] = "Rekordbox2.png",
-        ["Serato"] = "Serato4.png",
-        ["Traktor"] = "Traktor.jpeg",
-        ["EngineDJ"] = "EngineDJ.png"
-    };
+    /// <summary>
+    /// The application's dashboard.
+    /// </summary>
+    public DashboardViewModel Dashboard { get; }
 
-    public ObservableCollection<ProviderInfo> InstalledProviders { get; } = new();
-
-    public ObservableCollection<string> MusicLocations { get; } = new()
-    {
-        @"C:\Users\Simon\Music",
-        @"D:\Music"
-    };
-
+    /// <summary>
+    /// The view currently displayed by the MainWindow.
+    /// </summary>
     [ObservableProperty]
-    private ProviderInfo? selectedProvider;
+    private ViewModelBase currentView;
 
-    [ObservableProperty]
-    private bool isBusy;
-
+    /// <summary>
+    /// Status text displayed in the footer.
+    /// </summary>
     [ObservableProperty]
     private string statusText = "Ready";
 
     public MainViewModel()
     {
-        var discoveryService = new ProviderDiscoveryService();
+        Dashboard = new DashboardViewModel();
 
-        foreach (var provider in discoveryService.DiscoverProviders())
-        {
-            InstalledProviders.Add(CreateProvider(provider));
-        }
+        // Display the dashboard when the application starts.
+        CurrentView = Dashboard;
+
+        // Listen for navigation requests from the dashboard.
+        Dashboard.ProviderSelected += Dashboard_ProviderSelected;
     }
 
-    partial void OnSelectedProviderChanged(ProviderInfo? value)
+    private void Dashboard_ProviderSelected(object? sender, ProviderSelectedEventArgs e)
     {
-        if (value is null)
-        {
-            return;
-        }
-
-        StatusText = $"Selected {value.Name}";
-    }
-
-    private static ProviderInfo CreateProvider(ProviderDiscoveryResult provider)
-    {
-        ProviderLogos.TryGetValue(provider.Name, out var logoFile);
-
-        Bitmap? logo = null;
-
-        if (!string.IsNullOrWhiteSpace(logoFile))
-        {
-            logo = new Bitmap(
-                AssetLoader.Open(
-                    new Uri($"avares://DJLibraryManager.UI/Assets/Providers/{logoFile}")));
-        }
-
-        return new ProviderInfo
-        {
-            Name = provider.Name,
-            Installed = provider.Installed,
-            Version = provider.Version,
-            InstallPath = provider.InstallPath,
-            ExecutablePath = provider.ExecutablePath,
-            DatabasePath = provider.DatabasePath,
-            SettingsPath = provider.SettingsPath,
-            ProviderLogo = logo
-        };
+        CurrentView = new ProviderDetailsViewModel(e.Provider, Dashboard);
+        StatusText = $"Viewing {e.Provider.Name}";
     }
 }

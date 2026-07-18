@@ -115,4 +115,15 @@
 
     </Style>
 
+    <!-- ========================================================= -->
+    <!-- Text inside cards                                          -->
+    <!-- ========================================================= -->
+
+    <Style Selector="Border.card TextBlock">
+
+        <Setter Property="Foreground"
+                Value="{DynamicResource Brush.Text}"/>
+
+    </Style>
+
 </Styles>

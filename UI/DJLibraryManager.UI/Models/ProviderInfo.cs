@@ -1,4 +1,6 @@
-﻿using Avalonia.Media.Imaging;
+﻿using System.Windows.Input;
+
+using Avalonia.Media.Imaging;
 
 namespace DJLibraryManager.UI.Models;
 
@@ -46,6 +48,11 @@ public class ProviderInfo
     /// Provider logo displayed by the dashboard.
     /// </summary>
     public Bitmap? ProviderLogo { get; set; }
+
+    /// <summary>
+    /// Command executed when the provider card is clicked.
+    /// </summary>
+    public ICommand? OpenCommand { get; set; }
 
     /// <summary>
     /// Friendly installation status.

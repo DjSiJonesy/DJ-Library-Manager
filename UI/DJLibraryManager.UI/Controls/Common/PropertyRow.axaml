@@ -1,0 +1,40 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Common.PropertyRow"
+    x:Name="Root">
+
+    <Grid
+        ColumnDefinitions="36,180,*"
+        ColumnSpacing="16"
+        Margin="0,4">
+
+        <!-- Icon -->
+
+        <TextBlock
+            Grid.Column="0"
+            Text="{Binding Icon, ElementName=Root}"
+            FontSize="18"
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"/>
+
+        <!-- Label -->
+
+        <TextBlock
+            Grid.Column="1"
+            Classes="subheading"
+            Text="{Binding Label, ElementName=Root}"
+            VerticalAlignment="Center"/>
+
+        <!-- Value -->
+
+        <TextBlock
+            Grid.Column="2"
+            Classes="body"
+            Text="{Binding Value, ElementName=Root}"
+            VerticalAlignment="Center"
+            TextWrapping="Wrap"/>
+
+    </Grid>
+
+</UserControl>

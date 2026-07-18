@@ -2,22 +2,35 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Standard dashboard card -->
+
     <Style Selector="Border.card">
 
         <Setter Property="Background"
-                Value="{DynamicResource Brush.Panel}"/>
+                Value="{DynamicResource Brush.Panel}" />
 
         <Setter Property="BorderBrush"
-                Value="{DynamicResource Brush.Panel.Border}"/>
+                Value="{DynamicResource Brush.Panel.Border}" />
 
         <Setter Property="BorderThickness"
-                Value="1"/>
+                Value="1" />
 
         <Setter Property="CornerRadius"
-                Value="10"/>
+                Value="14" />
 
         <Setter Property="Padding"
-                Value="24"/>
+                Value="24" />
+
+        <Setter Property="Transitions">
+
+            <Transitions>
+
+                <BrushTransition Property="BorderBrush"
+                                 Duration="0:0:0.12"/>
+
+            </Transitions>
+
+        </Setter>
 
     </Style>
 

@@ -27,6 +27,5 @@
 
 	<ItemGroup>
 	  <Folder Include="Assets\Icons\" />
-	  <Folder Include="Controls\Common\" />
 	</ItemGroup>
 </Project>

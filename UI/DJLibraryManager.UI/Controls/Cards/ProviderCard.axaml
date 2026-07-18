@@ -1,66 +1,81 @@
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cards="using:DJLibraryManager.UI.Controls.Cards"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:DJLibraryManager.UI.Models"
     x:Class="DJLibraryManager.UI.Controls.Cards.ProviderCard"
-    x:DataType="cards:ProviderCard">
+    x:DataType="models:ProviderInfo"
+    mc:Ignorable="d">
 
     <UserControl.Styles>
 
-        <!-- Grey-out the card contents when the provider is not installed -->
-        <Style Selector="cards|ProviderCard[Installed=False] StackPanel">
-            <Setter Property="Opacity" Value="0.45"/>
+        <Style Selector="Border.card">
+            <Setter Property="Opacity" Value="1"/>
         </Style>
 
-        <!-- Grey status text when not installed -->
-        <Style Selector="cards|ProviderCard[Installed=False] TextBlock.status">
-            <Setter Property="Foreground" Value="#808080"/>
+        <Style Selector="Border.card:pointerover">
+            <Setter Property="BorderBrush"
+                    Value="#ab58fa"/>
+        </Style>
+
+        <Style Selector="Button:disabled Border.card">
+            <Setter Property="Opacity"
+                    Value="0.45"/>
         </Style>
 
     </UserControl.Styles>
 
-    <Border
-        Classes="card"
-        Width="160"
-        Height="160"
-        Margin="0,0,15,15">
+    <Button
+        Background="Transparent"
+        BorderThickness="0"
+        Padding="0"
+        Cursor="Hand"
+        IsEnabled="{Binding Installed}"
+        Command="{Binding OpenCommand}"
+        CommandParameter="{Binding Name}">
 
-        <StackPanel
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Spacing="10">
+        <Border
+            Classes="card"
+            Width="160"
+            Height="160"
+            Margin="0,0,15,15">
 
-            <TextBlock
-                Classes="section"
+            <StackPanel
                 HorizontalAlignment="Center"
-                Text="{Binding ProviderName,
-                               RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
+                VerticalAlignment="Center"
+                Spacing="10">
 
-            <Border
-                Width="68"
-                Height="68"
-                CornerRadius="8"
-                ClipToBounds="True"
-                BorderBrush="{DynamicResource Brush.Border}"
-                BorderThickness="1"
-                HorizontalAlignment="Center">
+                <TextBlock
+                    Classes="section"
+                    HorizontalAlignment="Center"
+                    Text="{Binding Name}" />
 
-                <Image
-                    Stretch="Uniform"
-                    Source="{Binding ProviderLogo,
-                                     RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
+                <Border
+                    Width="68"
+                    Height="68"
+                    CornerRadius="8"
+                    ClipToBounds="True"
+                    BorderBrush="{DynamicResource Brush.Border}"
+                    BorderThickness="1"
+                    HorizontalAlignment="Center">
 
-            </Border>
+                    <Image
+                        Stretch="Uniform"
+                        Source="{Binding ProviderLogo}" />
 
-            <TextBlock
-                Classes="status"
-                HorizontalAlignment="Center"
-                Foreground="{DynamicResource Brush.Accent}"
-                Text="{Binding Status,
-                               RelativeSource={RelativeSource AncestorType=cards:ProviderCard}}" />
+                </Border>
 
-        </StackPanel>
+                <TextBlock
+                    Classes="status"
+                    HorizontalAlignment="Center"
+                    Foreground="{DynamicResource Brush.Accent}"
+                    Text="{Binding Status}" />
 
-    </Border>
+            </StackPanel>
+
+        </Border>
+
+    </Button>
 
 </UserControl>

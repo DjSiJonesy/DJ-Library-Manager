@@ -2,40 +2,25 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- ========================================================= -->
+    <!-- Primary Button                                             -->
+    <!-- ========================================================= -->
+
     <ControlTheme
         x:Key="DJLM.PrimaryButton"
         TargetType="Button">
 
-        <!-- Default Properties -->
-
         <Setter Property="MinWidth" Value="240"/>
         <Setter Property="Height" Value="46"/>
-
         <Setter Property="CornerRadius" Value="8"/>
-
         <Setter Property="Padding" Value="24,12"/>
-
         <Setter Property="FontWeight" Value="Bold"/>
-
-        <Setter Property="Foreground"
-                Value="{DynamicResource Brush.Button.Foreground}"/>
-
-        <Setter Property="Background"
-                Value="{DynamicResource Brush.Button.Background}"/>
-
-        <Setter Property="BorderBrush"
-                Value="{DynamicResource Brush.Button.Border}"/>
-
-        <Setter Property="BorderThickness"
-                Value="1"/>
-
-        <Setter Property="HorizontalContentAlignment"
-                Value="Center"/>
-
-        <Setter Property="VerticalContentAlignment"
-                Value="Center"/>
-
-        <!-- Template -->
+        <Setter Property="Foreground" Value="{DynamicResource Brush.Button.Foreground}"/>
+        <Setter Property="Background" Value="{DynamicResource Brush.Button.Background}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Brush.Button.Border}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
 
         <Setter Property="Template">
 
@@ -57,8 +42,6 @@
 
         </Setter>
 
-        <!-- Hover -->
-
         <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
 
             <Setter Property="Background"
@@ -69,12 +52,11 @@
 
             <Setter Property="Foreground"
                     Value="{DynamicResource Brush.Button.Hover.Foreground}"/>
-            
-            <Setter Property="Cursor" Value="Hand"/>
+
+            <Setter Property="Cursor"
+                    Value="Hand"/>
 
         </Style>
-
-        <!-- Pressed -->
 
         <Style Selector="^:pressed">
 
@@ -96,8 +78,6 @@
 
         </Style>
 
-        <!-- Disabled -->
-
         <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
 
             <Setter Property="Background"
@@ -110,6 +90,23 @@
                     Value="{DynamicResource Brush.Button.Disabled.Foreground}"/>
 
         </Style>
+
+    </ControlTheme>
+
+    <!-- ========================================================= -->
+    <!-- Secondary Button                                           -->
+    <!-- ========================================================= -->
+
+    <ControlTheme
+        x:Key="DJLM.SecondaryButton"
+        TargetType="Button"
+        BasedOn="{StaticResource DJLM.PrimaryButton}">
+
+        <Setter Property="FontWeight"
+                Value="Normal"/>
+
+        <Setter Property="HorizontalContentAlignment"
+                Value="Left"/>
 
     </ControlTheme>
 

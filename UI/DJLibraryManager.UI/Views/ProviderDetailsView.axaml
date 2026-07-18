@@ -4,22 +4,132 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    xmlns:common="using:DJLibraryManager.UI.Controls.Common"
     x:Class="DJLibraryManager.UI.Views.ProviderDetailsView"
     x:DataType="vm:ProviderDetailsViewModel"
     mc:Ignorable="d">
 
-    <Design.DataContext>
-        <vm:ProviderDetailsViewModel/>
-    </Design.DataContext>
+    <ScrollViewer>
 
-    <Grid Margin="30">
+        <Grid>
 
-        <TextBlock
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            FontSize="24"
-            Text="Provider Details"/>
+            <StackPanel
+                Margin="30"
+                MaxWidth="1000"
+                HorizontalAlignment="Center"
+                Spacing="24">
 
-    </Grid>
+                <!-- Back -->
+
+                <Button
+                    HorizontalAlignment="Left"
+                    Command="{Binding GoBackCommand}"
+                    Content="← Dashboard"/>
+
+                <!-- Provider -->
+
+                <StackPanel
+                    HorizontalAlignment="Center"
+                    Spacing="8">
+
+                    <Border
+                        Classes="card"
+                        Width="150"
+                        Height="110"
+                        Padding="10">
+
+                        <Image
+                            Source="{Binding ProviderLogo}"
+                            Stretch="Uniform"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                    </Border>
+
+                    <TextBlock
+                        Classes="heading"
+                        HorizontalAlignment="Center"
+                        Text="{Binding ProviderName}"/>
+
+                    <TextBlock
+                        Classes="body"
+                        HorizontalAlignment="Center"
+                        Text="{Binding InstalledText}"/>
+
+                    <TextBlock
+                        Classes="caption"
+                        HorizontalAlignment="Center"
+                        Text="{Binding Version, StringFormat='Version {0}'}"/>
+
+                </StackPanel>
+
+                <!-- Installation -->
+
+                <Border Classes="card">
+
+                    <StackPanel Spacing="18">
+
+                        <TextBlock
+                            Classes="section"
+                            Text="Installation"/>
+
+                        <common:PropertyRow
+                            Icon="📄"
+                            Label="Executable"
+                            Value="{Binding ExecutablePath}"/>
+
+                        <common:PropertyRow
+                            Icon="🗄️"
+                            Label="Database"
+                            Value="{Binding DatabasePath}"/>
+
+                        <common:PropertyRow
+                            Icon="⚙️"
+                            Label="Settings"
+                            Value="{Binding SettingsPath}"/>
+
+                    </StackPanel>
+
+                </Border>
+
+                <!-- Actions -->
+
+                <Border Classes="card">
+
+                    <StackPanel Spacing="18">
+
+                        <TextBlock
+                            Classes="section"
+                            Text="Actions"/>
+
+                        <Button
+                            Theme="{StaticResource DJLM.PrimaryButton}"
+                            HorizontalAlignment="Stretch"
+                            Content="🔍 Analyse Library"/>
+
+                        <Button
+                            Theme="{StaticResource DJLM.SecondaryButton}"
+                            HorizontalAlignment="Stretch"
+                            Content="📂 Open Database Folder"/>
+
+                        <Button
+                            Theme="{StaticResource DJLM.SecondaryButton}"
+                            HorizontalAlignment="Stretch"
+                            Content="⚙️ Open Settings Folder"/>
+
+                        <Button
+                            Theme="{StaticResource DJLM.SecondaryButton}"
+                            HorizontalAlignment="Stretch"
+                            Content="💻 Open Installation Folder"/>
+
+                    </StackPanel>
+
+                </Border>
+
+            </StackPanel>
+
+        </Grid>
+
+    </ScrollViewer>
 
 </UserControl>
