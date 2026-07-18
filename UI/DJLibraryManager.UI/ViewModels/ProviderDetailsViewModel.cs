@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using CommunityToolkit.Mvvm.Input;
 using DJLibraryManager.UI.Models;
+using DJLibraryManager.UI.Services;
 
 namespace DJLibraryManager.UI.ViewModels;
 
@@ -56,5 +58,18 @@ public partial class ProviderDetailsViewModel : ViewModelBase
     private void GoBack()
     {
         GoBackRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    [RelayCommand]
+    private void OpenInstallationFolder()
+    {
+        if (string.IsNullOrWhiteSpace(Provider.ExecutablePath))
+        {
+            return;
+        }
+
+        var folder = Path.GetDirectoryName(Provider.ExecutablePath);
+
+        FolderLauncher.Open(folder);
     }
 }

@@ -108,6 +108,7 @@
                         <Button
                             Theme="{StaticResource DJLM.SecondaryButton}"
                             HorizontalAlignment="Stretch"
+                            Command="{Binding OpenInstallationFolderCommand}"
                             Content="💻 Open Installation Folder"/>
 
                         <Button
