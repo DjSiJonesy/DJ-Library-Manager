@@ -42,6 +42,7 @@
                         <Image
                             Source="{Binding ProviderLogo}"
                             Stretch="Uniform"/>
+
                     </Border>
 
                     <TextBlock
@@ -90,39 +91,186 @@
 
                 </Border>
 
-                <!-- Actions -->
+                <!-- Library -->
 
                 <Border Classes="card">
 
-                    <StackPanel Spacing="18">
+                    <StackPanel Spacing="20">
 
                         <TextBlock
                             Classes="section"
-                            Text="Actions"/>
+                            Text="Library"/>
 
-                        <Button
-                            Theme="{StaticResource DJLM.PrimaryButton}"
-                            HorizontalAlignment="Stretch"
-                            Content="🔍 Analyse Library"/>
+                        <!-- Primary Actions -->
 
-                        <Button
-                            Theme="{StaticResource DJLM.SecondaryButton}"
-                            HorizontalAlignment="Stretch"
-                            Command="{Binding OpenInstallationFolderCommand}"
-                            Content="💻 Open Installation Folder"/>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
 
-                        <Button
-                            Theme="{StaticResource DJLM.SecondaryButton}"
-                            HorizontalAlignment="Stretch"
-                            Command="{Binding OpenDatabaseFolderCommand}"
-                            Content="📂 Open Database Folder"/>
+                            <Button
+                                Grid.Column="0"
+                                Theme="{StaticResource DJLM.PrimaryButton}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding ImportLibraryCommand}"
+                                IsEnabled="{Binding Provider.CanImport}"
+                                Content="📥 Import Library"/>
 
-                        <Button
-                            Theme="{StaticResource DJLM.SecondaryButton}"
-                            HorizontalAlignment="Stretch"
-                            Command="{Binding OpenSettingsFolderCommand}"
-                            Content="⚙️ Open Settings Folder"/>
-                                                
+                            <Button
+                                Grid.Column="1"
+                                Theme="{StaticResource DJLM.SecondaryButton}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Content="🔍 Analyse Library"
+                                IsEnabled="{Binding Provider.CanAnalyse}"/>
+
+                        </Grid>
+
+                        <!-- Import Progress -->
+
+                            <Border
+                                Classes="card"
+                                IsVisible="{Binding CurrentOperation.IsRunning}">
+
+                                <StackPanel Spacing="12">
+
+                                    <TextBlock
+                                        Classes="section"
+                                        Text="{Binding CurrentOperation.OperationName}"/>
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        FontWeight="SemiBold"
+                                        Text="{Binding CurrentOperation.CurrentStage}"/>
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        Opacity="0.75"
+                                        Text="{Binding CurrentOperation.CurrentItem}"/>
+
+                                    <ProgressBar
+                                        Height="8"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        Value="{Binding CurrentOperation.Percentage}"
+                                        IsIndeterminate="{Binding CurrentOperation.IsIndeterminate}"/>
+
+                                    <Grid ColumnDefinitions="*,Auto">
+
+                                        <TextBlock
+                                            Text="{Binding CurrentOperation.CurrentValue}"/>
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="{Binding CurrentOperation.Percentage, StringFormat='{}{0:F0}%'}"/>
+
+                                    </Grid>
+
+                                </StackPanel>
+
+                            </Border>
+
+                        <!-- Library Information -->
+
+                        <Grid
+                            ColumnDefinitions="170,*"
+                            RowDefinitions="Auto,Auto,Auto,Auto"
+                            RowSpacing="12">
+
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                FontWeight="SemiBold"
+                                Text="Status"/>
+
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Text="{Binding Provider.LibraryStatus}"/>
+
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                FontWeight="SemiBold"
+                                Text="Last Imported"/>
+
+                            <TextBlock
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Text="{Binding Provider.LastImported}"/>
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                FontWeight="SemiBold"
+                                Text="Tracks"/>
+
+                            <TextBlock
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Text="{Binding Provider.TrackCount}"/>
+
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                FontWeight="SemiBold"
+                                Text="Playlists"/>
+
+                            <TextBlock
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Text="{Binding Provider.PlaylistCount}"/>
+
+                        </Grid>
+
+                    </StackPanel>
+
+                </Border>
+
+                <!-- Utilities -->
+
+                <Border Classes="card">
+
+                    <StackPanel Spacing="20">
+
+                        <TextBlock
+                            Classes="section"
+                            Text="Utilities"/>
+
+                        <Grid
+                            ColumnDefinitions="*,*"
+                            ColumnSpacing="15"
+                            RowDefinitions="Auto,Auto"
+                            RowSpacing="15">
+
+                            <Button
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                Theme="{StaticResource DJLM.SecondaryButton}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding OpenInstallationFolderCommand}"
+                                Content="💻 Installation Folder"/>
+
+                            <Button
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Theme="{StaticResource DJLM.SecondaryButton}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding OpenDatabaseFolderCommand}"
+                                Content="📂 Database Folder"/>
+
+                            <Button
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                Grid.ColumnSpan="2"
+                                Theme="{StaticResource DJLM.SecondaryButton}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                Command="{Binding OpenSettingsFolderCommand}"
+                                Content="⚙️ Settings Folder"/>
+
+                        </Grid>
+
                     </StackPanel>
 
                 </Border>

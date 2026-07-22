@@ -1,29 +1,33 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using DJLibraryManager.UI.Services;
 using DJLibraryManager.UI.ViewModels;
 using DJLibraryManager.UI.Views;
 
-namespace DJLibraryManager.UI
+namespace DJLibraryManager.UI;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    public static ApplicationServices Services { get; private set; } = null!;
+
+    public override void Initialize()
     {
-        public override void Initialize()
-        {
-            AvaloniaXamlLoader.Load(this);
-        }
+        AvaloniaXamlLoader.Load(this);
+    }
 
-        public override void OnFrameworkInitializationCompleted()
+    public override void OnFrameworkInitializationCompleted()
+    {
+        Services = new ApplicationServices();
+
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.MainWindow = new MainWindow
             {
-                desktop.MainWindow = new MainWindow
-                {
-                    DataContext = new MainViewModel(),
-                };
-            }
-
-            base.OnFrameworkInitializationCompleted();
+                DataContext = new MainViewModel(),
+            };
         }
+
+        base.OnFrameworkInitializationCompleted();
     }
 }

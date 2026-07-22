@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using DJLibraryManager.UI.Models.Import;
 using System;
 
 namespace DJLibraryManager.UI.ViewModels;
@@ -9,6 +10,11 @@ public partial class MainViewModel : ViewModelBase
     /// The application's dashboard.
     /// </summary>
     public DashboardViewModel Dashboard { get; }
+
+    /// <summary>
+    /// The currently imported library.
+    /// </summary>
+    public ImportResult? CurrentLibrary { get; private set; }
 
     /// <summary>
     /// The view currently displayed by the MainWindow.
@@ -33,7 +39,10 @@ public partial class MainViewModel : ViewModelBase
 
     private void Dashboard_ProviderSelected(object? sender, ProviderSelectedEventArgs e)
     {
-        var details = new ProviderDetailsViewModel(e.Provider, Dashboard);
+        var details = new ProviderDetailsViewModel(
+            e.Provider,
+            Dashboard,
+            LibraryImported);
 
         details.GoBackRequested += Details_GoBackRequested;
 
@@ -42,9 +51,16 @@ public partial class MainViewModel : ViewModelBase
         StatusText = $"Viewing {e.Provider.Name}";
     }
 
+    private void LibraryImported(ImportResult result)
+    {
+        CurrentLibrary = result;
+
+        StatusText =
+            $"Imported {result.TrackCount:N0} tracks from {result.ProviderName}";
+    }
+
     private void Details_GoBackRequested(object? sender, EventArgs e)
     {
         CurrentView = Dashboard;
-        StatusText = "Ready";
     }
 }
