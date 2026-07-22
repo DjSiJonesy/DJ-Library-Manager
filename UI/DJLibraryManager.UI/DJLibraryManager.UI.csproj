@@ -27,6 +27,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Assets\Icons\" />
+	  <Folder Include="Docs\Architecture\" />
 	  <Folder Include="Providers\EngineDJ\Models\" />
 	  <Folder Include="Providers\EngineDJ\Translators\" />
 	  <Folder Include="Providers\EngineDJ\Services\" />
@@ -39,5 +40,11 @@
 	  <Folder Include="Providers\Traktor\Models\" />
 	  <Folder Include="Providers\Traktor\Translators\" />
 	  <Folder Include="Providers\Traktor\Services\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Controls\Panels\ProviderWorkspacePanel.axaml.cs">
+	    <DependentUpon>ProviderWorkspacePanel.axaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 </Project>

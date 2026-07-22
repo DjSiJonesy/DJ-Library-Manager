@@ -18,6 +18,11 @@ public partial class MainViewModel : ViewModelBase
 
     /// <summary>
     /// The view currently displayed by the MainWindow.
+    /// 
+    /// NOTE:
+    /// During the transition to the new workspace architecture the
+    /// Dashboard remains the application's home view. Selecting a
+    /// provider still opens the Provider Workspace.
     /// </summary>
     [ObservableProperty]
     private ViewModelBase currentView;
@@ -37,20 +42,28 @@ public partial class MainViewModel : ViewModelBase
         Dashboard.ProviderSelected += Dashboard_ProviderSelected;
     }
 
-    private void Dashboard_ProviderSelected(object? sender, ProviderSelectedEventArgs e)
+    /// <summary>
+    /// Opens the selected provider workspace.
+    /// </summary>
+    private void Dashboard_ProviderSelected(
+        object? sender,
+        ProviderSelectedEventArgs e)
     {
-        var details = new ProviderDetailsViewModel(
+        var workspace = new ProviderWorkspaceViewModel(
             e.Provider,
             Dashboard,
             LibraryImported);
 
-        details.GoBackRequested += Details_GoBackRequested;
+        workspace.GoBackRequested += Workspace_GoBackRequested;
 
-        CurrentView = details;
+        CurrentView = workspace;
 
         StatusText = $"Viewing {e.Provider.Name}";
     }
 
+    /// <summary>
+    /// Called when a provider finishes importing its library.
+    /// </summary>
     private void LibraryImported(ImportResult result)
     {
         CurrentLibrary = result;
@@ -59,8 +72,15 @@ public partial class MainViewModel : ViewModelBase
             $"Imported {result.TrackCount:N0} tracks from {result.ProviderName}";
     }
 
-    private void Details_GoBackRequested(object? sender, EventArgs e)
+    /// <summary>
+    /// Returns to the dashboard.
+    /// </summary>
+    private void Workspace_GoBackRequested(
+        object? sender,
+        EventArgs e)
     {
         CurrentView = Dashboard;
+
+        StatusText = "Ready";
     }
 }

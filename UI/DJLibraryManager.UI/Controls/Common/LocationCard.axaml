@@ -1,0 +1,43 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Common.LocationCard"
+    x:Name="Root">
+
+    <Button
+        Classes="Secondary"
+        Command="{Binding Command, ElementName=Root}"
+        HorizontalContentAlignment="Stretch">
+
+        <Border Padding="12">
+
+            <StackPanel Spacing="6">
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8">
+
+                    <TextBlock
+                        FontSize="18"
+                        Text="{Binding Icon, ElementName=Root}" />
+
+                    <TextBlock
+                        FontSize="16"
+                        FontWeight="SemiBold"
+                        Text="{Binding Title, ElementName=Root}" />
+
+                </StackPanel>
+
+                <TextBlock
+                    Margin="26,0,0,0"
+                    Opacity="0.75"
+                    TextWrapping="Wrap"
+                    Text="{Binding Path, ElementName=Root}" />
+
+            </StackPanel>
+
+        </Border>
+
+    </Button>
+
+</UserControl>

@@ -5,117 +5,136 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
     xmlns:cards="using:DJLibraryManager.UI.Controls.Cards"
+    xmlns:panels="using:DJLibraryManager.UI.Controls.Panels"
     x:Class="DJLibraryManager.UI.Views.DashboardView"
     x:DataType="vm:DashboardViewModel"
     mc:Ignorable="d">
 
     <Border
         Classes="card"
-        Padding="30">
+        Padding="25">
 
-        <Grid>
+        <Grid
+            ColumnDefinitions="3*,2*"
+            ColumnSpacing="30">
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            <!-- ===================================================== -->
+            <!-- LEFT -->
+            <!-- ===================================================== -->
 
-            <StackPanel
-                Grid.Row="0"
-                Spacing="14">
+            <Grid Grid.Column="0">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
                 <TextBlock
+                    Grid.Row="0"
                     Classes="heading"
                     Text="Startup Discovery"/>
 
                 <TextBlock
+                    Grid.Row="1"
+                    Margin="0,10,0,0"
                     Classes="body"
-                    Text="The application will automatically discover installed DJ software and music libraries before beginning analysis."/>
+                    Text="The application automatically discovers installed DJ software and music libraries." />
 
-                <TextBlock
-                    Classes="section"
-                    Margin="0,8,0,0"
-                    Text="Installed DJ Software"/>
+                <!-- Providers -->
 
-                <ItemsControl ItemsSource="{Binding InstalledProviders}">
+                <StackPanel
+                    Grid.Row="2"
+                    Margin="0,25,0,0"
+                    Spacing="12">
 
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
+                    <TextBlock
+                        Classes="section"
+                        Text="Installed DJ Software"/>
 
-                    <ItemsControl.ItemTemplate>
+                    <ItemsControl
+                        ItemsSource="{Binding InstalledProviders}">
 
-                        <DataTemplate>
+                        <ItemsControl.ItemsPanel>
 
-                            <cards:ProviderCard/>
+                            <ItemsPanelTemplate>
 
-                        </DataTemplate>
+                                <WrapPanel Orientation="Horizontal"/>
 
-                    </ItemsControl.ItemTemplate>
+                            </ItemsPanelTemplate>
 
-                </ItemsControl>
+                        </ItemsControl.ItemsPanel>
 
-                <TextBlock
-                    Classes="section"
-                    Margin="0,20,0,0"
-                    Text="Selected Provider"/>
+                        <ItemsControl.ItemTemplate>
 
-                <TextBlock
-                    Classes="body"
-                    Text="{Binding SelectedProviderName}" />
+                            <DataTemplate>
 
-                <TextBlock
-                    Classes="section"
-                    Margin="0,20,0,0"
-                    Text="Music Locations"/>
+                                <cards:ProviderCard/>
 
-                <ItemsControl
-                    Margin="12,0,0,0"
-                    ItemsSource="{Binding MusicLocations}">
+                            </DataTemplate>
 
-                    <ItemsControl.ItemTemplate>
+                        </ItemsControl.ItemTemplate>
 
-                        <DataTemplate>
+                    </ItemsControl>
 
-                            <Grid
-                                ColumnDefinitions="Auto,*"
-                                ColumnSpacing="8">
+                </StackPanel>
 
-                                <TextBlock
-                                    Grid.Column="0"
-                                    FontSize="16"
-                                    VerticalAlignment="Center"
-                                    Text="📁"/>
+                <!-- Bottom -->
 
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Classes="listitem"
-                                    VerticalAlignment="Center"
-                                    Text="{Binding}" />
+                <StackPanel
+                    Grid.Row="4"
+                    Margin="0,25,0,0"
+                    Spacing="20">
 
-                            </Grid>
+                    <Border Classes="card">
 
-                        </DataTemplate>
+                        <StackPanel Spacing="15">
 
-                    </ItemsControl.ItemTemplate>
+                            <TextBlock
+                                Classes="section"
+                                Text="File Locations"/>
 
-                </ItemsControl>
+                            <TextBlock
+                                Classes="listitem"
+                                Text="(Music locations and folder shortcuts will move here)"/>
 
-            </StackPanel>
+                        </StackPanel>
+
+                    </Border>
+
+                    <Button
+                        Theme="{StaticResource DJLM.PrimaryButton}"
+                        HorizontalAlignment="Left"
+                        Content="Analyse Library"/>
+
+                </StackPanel>
+
+            </Grid>
+
+            <!-- ===================================================== -->
+            <!-- RIGHT -->
+            <!-- ===================================================== -->
 
             <Border
-                Grid.Row="1"
-                Margin="0,24,0,0"
-                BorderThickness="1,0,0,0"
-                BorderBrush="{DynamicResource Brush.Border}"
-                Padding="0,20,0,0">
+                Grid.Column="1"
+                Classes="card"
+                Padding="20">
 
-                <Button
-                    Theme="{StaticResource DJLM.PrimaryButton}"
-                    HorizontalAlignment="Left"
-                    Content="Analyse Library"/>
+                <!--
+                    During this transition the dashboard hosts the
+                    ProviderWorkspacePanel. It is displayed once a
+                    provider has been selected.
+                -->
+
+                <ContentControl
+                    IsVisible="{Binding SelectedProvider}">
+
+                    <panels:ProviderWorkspacePanel
+                        DataContext="{Binding SelectedProvider}" />
+
+                </ContentControl>
 
             </Border>
 

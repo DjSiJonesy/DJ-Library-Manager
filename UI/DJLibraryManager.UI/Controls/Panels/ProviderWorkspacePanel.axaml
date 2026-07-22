@@ -1,0 +1,225 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    xmlns:common="using:DJLibraryManager.UI.Controls.Common"
+    x:Class="DJLibraryManager.UI.Controls.Panels.ProviderWorkspacePanel"
+    x:DataType="vm:ProviderWorkspaceViewModel"
+    mc:Ignorable="d">
+
+    <ScrollViewer>
+
+        <StackPanel
+            Margin="30"
+            Spacing="24">
+
+            <!-- Provider Header -->
+
+            <Border Classes="card">
+
+                <Grid
+                    ColumnDefinitions="120,*"
+                    ColumnSpacing="24">
+
+                    <!-- Logo -->
+
+                    <Border
+                        Width="96"
+                        Height="96"
+                        CornerRadius="16"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        ClipToBounds="True">
+
+                        <Image
+                            Source="{Binding ProviderLogo}"
+                            Stretch="Uniform"/>
+
+                    </Border>
+
+                    <!-- Provider Information -->
+
+                    <StackPanel
+                        Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Spacing="8">
+
+                        <TextBlock
+                            Classes="heading"
+                            Text="{Binding ProviderName}"/>
+
+                        <TextBlock
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            Text="{Binding InstalledText}"/>
+
+                        <TextBlock
+                            Classes="caption"
+                            Text="{Binding Version, StringFormat='Version {0}'}"/>
+
+                    </StackPanel>
+
+                </Grid>
+
+            </Border>
+
+         <!-- Library -->
+
+            <Border Classes="card">
+
+                <StackPanel Spacing="20">
+
+                    <TextBlock
+                        Classes="section"
+                        Text="Library"/>
+
+        <!-- Primary Action -->
+
+            <Button
+                Theme="{StaticResource DJLM.PrimaryButton}"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Center"
+                Command="{Binding ImportLibraryCommand}"
+                IsEnabled="{Binding Provider.CanImport}"
+                Content="📥 Import Library"/>
+
+        <!-- Import Progress -->
+
+            <Border
+                Classes="card"
+                IsVisible="{Binding CurrentOperation.IsRunning}">
+
+                <StackPanel Spacing="12">
+
+                    <TextBlock
+                        Classes="section"
+                        Text="{Binding CurrentOperation.OperationName}"/>
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        FontWeight="SemiBold"
+                        Text="{Binding CurrentOperation.CurrentStage}"/>
+
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        Opacity="0.75"
+                        Text="{Binding CurrentOperation.CurrentItem}"/>
+
+                    <ProgressBar
+                        Height="8"
+                        Minimum="0"
+                        Maximum="100"
+                        Value="{Binding CurrentOperation.Percentage}"
+                        IsIndeterminate="{Binding CurrentOperation.IsIndeterminate}"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+
+                        <TextBlock
+                            Text="{Binding CurrentOperation.CurrentValue}"/>
+
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="{Binding CurrentOperation.Percentage, StringFormat='{}{0:F0}%'}"/>
+
+                    </Grid>
+
+                </StackPanel>
+
+            </Border>
+
+        <!-- Library Information -->
+
+            <Grid
+                ColumnDefinitions="170,*"
+                RowDefinitions="Auto,Auto,Auto,Auto"
+                RowSpacing="12">
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    FontWeight="SemiBold"
+                    Text="Status"/>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Text="{Binding Provider.LibraryStatus}"/>
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    FontWeight="SemiBold"
+                    Text="Last Imported"/>
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Text="{Binding Provider.LastImported}"/>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    FontWeight="SemiBold"
+                    Text="Tracks"/>
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Text="{Binding Provider.TrackCount}"/>
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    FontWeight="SemiBold"
+                    Text="Playlists"/>
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Text="{Binding Provider.PlaylistCount}"/>
+
+            </Grid>
+
+        </StackPanel>
+
+    </Border>
+
+            <!-- File Locations -->
+
+            <Border Classes="card">
+
+                <StackPanel Spacing="18">
+
+                    <TextBlock
+                        Classes="section"
+                        Text="File Locations"/>
+
+                    <common:LocationCard
+                        Icon="💻"
+                        Title="Installation"
+                        Path="{Binding ExecutablePath}"
+                        Command="{Binding OpenInstallationFolderCommand}" />
+
+                    <common:LocationCard
+                        Icon="🗄️"
+                        Title="Database"
+                        Path="{Binding DatabasePath}"
+                        Command="{Binding OpenDatabaseFolderCommand}" />
+
+                    <common:LocationCard
+                        Icon="⚙️"
+                        Title="Settings"
+                        Path="{Binding SettingsPath}"
+                        Command="{Binding OpenSettingsFolderCommand}" />
+
+                </StackPanel>
+
+            </Border>
+
+        </StackPanel>
+
+    </ScrollViewer>
+
+</UserControl>

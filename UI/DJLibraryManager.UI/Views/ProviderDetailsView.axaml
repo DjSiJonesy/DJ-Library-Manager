@@ -6,7 +6,7 @@
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
     xmlns:common="using:DJLibraryManager.UI.Controls.Common"
     x:Class="DJLibraryManager.UI.Views.ProviderDetailsView"
-    x:DataType="vm:ProviderDetailsViewModel"
+    x:DataType="vm:ProviderWorkspaceViewModel"
     mc:Ignorable="d">
 
     <ScrollViewer>

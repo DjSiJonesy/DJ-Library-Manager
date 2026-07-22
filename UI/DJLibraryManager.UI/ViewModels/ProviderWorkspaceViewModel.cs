@@ -11,14 +11,15 @@ using DJLibraryManager.UI.Services;
 
 namespace DJLibraryManager.UI.ViewModels;
 
-public partial class ProviderDetailsViewModel : ViewModelBase, IDisposable
+public partial class ProviderWorkspaceViewModel : WorkspaceViewModel, IDisposable
 {
     private readonly DashboardViewModel _dashboard;
     private readonly Action<ImportResult> _libraryImported;
 
     public ProviderInfo Provider { get; }
+    public override string Title => Provider.Name;
 
-    public ProviderDetailsViewModel(
+    public ProviderWorkspaceViewModel(
         ProviderInfo provider,
         DashboardViewModel dashboard,
         Action<ImportResult> libraryImported)

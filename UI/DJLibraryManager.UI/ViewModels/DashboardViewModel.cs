@@ -16,8 +16,7 @@ namespace DJLibraryManager.UI.ViewModels;
 
 /// <summary>
 /// Dashboard displayed when the application starts.
-/// Responsible for discovering installed providers and raising
-/// navigation requests when a provider is selected.
+/// Responsible for discovering installed providers.
 /// </summary>
 public partial class DashboardViewModel : ViewModelBase
 {
@@ -32,7 +31,8 @@ public partial class DashboardViewModel : ViewModelBase
 
     /// <summary>
     /// Raised when the user selects a provider.
-    /// MainViewModel handles the actual navigation.
+    /// During the transition to the workspace architecture this
+    /// is still used by MainViewModel.
     /// </summary>
     public event EventHandler<ProviderSelectedEventArgs>? ProviderSelected;
 
@@ -66,9 +66,13 @@ public partial class DashboardViewModel : ViewModelBase
         if (string.IsNullOrWhiteSpace(providerName))
             return;
 
-        var provider = InstalledProviders.FirstOrDefault(p => p.Name == providerName);
+        var provider = InstalledProviders.FirstOrDefault(
+            p => p.Name.Equals(providerName, StringComparison.OrdinalIgnoreCase));
 
-        if (provider is null || !provider.Installed)
+        if (provider is null)
+            return;
+
+        if (!provider.Installed)
             return;
 
         SelectedProvider = provider;
@@ -108,8 +112,7 @@ public partial class DashboardViewModel : ViewModelBase
 }
 
 /// <summary>
-/// Event arguments used when requesting navigation
-/// to a provider details page.
+/// Event arguments raised when a provider is selected.
 /// </summary>
 public sealed class ProviderSelectedEventArgs : EventArgs
 {
