@@ -9,6 +9,8 @@ using Avalonia.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
+using DJLibraryManager.Core.Models;
+using DJLibraryManager.Core.Services;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Services;
 
@@ -16,7 +18,7 @@ namespace DJLibraryManager.UI.ViewModels;
 
 /// <summary>
 /// Dashboard displayed when the application starts.
-/// Responsible for discovering installed providers.
+/// Responsible for discovering installed providers and media locations.
 /// </summary>
 public partial class DashboardViewModel : ViewModelBase
 {
@@ -29,20 +31,11 @@ public partial class DashboardViewModel : ViewModelBase
         ["EngineDJ"] = "EngineDJ.png"
     };
 
-    /// <summary>
-    /// Raised when the user selects a provider.
-    /// During the transition to the workspace architecture this
-    /// is still used by MainViewModel.
-    /// </summary>
     public event EventHandler<ProviderSelectedEventArgs>? ProviderSelected;
 
     public ObservableCollection<ProviderInfo> InstalledProviders { get; } = new();
 
-    public ObservableCollection<string> MusicLocations { get; } = new()
-    {
-        @"C:\Users\Simon\Music",
-        @"D:\Music"
-    };
+    public ObservableCollection<MediaLocation> MediaLocations { get; } = new();
 
     [ObservableProperty]
     private string? selectedProviderName;
@@ -52,11 +45,27 @@ public partial class DashboardViewModel : ViewModelBase
 
     public DashboardViewModel()
     {
+        LoadProviders();
+        LoadMediaLocations();
+    }
+
+    private void LoadProviders()
+    {
         var discoveryService = new ProviderDiscoveryService();
 
         foreach (var provider in discoveryService.DiscoverProviders())
         {
             InstalledProviders.Add(CreateProvider(provider));
+        }
+    }
+
+    private void LoadMediaLocations()
+    {
+        var discoveryService = new MediaLocationDiscoveryService();
+
+        foreach (var location in discoveryService.DiscoverLocations())
+        {
+            MediaLocations.Add(location);
         }
     }
 
@@ -69,10 +78,7 @@ public partial class DashboardViewModel : ViewModelBase
         var provider = InstalledProviders.FirstOrDefault(
             p => p.Name.Equals(providerName, StringComparison.OrdinalIgnoreCase));
 
-        if (provider is null)
-            return;
-
-        if (!provider.Installed)
+        if (provider is null || !provider.Installed)
             return;
 
         SelectedProvider = provider;
@@ -81,6 +87,15 @@ public partial class DashboardViewModel : ViewModelBase
         ProviderSelected?.Invoke(
             this,
             new ProviderSelectedEventArgs(provider));
+    }
+
+    [RelayCommand]
+    private void OpenMediaLocation(MediaLocation? location)
+    {
+        if (location is null)
+            return;
+
+        FolderLauncher.Open(location.Path);
     }
 
     private ProviderInfo CreateProvider(ProviderDiscoveryResult provider)

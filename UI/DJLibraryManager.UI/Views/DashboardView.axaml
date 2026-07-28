@@ -6,6 +6,7 @@
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
     xmlns:cards="using:DJLibraryManager.UI.Controls.Cards"
     xmlns:panels="using:DJLibraryManager.UI.Controls.Panels"
+    xmlns:views="using:DJLibraryManager.UI.Views"
     x:Class="DJLibraryManager.UI.Views.DashboardView"
     x:DataType="vm:DashboardViewModel"
     mc:Ignorable="d">
@@ -14,9 +15,9 @@
         Classes="card"
         Padding="25">
 
-        <Grid
-            ColumnDefinitions="3*,2*"
-            ColumnSpacing="30">
+            <Grid
+            ColumnDefinitions="720,*"
+            ColumnSpacing="24">
 
             <!-- ===================================================== -->
             <!-- LEFT -->
@@ -24,94 +25,286 @@
 
             <Grid Grid.Column="0">
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+    </Grid.RowDefinitions>
 
-                <TextBlock
-                    Grid.Row="0"
-                    Classes="heading"
-                    Text="Startup Discovery"/>
+    <TextBlock
+        Grid.Row="0"
+        Classes="heading"
+        Text="Startup Discovery"/>
 
-                <TextBlock
-                    Grid.Row="1"
-                    Margin="0,10,0,0"
-                    Classes="body"
-                    Text="The application automatically discovers installed DJ software and music libraries." />
+    <TextBlock
+        Grid.Row="1"
+        Margin="0,10,0,0"
+        Classes="body"
+        Text="The application automatically discovers installed DJ software and media locations."/>
 
-                <!-- Providers -->
+        <ScrollViewer
+            Grid.Row="2"
+            Margin="0,25,0,0"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
 
-                <StackPanel
-                    Grid.Row="2"
-                    Margin="0,25,0,0"
-                    Spacing="12">
+            <StackPanel
+                Spacing="20">
 
-                    <TextBlock
-                        Classes="section"
-                        Text="Installed DJ Software"/>
+        <!-- ===================================================== -->
+        <!-- Installed Providers -->
+        <!-- ===================================================== -->
 
-                    <ItemsControl
-                        ItemsSource="{Binding InstalledProviders}">
+        <TextBlock
+            Classes="section"
+            Text="Installed DJ Software"/>
 
-                        <ItemsControl.ItemsPanel>
+        <ItemsControl
+            ItemsSource="{Binding InstalledProviders}">
 
-                            <ItemsPanelTemplate>
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
 
-                                <WrapPanel Orientation="Horizontal"/>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <cards:ProviderCard/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
 
-                            </ItemsPanelTemplate>
+        </ItemsControl>
 
-                        </ItemsControl.ItemsPanel>
+        <!-- ===================================================== -->
+        <!-- Media Locations -->
+        <!-- ===================================================== -->
 
-                        <ItemsControl.ItemTemplate>
+<Border
+    Classes="card"
+    Padding="12">
 
-                            <DataTemplate>
+    <StackPanel Spacing="15">
 
-                                <cards:ProviderCard/>
+        <TextBlock
+            Classes="section"
+            Text="Media Locations"/>
 
-                            </DataTemplate>
+        <ItemsControl
+            ItemsSource="{Binding MediaLocations}">
 
-                        </ItemsControl.ItemTemplate>
+            <ItemsControl.ItemTemplate>
 
-                    </ItemsControl>
+                <DataTemplate>
 
-                </StackPanel>
+                    <Border
+                        Margin="0,0,0,6"
+                        Padding="6"
+                        CornerRadius="6">
 
-                <!-- Bottom -->
+                        <Grid
+                            ColumnDefinitions="Auto,Auto,Auto,*"
+                            ColumnSpacing="8">
 
-                <StackPanel
-                    Grid.Row="4"
-                    Margin="0,25,0,0"
-                    Spacing="20">
+                            <!-- Open Folder -->
 
-                    <Border Classes="card">
+                            <Button
+                                Grid.Column="0"
+                                Width="28"
+                                Height="28"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Command="{Binding $parent[views:DashboardView].OpenMediaLocationCommand}"
+                                CommandParameter="{Binding}">
 
-                        <StackPanel Spacing="15">
+                                <TextBlock
+                                    FontSize="16"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Text="📁"/>
+
+                            </Button>
+
+                            <!-- Folder Path -->
 
                             <TextBlock
-                                Classes="section"
-                                Text="File Locations"/>
+                                Grid.Column="1"
+                                Margin="4,0,4,0"
+                                Classes="body"
+                                VerticalAlignment="Center"
+                                Text="{Binding Path}"/>
 
-                            <TextBlock
-                                Classes="listitem"
-                                Text="(Music locations and folder shortcuts will move here)"/>
+                            <!-- Navigate -->
 
-                        </StackPanel>
+                            <Button
+                                Grid.Column="2"
+                                Width="24"
+                                Height="24"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Content="❯"/>
+
+                        </Grid>
 
                     </Border>
 
-                    <Button
-                        Theme="{StaticResource DJLM.PrimaryButton}"
-                        HorizontalAlignment="Left"
-                        Content="Analyse Library"/>
+                </DataTemplate>
 
-                </StackPanel>
+            </ItemsControl.ItemTemplate>
 
-            </Grid>
+        </ItemsControl>
+
+    </StackPanel>
+
+</Border>
+
+        <!-- ===================================================== -->
+        <!-- Library Tools -->
+        <!-- ===================================================== -->
+
+<Border
+    Classes="card"
+    Padding="12">
+
+    <StackPanel Spacing="15">
+
+        <TextBlock
+            Classes="section"
+            Text="Library Tools"/>
+
+        <Grid
+            ColumnDefinitions="Auto,Auto,*"
+            ColumnSpacing="8">
+
+            <TextBlock
+                Grid.Column="0"
+                Classes="body"
+                VerticalAlignment="Center"
+                Text="📚 Library Explorer"/>
+
+               <Button
+                 Grid.Column="2"
+                 Width="24"
+                 Height="24"
+                 Padding="0"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 Cursor="Hand"
+                 HorizontalContentAlignment="Center"
+                 VerticalContentAlignment="Center"
+                 Content="❯"/>
+
+        </Grid>
+
+        <Grid
+            ColumnDefinitions="Auto,Auto,*"
+            ColumnSpacing="8">
+
+            <TextBlock
+                Grid.Column="0"
+                Classes="body"
+                VerticalAlignment="Center"
+                Text="🔍 Analysis"/>
+
+                <Button
+                  Grid.Column="2"
+                  Width="24"
+                  Height="24"
+                  Padding="0"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  Cursor="Hand"
+                  HorizontalContentAlignment="Center"
+                  VerticalContentAlignment="Center"
+                  Content="❯"/>
+
+        </Grid>
+
+        <Grid
+            ColumnDefinitions="Auto,Auto,*"
+            ColumnSpacing="8">
+
+            <TextBlock
+                Grid.Column="0"
+                Classes="body"
+                VerticalAlignment="Center"
+                Text="🛠 Recovery"/>
+
+                <Button
+                  Grid.Column="2"
+                  Width="24"
+                  Height="24"
+                  Padding="0"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  Cursor="Hand"
+                  HorizontalContentAlignment="Center"
+                  VerticalContentAlignment="Center"
+                  Content="❯"/>
+        </Grid>
+
+        <Grid
+            ColumnDefinitions="Auto,Auto,*"
+            ColumnSpacing="8">
+
+            <TextBlock
+                Grid.Column="0"
+                Classes="body"
+                VerticalAlignment="Center"
+                Text="📊 Reports"/>
+
+            <Button
+                Grid.Column="1"
+                Width="24"
+                Height="24"
+                Padding="0"
+                Background="Transparent"
+                BorderThickness="0"
+                Cursor="Hand"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Content="❯"/>
+
+        </Grid>
+
+        <Grid
+            ColumnDefinitions="Auto,Auto,*"
+            ColumnSpacing="8">
+
+            <TextBlock
+                Grid.Column="0"
+                Classes="body"
+                VerticalAlignment="Center"
+                Text="⚙ Settings"/>
+
+            <Button
+                Grid.Column="1"
+                Width="24"
+                Height="24"
+                Padding="0"
+                Background="Transparent"
+                BorderThickness="0"
+                Cursor="Hand"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Content="❯"/>
+
+        </Grid>
+
+    </StackPanel>
+
+</Border>
+
+</StackPanel>
+
+</ScrollViewer>
+</Grid>
 
             <!-- ===================================================== -->
             <!-- RIGHT -->
@@ -121,12 +314,6 @@
                 Grid.Column="1"
                 Classes="card"
                 Padding="20">
-
-                <!--
-                    During this transition the dashboard hosts the
-                    ProviderWorkspacePanel. It is displayed once a
-                    provider has been selected.
-                -->
 
                 <ContentControl
                     IsVisible="{Binding SelectedProvider}">
