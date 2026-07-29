@@ -1,0 +1,332 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    xmlns:common="using:DJLibraryManager.UI.Controls.Common"
+    x:Class="DJLibraryManager.UI.Views.ProviderWorkspaceView"
+    x:DataType="vm:ProviderWorkspaceViewModel"
+    mc:Ignorable="d">
+
+<ScrollViewer>
+
+    <Grid>
+
+        <StackPanel
+            Margin="30"
+            MaxWidth="1200"
+            HorizontalAlignment="Stretch"
+            Spacing="24">
+
+            <!-- Navigation -->
+
+            <Button
+                HorizontalAlignment="Left"
+                Command="{Binding GoBackCommand}"
+                Content="← Dashboard"/>
+
+            <!-- Header -->
+
+            <Grid
+                ColumnDefinitions="220,*"
+                ColumnSpacing="24">
+
+  <!-- Provider Summary -->
+
+<Border
+    Grid.Column="0"
+    Classes="card">
+
+    <StackPanel
+        Margin="16"
+        HorizontalAlignment="Stretch"
+        Spacing="12">
+
+        <Border
+            Width="64"
+            Height="64"
+            CornerRadius="12"
+            ClipToBounds="True"
+            HorizontalAlignment="Center">
+
+            <Image
+                Source="{Binding ProviderLogo}"
+                Stretch="Uniform"/>
+
+        </Border>
+
+        <TextBlock
+            Classes="heading"
+            HorizontalAlignment="Center"
+            Text="{Binding ProviderName}"/>
+
+        <StackPanel
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            Spacing="8">
+
+            <Ellipse
+                Width="10"
+                Height="10"
+                VerticalAlignment="Center"
+                Fill="{Binding StatusBrush}"/>
+
+            <TextBlock
+                Classes="body"
+                VerticalAlignment="Center"
+                Text="{Binding StatusText}"/>
+
+        </StackPanel>
+
+        <TextBlock
+            Classes="caption"
+            HorizontalAlignment="Center"
+            Text="{Binding Version, StringFormat='Version {0}'}"/>
+
+        <Button
+            Margin="0,12,0,0"
+            Height="44"
+            Width="180"
+            HorizontalAlignment="Center"
+            HorizontalContentAlignment="Center"
+            Theme="{StaticResource DJLM.PrimaryButton}"
+            Command="{Binding ImportLibraryCommand}"
+            IsEnabled="{Binding Provider.CanImport}"
+            Content="📥 Import Library"/>
+
+    </StackPanel>
+
+</Border>
+
+                <!-- Installation -->
+
+                <Border
+                    Grid.Column="1"
+                    Classes="card">
+
+                    <StackPanel Spacing="18">
+
+                        <TextBlock
+                            Classes="section"
+                            Text="Installation"/>
+
+                        <!-- Executable -->
+
+                        <Button
+                            Theme="{StaticResource DJLM.SecondaryButton}"
+                            Height="72"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Center"
+                            Command="{Binding OpenInstallationFolderCommand}">
+
+                            <StackPanel
+                                Margin="8"
+                                Spacing="6">
+
+                                <TextBlock
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Text="💻  Executable"/>
+
+                                <TextBlock
+                                    Classes="caption"
+                                    Text="{Binding ExecutablePath}"
+                                    TextWrapping="Wrap"/>
+
+                            </StackPanel>
+
+                        </Button>
+
+                        <!-- Database -->
+
+                        <Button
+                            Theme="{StaticResource DJLM.SecondaryButton}"
+                            Height="72"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Center"
+                            Command="{Binding OpenInstallationFolderCommand}">
+
+                            <StackPanel
+                                Margin="8"
+                                Spacing="6">
+
+                                <TextBlock
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Text="🗄️  Database"/>
+
+                                <TextBlock
+                                    Classes="caption"
+                                    Text="{Binding DatabasePath}"
+                                    TextWrapping="Wrap"/>
+
+                            </StackPanel>
+
+                        </Button>
+
+                        <!-- Settings -->
+
+                        <Button
+                            Theme="{StaticResource DJLM.SecondaryButton}"
+                            Height="72"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Center"
+                            Command="{Binding OpenInstallationFolderCommand}">
+
+                            <StackPanel
+                                Margin="8"
+                                Spacing="6">
+
+                                <TextBlock
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Text="⚙️  Settings"/>
+
+                                <TextBlock
+                                    Classes="caption"
+                                    Text="{Binding SettingsPath}"
+                                    TextWrapping="Wrap"/>
+
+                            </StackPanel>
+
+                        </Button>
+
+                    </StackPanel>
+
+                </Border>
+
+            </Grid>
+
+                <!-- Library -->
+
+                <Border Classes="card">
+
+                    <StackPanel Spacing="20">
+
+                        <TextBlock
+                            Classes="section"
+                            Text="Library"/>
+
+                        <!-- Primary Actions -->
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+
+                                                       
+                        </Grid>
+
+                        <!-- Import Progress -->
+
+                            <Border
+                                Classes="card"
+                                IsVisible="{Binding CurrentOperation.IsRunning}">
+
+                                <StackPanel Spacing="12">
+
+                                    <TextBlock
+                                        Classes="section"
+                                        Text="Import Progress"/>
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        FontWeight="SemiBold"
+                                        FontSize="16"
+                                        Text="{Binding CurrentOperation.OperationName}"/>
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        FontWeight="SemiBold"
+                                        Text="{Binding CurrentOperation.CurrentStage}"/>
+
+                                    <TextBlock
+                                        HorizontalAlignment="Center"
+                                        Opacity="0.75"
+                                        Text="{Binding CurrentOperation.CurrentItem}"/>
+
+                                    <ProgressBar
+                                        Height="8"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        Value="{Binding CurrentOperation.Percentage}"
+                                        IsIndeterminate="{Binding CurrentOperation.IsIndeterminate}"/>
+
+                                    <Grid ColumnDefinitions="*,Auto">
+
+                                        <TextBlock
+                                            Text="{Binding CurrentOperation.CurrentValue}"/>
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="{Binding CurrentOperation.Percentage, StringFormat='{}{0:F0}%'}"/>
+
+                                    </Grid>
+
+                                </StackPanel>
+
+                            </Border>
+
+                            <!-- Library Information -->
+
+                            <StackPanel Spacing="8">
+
+                                <!-- Status -->
+
+                                <Grid
+                                    ColumnDefinitions="36,180,*"
+                                    ColumnSpacing="16"
+                                    Margin="0,4">
+
+                                    <Ellipse
+                                        Width="18"
+                                        Height="18"
+                                        Fill="{Binding Provider.LibraryStatusBrush}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Classes="subheading"
+                                        Text="Status"
+                                        VerticalAlignment="Center"/>
+
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        Classes="body"
+                                        Text="{Binding Provider.LibraryStatus}"
+                                        VerticalAlignment="Center"/>
+
+                                </Grid>
+
+                                <!-- Remaining Library Properties -->
+
+                                <common:PropertyRow
+                                    Icon="📅"
+                                    Label="Last Imported"
+                                    Value="{Binding Provider.LastImported}"/>
+
+                                <common:PropertyRow
+                                    Icon="💿"
+                                    Label="Tracks"
+                                    Value="{Binding Provider.TrackCount}"/>
+
+                                <common:PropertyRow
+                                    Icon="📂"
+                                    Label="Playlists"
+                                    Value="{Binding Provider.PlaylistCount}"/>
+
+                            </StackPanel>
+
+                    </StackPanel>
+
+                </Border>
+
+       </StackPanel>
+
+    </Grid>
+
+</ScrollViewer>
+
+</UserControl>

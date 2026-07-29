@@ -54,6 +54,40 @@
     </Style>
 
     <!-- ========================================================= -->
+    <!-- Provider Name                                              -->
+    <!-- ========================================================= -->
+
+    <Style Selector="TextBlock.providerName">
+
+        <Setter Property="FontSize"
+                Value="12"/>
+
+        <Setter Property="FontWeight"
+                Value="SemiBold"/>
+
+        <Setter Property="Foreground"
+                Value="{DynamicResource Brush.Text}"/>
+
+    </Style>
+
+    <!-- ========================================================= -->
+    <!-- Provider Status                                            -->
+    <!-- ========================================================= -->
+
+    <Style Selector="TextBlock.providerStatus">
+
+        <Setter Property="FontSize"
+                Value="10"/>
+
+        <Setter Property="FontWeight"
+                Value="Medium"/>
+
+        <Setter Property="Foreground"
+                Value="{DynamicResource Brush.Accent}"/>
+
+    </Style>
+
+    <!-- ========================================================= -->
     <!-- Sub Heading                                                -->
     <!-- ========================================================= -->
 

@@ -315,13 +315,8 @@
                 Classes="card"
                 Padding="20">
 
-                <ContentControl
-                    IsVisible="{Binding SelectedProvider}">
-
-                    <panels:ProviderWorkspacePanel
-                        DataContext="{Binding SelectedProvider}" />
-
-                </ContentControl>
+            <ContentControl
+                Content="{Binding CurrentWorkspace}" />
 
             </Border>
 

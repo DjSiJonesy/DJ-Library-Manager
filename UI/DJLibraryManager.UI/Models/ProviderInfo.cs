@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
@@ -94,16 +95,29 @@ public partial class ProviderInfo : ObservableObject
     public bool CanAnalyse => ImportState == ImportState.Imported;
 
     /// <summary>
-    /// Friendly import status.
+    /// Friendly library import status.
     /// </summary>
     public string LibraryStatus =>
         ImportState switch
         {
             ImportState.NotImported => "Not Imported",
             ImportState.Importing => "Importing...",
-            ImportState.Imported => "✓ Imported",
+            ImportState.Imported => "Imported",
             ImportState.Failed => "Import Failed",
             _ => "Unknown"
+        };
+
+    /// <summary>
+    /// Colour used for the library status indicator.
+    /// </summary>
+    public IBrush LibraryStatusBrush =>
+        ImportState switch
+        {
+            ImportState.NotImported => Brushes.Gray,
+            ImportState.Importing => Brushes.Orange,
+            ImportState.Imported => Brushes.LimeGreen,
+            ImportState.Failed => Brushes.Red,
+            _ => Brushes.Gray
         };
 
     /// <summary>
@@ -129,12 +143,21 @@ public partial class ProviderInfo : ObservableObject
     /// </summary>
     public string Status =>
         Installed
-            ? "✓ Installed"
+            ? "Installed"
             : "Not Installed";
+
+    /// <summary>
+    /// Colour used for the provider installation indicator.
+    /// </summary>
+    public IBrush StatusBrush =>
+        Installed
+            ? Brushes.LimeGreen
+            : Brushes.Gray;
 
     partial void OnInstalledChanged(bool value)
     {
         OnPropertyChanged(nameof(Status));
+        OnPropertyChanged(nameof(StatusBrush));
         OnPropertyChanged(nameof(CardOpacity));
         OnPropertyChanged(nameof(CardCursor));
         OnPropertyChanged(nameof(CanHover));
@@ -144,6 +167,7 @@ public partial class ProviderInfo : ObservableObject
     {
         OnPropertyChanged(nameof(LibraryImported));
         OnPropertyChanged(nameof(LibraryStatus));
+        OnPropertyChanged(nameof(LibraryStatusBrush));
         OnPropertyChanged(nameof(IsImporting));
         OnPropertyChanged(nameof(CanImport));
         OnPropertyChanged(nameof(CanAnalyse));

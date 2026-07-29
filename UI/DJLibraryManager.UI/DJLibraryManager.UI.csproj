@@ -46,5 +46,8 @@
 	  <Compile Update="Controls\Panels\ProviderWorkspacePanel.axaml.cs">
 	    <DependentUpon>ProviderWorkspacePanel.axaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Views\ProviderWorkspaceView.axaml.cs">
+	    <DependentUpon>ProviderWorkspaceView.axaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 </Project>

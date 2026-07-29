@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Input;
 using DJLibraryManager.UI.Models;
@@ -37,6 +38,10 @@ public partial class ProviderWorkspaceViewModel : WorkspaceViewModel, IDisposabl
     public string ProviderName => Provider.Name;
 
     public bool IsInstalled => Provider.Installed;
+
+    public IBrush StatusBrush => Provider.StatusBrush;
+
+    public string StatusText => Provider.Status;
 
     public string InstalledText =>
         Provider.Installed
@@ -141,7 +146,17 @@ public partial class ProviderWorkspaceViewModel : WorkspaceViewModel, IDisposabl
         {
             case nameof(ProviderInfo.Installed):
                 OnPropertyChanged(nameof(IsInstalled));
+                OnPropertyChanged(nameof(StatusBrush));
+                OnPropertyChanged(nameof(StatusText));
                 OnPropertyChanged(nameof(InstalledText));
+                break;
+
+            case nameof(ProviderInfo.StatusBrush):
+                OnPropertyChanged(nameof(StatusBrush));
+                break;
+
+            case nameof(ProviderInfo.Status):
+                OnPropertyChanged(nameof(StatusText));
                 break;
 
             case nameof(ProviderInfo.LibraryImported):

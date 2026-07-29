@@ -10,7 +10,7 @@
         x:Key="DJLM.PrimaryButton"
         TargetType="Button">
 
-        <Setter Property="MinWidth" Value="240"/>
+        <Setter Property="MinWidth" Value="120"/>
         <Setter Property="Height" Value="46"/>
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="24,12"/>

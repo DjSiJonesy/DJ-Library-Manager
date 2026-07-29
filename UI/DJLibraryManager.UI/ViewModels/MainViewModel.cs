@@ -17,15 +17,11 @@ public partial class MainViewModel : ViewModelBase
     public ImportResult? CurrentLibrary { get; private set; }
 
     /// <summary>
-    /// The view currently displayed by the MainWindow.
-    /// 
-    /// NOTE:
-    /// During the transition to the new workspace architecture the
-    /// Dashboard remains the application's home view. Selecting a
-    /// provider still opens the Provider Workspace.
+    /// The currently displayed provider workspace.
+    /// Null when no provider has been selected.
     /// </summary>
     [ObservableProperty]
-    private ViewModelBase currentView;
+    private ProviderWorkspaceViewModel? currentWorkspace;
 
     /// <summary>
     /// Status text displayed in the footer.
@@ -37,7 +33,8 @@ public partial class MainViewModel : ViewModelBase
     {
         Dashboard = new DashboardViewModel();
 
-        CurrentView = Dashboard;
+        CurrentWorkspace = null;
+        Dashboard.CurrentWorkspace = null;
 
         Dashboard.ProviderSelected += Dashboard_ProviderSelected;
     }
@@ -56,7 +53,8 @@ public partial class MainViewModel : ViewModelBase
 
         workspace.GoBackRequested += Workspace_GoBackRequested;
 
-        CurrentView = workspace;
+        CurrentWorkspace = workspace;
+        Dashboard.CurrentWorkspace = workspace;
 
         StatusText = $"Viewing {e.Provider.Name}";
     }
@@ -79,7 +77,8 @@ public partial class MainViewModel : ViewModelBase
         object? sender,
         EventArgs e)
     {
-        CurrentView = Dashboard;
+        CurrentWorkspace = null;
+        Dashboard.CurrentWorkspace = null;
 
         StatusText = "Ready";
     }

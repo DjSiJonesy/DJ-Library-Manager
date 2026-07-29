@@ -44,29 +44,26 @@
 
         </Button.Template>
 
-            <Border
-                x:Name="CardBorder"
-                Classes="card"
-                Width="160"
-                Height="160"
-                Margin="0,0,15,15"
-                Opacity="{Binding CardOpacity}"
-                PointerEntered="CardBorder_PointerEntered"
-                PointerExited="CardBorder_PointerExited">
+        <Border
+            x:Name="CardBorder"
+            Classes="card"
+            Width="125"
+            Height="125"
+            Margin="0,0,12,12"
+            Opacity="{Binding CardOpacity}"
+            PointerEntered="CardBorder_PointerEntered"
+            PointerExited="CardBorder_PointerExited">
 
             <StackPanel
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Spacing="10">
+                Spacing="4">
 
-                <TextBlock
-                    Classes="section"
-                    HorizontalAlignment="Center"
-                    Text="{Binding Name}" />
+                <!-- Provider Logo -->
 
                 <Border
-                    Width="68"
-                    Height="68"
+                    Width="56"
+                    Height="56"
                     CornerRadius="8"
                     ClipToBounds="True"
                     BorderBrush="{DynamicResource Brush.Border}"
@@ -79,11 +76,34 @@
 
                 </Border>
 
+                <!-- Provider Name -->
+
                 <TextBlock
-                    Classes="status"
+                    Classes="providerName"
                     HorizontalAlignment="Center"
-                    Foreground="{DynamicResource Brush.Accent}"
-                    Text="{Binding Status}" />
+                    TextAlignment="Center"
+                    Text="{Binding Name}" />
+
+                <!-- Provider Status -->
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Spacing="6">
+
+                    <Ellipse
+                        Width="8"
+                        Height="8"
+                        Fill="{Binding StatusBrush}"
+                        VerticalAlignment="Center"/>
+
+                    <TextBlock
+                        Classes="providerStatus"
+                        VerticalAlignment="Center"
+                        Text="{Binding Status}" />
+
+                </StackPanel>
 
             </StackPanel>
 

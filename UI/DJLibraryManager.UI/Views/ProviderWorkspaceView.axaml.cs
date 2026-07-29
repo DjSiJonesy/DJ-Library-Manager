@@ -2,9 +2,9 @@
 
 namespace DJLibraryManager.UI.Views;
 
-public partial class ProviderDetailsView : UserControl
+public partial class ProviderWorkspaceView : UserControl
 {
-    public ProviderDetailsView()
+    public ProviderWorkspaceView()
     {
         InitializeComponent();
     }

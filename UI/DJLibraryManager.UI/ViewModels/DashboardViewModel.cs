@@ -38,6 +38,9 @@ public partial class DashboardViewModel : ViewModelBase
     public ObservableCollection<MediaLocation> MediaLocations { get; } = new();
 
     [ObservableProperty]
+    private ProviderWorkspaceViewModel? currentWorkspace;
+
+    [ObservableProperty]
     private string? selectedProviderName;
 
     [ObservableProperty]

@@ -52,7 +52,7 @@
 
         <ContentControl
             Grid.Row="2"
-            Content="{Binding CurrentView}" />
+            Content="{Binding Dashboard}" />
 
         <!-- Footer -->
 
