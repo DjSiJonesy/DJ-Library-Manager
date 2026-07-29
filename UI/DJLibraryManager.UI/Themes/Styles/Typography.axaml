@@ -26,7 +26,7 @@
     <Style Selector="TextBlock.heading">
 
         <Setter Property="FontSize"
-                Value="28"/>
+                Value="24"/>
 
         <Setter Property="FontWeight"
                 Value="Bold"/>
