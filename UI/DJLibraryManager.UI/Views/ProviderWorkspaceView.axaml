@@ -147,7 +147,7 @@
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Center"
-                            Command="{Binding OpenInstallationFolderCommand}">
+                            Command="{Binding OpenDatabaseFolderCommand}">
 
                             <StackPanel
                                 Margin="8"
@@ -175,7 +175,7 @@
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
                             VerticalContentAlignment="Center"
-                            Command="{Binding OpenInstallationFolderCommand}">
+                            Command="{Binding OpenSettingsFolderCommand}">
 
                             <StackPanel
                                 Margin="8"

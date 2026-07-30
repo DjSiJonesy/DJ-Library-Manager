@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -48,17 +49,36 @@ public partial class DashboardViewModel : ViewModelBase
 
     public DashboardViewModel()
     {
-        LoadProviders();
+        _ = InitializeAsync();
+    }
+
+    private async Task InitializeAsync()
+    {
+        await LoadProvidersAsync();
         LoadMediaLocations();
     }
 
-    private void LoadProviders()
+    private async Task LoadProvidersAsync()
     {
         var discoveryService = new ProviderDiscoveryService();
+        var repository = App.Services.LibraryRepository;
 
-        foreach (var provider in discoveryService.DiscoverProviders())
+        foreach (var discoveredProvider in discoveryService.DiscoverProviders())
         {
-            InstalledProviders.Add(CreateProvider(provider));
+            var provider = CreateProvider(discoveredProvider);
+
+            var metadata =
+    await repository.GetProviderImportAsync(provider.Name);
+
+            if (provider.Installed && metadata is not null)
+            {
+                provider.ImportState = ImportState.Imported;
+                provider.TrackCount = metadata.TrackCount;
+                provider.PlaylistCount = metadata.PlaylistCount;
+                provider.LastImported = metadata.LastImported;
+            }
+
+            InstalledProviders.Add(provider);
         }
     }
 

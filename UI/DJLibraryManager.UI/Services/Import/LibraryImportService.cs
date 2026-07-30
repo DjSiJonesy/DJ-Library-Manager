@@ -12,11 +12,17 @@ public sealed class LibraryImportService
 {
     private readonly List<IProviderImporter> _importers = new();
     private readonly IProgressReporter _progressReporter;
+    private readonly LibraryRepository _libraryRepository;
 
-    public LibraryImportService(IProgressReporter progressReporter)
+    public LibraryImportService(
+        IProgressReporter progressReporter,
+        LibraryRepository libraryRepository)
     {
         _progressReporter = progressReporter
             ?? throw new ArgumentNullException(nameof(progressReporter));
+
+        _libraryRepository = libraryRepository
+            ?? throw new ArgumentNullException(nameof(libraryRepository));
     }
 
     public void Register(IProviderImporter importer)
@@ -57,16 +63,28 @@ public sealed class LibraryImportService
 
             var result = await importer.ImportAsync(provider);
 
-            if (result.Success)
-            {
-                _progressReporter.ReportStage("Finalising...");
-
-                _progressReporter.Complete();
-            }
-            else
+            if (!result.Success)
             {
                 _progressReporter.Fail(result.ErrorMessage ?? "Import failed.");
+                return result;
             }
+
+            _progressReporter.ReportStage("Saving media library...");
+
+            await _libraryRepository.SaveProviderLibraryAsync(
+                                        result.ProviderName,
+                                        result.MediaItems);
+
+            _progressReporter.ReportStage("Saving library metadata...");
+
+            await _libraryRepository.SaveProviderImportAsync(
+                                        provider,
+                                        result);
+
+            
+            _progressReporter.ReportStage("Finalising...");
+
+            _progressReporter.Complete();
 
             return result;
         }
