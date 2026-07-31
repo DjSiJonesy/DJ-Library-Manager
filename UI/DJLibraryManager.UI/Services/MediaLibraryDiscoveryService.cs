@@ -1,5 +1,5 @@
 ﻿using DJLibraryManager.Core.Services;
-using DJLibraryManager.UI.Models;
+using DJLibraryManager.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -60,6 +60,22 @@ public class MediaLibraryDiscoveryService
 
             ScanFolder(root, libraries);
         }
+
+        return libraries
+            .GroupBy(x => x.Path, StringComparer.OrdinalIgnoreCase)
+            .Select(g => g.First())
+            .OrderBy(x => x.Path)
+            .ToList();
+    }
+
+    public List<MediaLibrary> DiscoverLibraries(MediaLocation location)
+    {
+        var libraries = new List<MediaLibrary>();
+
+        if (!Directory.Exists(location.Path))
+            return libraries;
+
+        ScanFolder(location.Path, libraries);
 
         return libraries
             .GroupBy(x => x.Path, StringComparer.OrdinalIgnoreCase)

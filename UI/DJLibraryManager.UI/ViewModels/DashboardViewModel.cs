@@ -33,13 +33,14 @@ public partial class DashboardViewModel : ViewModelBase
     };
 
     public event EventHandler<ProviderSelectedEventArgs>? ProviderSelected;
+    public event EventHandler<MediaLocationSelectedEventArgs>? MediaLocationSelected;
 
     public ObservableCollection<ProviderInfo> InstalledProviders { get; } = new();
 
     public ObservableCollection<MediaLocation> MediaLocations { get; } = new();
 
     [ObservableProperty]
-    private ProviderWorkspaceViewModel? currentWorkspace;
+    private WorkspaceViewModel? currentWorkspace;
 
     [ObservableProperty]
     private string? selectedProviderName;
@@ -121,6 +122,17 @@ public partial class DashboardViewModel : ViewModelBase
         FolderLauncher.Open(location.Path);
     }
 
+    [RelayCommand]
+    private void SelectMediaLocation(MediaLocation? location)
+    {
+        if (location is null)
+            return;
+
+        MediaLocationSelected?.Invoke(
+            this,
+            new MediaLocationSelectedEventArgs(location));
+    }
+
     private ProviderInfo CreateProvider(ProviderDiscoveryResult provider)
     {
         ProviderLogos.TryGetValue(provider.Name, out var logoFile);
@@ -159,5 +171,17 @@ public sealed class ProviderSelectedEventArgs : EventArgs
     public ProviderSelectedEventArgs(ProviderInfo provider)
     {
         Provider = provider;
+    }
+}
+/// <summary>
+/// Event arguments raised when a media location is selected.
+/// </summary>
+public sealed class MediaLocationSelectedEventArgs : EventArgs
+{
+    public MediaLocation MediaLocation { get; }
+
+    public MediaLocationSelectedEventArgs(MediaLocation mediaLocation)
+    {
+        MediaLocation = mediaLocation;
     }
 }

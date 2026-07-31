@@ -1,0 +1,221 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    x:Class="DJLibraryManager.UI.Views.MediaLocationWorkspaceView"
+    x:DataType="vm:MediaLocationWorkspaceViewModel"
+    mc:Ignorable="d">
+
+    <StackPanel Spacing="20">
+
+        <!-- ===================================================== -->
+        <!-- Header -->
+        <!-- ===================================================== -->
+
+        <StackPanel>
+
+            <TextBlock
+                Classes="heading"
+                Text="Media Location"/>
+
+            <TextBlock
+                Classes="caption"
+                Text="Discover and analyse media stored in this location."/>
+
+        </StackPanel>
+
+<!-- ===================================================== -->
+<!-- Location Information -->
+<!-- ===================================================== -->
+
+<Border
+    Classes="card"
+    Padding="20">
+
+    <Grid
+        RowDefinitions="Auto,Auto"
+        RowSpacing="20">
+
+        <!-- Information -->
+
+        <Grid
+            Grid.Row="0"
+            RowDefinitions="Auto,Auto,Auto,Auto"
+            ColumnDefinitions="160,*"
+            RowSpacing="12">
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                Classes="body"
+                Text="Name"/>
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
+                Classes="body"
+                Text="{Binding Name}"/>
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
+                Classes="body"
+                Text="Path"/>
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="1"
+                Classes="body"
+                Text="{Binding Path}"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0"
+                Classes="body"
+                Text="Drive"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="1"
+                Classes="body"
+                Text="{Binding Drive}"/>
+
+            <TextBlock
+                Grid.Row="3"
+                Grid.Column="0"
+                Classes="body"
+                Text="Status"/>
+
+            <TextBlock
+                Grid.Row="3"
+                Grid.Column="1"
+                Classes="body"
+                Text="{Binding Status}"/>
+
+        </Grid>
+
+        <!-- Discover Button -->
+
+        <Button
+            Grid.Row="1"
+            Width="180"
+            HorizontalAlignment="Left"
+            Content="Discover Media"
+            Command="{Binding DiscoverMediaCommand}"/>
+
+    </Grid>
+
+</Border>
+
+       <!-- ===================================================== -->
+<!-- Discovered Media Folders -->
+<!-- ===================================================== -->
+
+<Border
+    Classes="card"
+    Padding="20">
+
+    <StackPanel Spacing="15">
+
+        <TextBlock
+            Classes="section"
+            Text="Discovered Media Folders"/>
+
+        <!-- Column Headings -->
+
+        <Grid
+            Margin="8,0,24,4"
+            ColumnDefinitions="*,90,90"
+            ColumnSpacing="20">
+
+            <TextBlock
+                Grid.Column="0"
+                FontWeight="Bold"
+                Text="Folder"/>
+
+            <TextBlock
+                Grid.Column="1"
+                FontWeight="Bold"
+                HorizontalAlignment="Center"
+                Text="Audio"/>
+
+            <TextBlock
+                Grid.Column="2"
+                FontWeight="Bold"
+                HorizontalAlignment="Center"
+                Text="Video"/>
+
+        </Grid>
+
+        <Border
+            Height="1"
+            Background="#555"/>
+
+        <ScrollViewer
+            Height="450"
+            Padding="0,0,0,12"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
+
+            <ItemsControl
+                ItemsSource="{Binding Libraries}">
+
+                <ItemsControl.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            Margin="0,0,0,4"
+                            Padding="8"
+                            CornerRadius="4">
+
+                            <Grid
+                                Margin="0,0,24,0"
+                                ColumnDefinitions="*,90,90"
+                                ColumnSpacing="20">
+
+                                <!-- Folder -->
+
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Classes="body"
+                                    Text="{Binding Path}"
+                                    TextTrimming="CharacterEllipsis"/>
+
+                                <!-- Audio -->
+
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="body"
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding AudioFileCount}"/>
+
+                                <!-- Video -->
+
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Classes="body"
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding VideoFileCount}"/>
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+        </ScrollViewer>
+
+    </StackPanel>
+
+</Border>
+
+    </StackPanel>
+
+</UserControl>

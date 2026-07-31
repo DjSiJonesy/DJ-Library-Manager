@@ -18,6 +18,7 @@ public partial class DashboardView : UserControl
             {
                 SelectProviderCommand = vm.SelectProviderCommand;
                 OpenMediaLocationCommand = vm.OpenMediaLocationCommand;
+                SelectMediaLocationCommand = vm.SelectMediaLocationCommand;
             }
         };
     }
@@ -25,4 +26,6 @@ public partial class DashboardView : UserControl
     public ICommand? SelectProviderCommand { get; private set; }
 
     public ICommand? OpenMediaLocationCommand { get; private set; }
+
+    public ICommand? SelectMediaLocationCommand { get; private set; }
 }

@@ -1,4 +1,4 @@
-﻿namespace DJLibraryManager.UI.Models;
+﻿namespace DJLibraryManager.Core.Models;
 
 public class MediaLibrary
 {

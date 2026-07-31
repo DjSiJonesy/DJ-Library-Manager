@@ -29,55 +29,91 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="15"/>
+            <RowDefinition Height="4"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
+<!-- Header -->
 
-                <Grid
-                    Grid.Row="0"
-                    ColumnDefinitions="*,Auto">
+<Grid
+    Grid.Row="0"
+    ColumnDefinitions="Auto,*,Auto"
+    ColumnSpacing="20">
 
-                    <!-- Application Title -->
+    <!-- ========================================================= -->
+    <!-- Application Logo                                           -->
+    <!-- ========================================================= -->
 
-                    <StackPanel Grid.Column="0">
+    <Border
+        Grid.Column="0"
+        Width="85"
+        Height="85"
+        Padding="8"
+        VerticalAlignment="Center"
+        CornerRadius="12"
+        BorderBrush="{DynamicResource Brush.Accent}"
+        BorderThickness="1">
 
-                        <TextBlock
-                            Classes="display"
-                            Text="DJ Library Manager"/>
+        <Image
+            Source="avares://DJLibraryManager.UI/Assets/Headphones.png"
+            Stretch="Uniform"/>
 
-                        <Image
-                            Margin="0,6,0,0"
-                            Width="160"
-                            Height="45"
-                            HorizontalAlignment="Left"
-                            Stretch="Uniform"
-                            Source="avares://DJLibraryManager.UI/Assets/SMSounds Logo Hi Res.png"/>
+    </Border>
 
-                    </StackPanel>
+    <!-- ========================================================= -->
+    <!-- Product Information                                        -->
+    <!-- ========================================================= -->
 
-                    <!-- Company Logo -->
+    <StackPanel
+        Grid.Column="1"
+        VerticalAlignment="Center">
 
-                        <Border
-                            Grid.Column="1"
-                            Width="90"
-                            Height="90"
-                            Padding="8"
-                            Margin="0,5,10,0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
-                            CornerRadius="12"
-                            BorderBrush="{DynamicResource Brush.Accent}"
-                            BorderThickness="1">
+        <TextBlock
+            Classes="display"
+            Text="DJ Library Manager"/>
 
-                            <Image
-                                Source="avares://DJLibraryManager.UI/Assets/Headphones.png"
-                                Stretch="Uniform"/>
+        <Image
+            Margin="0,8,0,0"
+            Width="160"
+            Height="45"
+            HorizontalAlignment="Left"
+            Stretch="Uniform"
+            Source="avares://DJLibraryManager.UI/Assets/SMSounds Logo Hi Res.png"/>
 
-                        </Border>
+    </StackPanel>
 
-                </Grid>
+    <!-- ========================================================= -->
+    <!-- User / Licence Information                                 -->
+    <!-- ========================================================= -->
+
+    <Border
+        Grid.Column="2"
+        Padding="18,12"
+        VerticalAlignment="Center"
+        CornerRadius="10"
+        BorderBrush="{DynamicResource Brush.Border}"
+        BorderThickness="1">
+
+        <StackPanel
+            HorizontalAlignment="Center">
+
+            <TextBlock
+                HorizontalAlignment="Center"
+                FontSize="15"
+                FontWeight="SemiBold"
+                Text="Guest User"/>
+
+            <TextBlock
+                Margin="0,4,0,0"
+                Classes="caption"
+                HorizontalAlignment="Center"
+                Text="Community Edition"/>
+
+        </StackPanel>
+
+    </Border>
+
+</Grid>
 
         <!-- Main Content -->
 
@@ -89,6 +125,7 @@
 
         <TextBlock
             Grid.Row="4"
+            Margin="0,2,0,0"
             Classes="caption"
             HorizontalAlignment="Right"
             Text="{Binding StatusText}" />

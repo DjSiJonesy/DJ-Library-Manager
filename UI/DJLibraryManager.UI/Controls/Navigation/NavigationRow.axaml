@@ -1,0 +1,80 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Navigation.NavigationRow"
+    x:Name="Root">
+
+    <Border
+        Padding="4"
+        CornerRadius="6">
+
+        <Grid
+            ColumnDefinitions="Auto,*,Auto"
+            ColumnSpacing="10">
+
+            <!-- Icon -->
+
+            <Button
+                Grid.Column="0"
+                Width="28"
+                Height="28"
+                Padding="0"
+                Background="Transparent"
+                BorderThickness="0"
+                Cursor="Hand"
+                Command="{Binding LeftCommand, ElementName=Root}"
+                CommandParameter="{Binding LeftCommandParameter, ElementName=Root}">
+
+                <TextBlock
+                    FontSize="16"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{Binding Icon, ElementName=Root}"/>
+
+            </Button>
+
+            <!-- Description -->
+
+            <Button
+                Grid.Column="1"
+                Padding="0"
+                Background="Transparent"
+                BorderThickness="0"
+                Cursor="Hand"
+                HorizontalContentAlignment="Left"
+                Command="{Binding LeftCommand, ElementName=Root}"
+                CommandParameter="{Binding LeftCommandParameter, ElementName=Root}">
+
+                <TextBlock
+                    Classes="body"
+                    VerticalAlignment="Center"
+                    Text="{Binding Text, ElementName=Root}"/>
+
+            </Button>
+
+            <!-- Navigate -->
+
+            <Button
+                Grid.Column="2"
+                Width="28"
+                Height="28"
+                Padding="0"
+                Background="Transparent"
+                BorderThickness="0"
+                Cursor="Hand"
+                Command="{Binding RightCommand, ElementName=Root}"
+                CommandParameter="{Binding RightCommandParameter, ElementName=Root}">
+
+                <TextBlock
+                    FontSize="16"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="➡️"/>
+
+            </Button>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

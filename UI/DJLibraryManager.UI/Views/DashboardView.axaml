@@ -6,6 +6,7 @@
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
     xmlns:cards="using:DJLibraryManager.UI.Controls.Cards"
     xmlns:panels="using:DJLibraryManager.UI.Controls.Panels"
+    xmlns:navigation="using:DJLibraryManager.UI.Controls.Navigation"
     xmlns:views="using:DJLibraryManager.UI.Views"
     x:Class="DJLibraryManager.UI.Views.DashboardView"
     x:DataType="vm:DashboardViewModel"
@@ -14,22 +15,27 @@
     <Border
         Classes="card"
         Padding="25">
+        
 
             <Grid
-            ColumnDefinitions="720,*"
-            ColumnSpacing="24">
+                RowDefinitions="*"
+                ColumnDefinitions="720,*"
+                ColumnSpacing="24">
 
             <!-- ===================================================== -->
             <!-- LEFT -->
             <!-- ===================================================== -->
 
-            <Grid Grid.Column="0">
+            <Grid
+                Grid.Row="0"
+                Grid.Column="0"
+                VerticalAlignment="Stretch">
 
-    <Grid.RowDefinitions>
-        <RowDefinition Height="Auto"/>
-        <RowDefinition Height="Auto"/>
-        <RowDefinition Height="*"/>
-    </Grid.RowDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
     <TextBlock
         Grid.Row="0"
@@ -44,12 +50,12 @@
 
         <ScrollViewer
             Grid.Row="2"
-            Margin="0,25,0,0"
+            Margin="0,15,0,0"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Disabled">
 
             <StackPanel
-                Spacing="20">
+                Spacing="16">
 
         <!-- ===================================================== -->
         <!-- Installed Providers -->
@@ -80,222 +86,76 @@
         <!-- Media Locations -->
         <!-- ===================================================== -->
 
-<Border
-    Classes="card"
-    Padding="12">
+        <Border
+            Classes="card"
+            Padding="12">
 
-    <StackPanel Spacing="15">
+            <StackPanel Spacing="15">
 
-        <TextBlock
-            Classes="section"
-            Text="Media Locations"/>
+                <TextBlock
+                    Classes="section"
+                    Text="Media Locations"/>
 
-        <ItemsControl
-            ItemsSource="{Binding MediaLocations}">
+                <ItemsControl
+                    ItemsSource="{Binding MediaLocations}">
 
-            <ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemTemplate>
 
-                <DataTemplate>
+                        <DataTemplate>
 
-                    <Border
-                        Margin="0,0,0,6"
-                        Padding="6"
-                        CornerRadius="6">
+                            <navigation:NavigationRow
+                                Icon="📁"
+                                Text="{Binding Path}"
 
-                        <Grid
-                            ColumnDefinitions="Auto,Auto,Auto,*"
-                            ColumnSpacing="8">
+                                LeftCommand="{Binding $parent[views:DashboardView].OpenMediaLocationCommand}"
+                                LeftCommandParameter="{Binding}"
 
-                            <!-- Open Folder -->
+                                RightCommand="{Binding $parent[views:DashboardView].SelectMediaLocationCommand}"
+                                RightCommandParameter="{Binding}" />
 
-                            <Button
-                                Grid.Column="0"
-                                Width="28"
-                                Height="28"
-                                Padding="0"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Cursor="Hand"
-                                Command="{Binding $parent[views:DashboardView].OpenMediaLocationCommand}"
-                                CommandParameter="{Binding}">
+                        </DataTemplate>
 
-                                <TextBlock
-                                    FontSize="16"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Text="📁"/>
+                    </ItemsControl.ItemTemplate>
 
-                            </Button>
+                </ItemsControl>
 
-                            <!-- Folder Path -->
+            </StackPanel>
 
-                            <TextBlock
-                                Grid.Column="1"
-                                Margin="4,0,4,0"
-                                Classes="body"
-                                VerticalAlignment="Center"
-                                Text="{Binding Path}"/>
+        </Border>
 
-                            <!-- Navigate -->
-
-                            <Button
-                                Grid.Column="2"
-                                Width="24"
-                                Height="24"
-                                Padding="0"
-                                Background="Transparent"
-                                BorderThickness="0"
-                                Cursor="Hand"
-                                HorizontalContentAlignment="Center"
-                                VerticalContentAlignment="Center"
-                                Content="❯"/>
-
-                        </Grid>
-
-                    </Border>
-
-                </DataTemplate>
-
-            </ItemsControl.ItemTemplate>
-
-        </ItemsControl>
-
-    </StackPanel>
-
-</Border>
-
-        <!-- ===================================================== -->
-        <!-- Library Tools -->
-        <!-- ===================================================== -->
+<!-- ===================================================== -->
+<!-- Library Tools -->
+<!-- ===================================================== -->
 
 <Border
     Classes="card"
     Padding="12">
 
-    <StackPanel Spacing="15">
+    <StackPanel Spacing="10">
 
         <TextBlock
             Classes="section"
             Text="Library Tools"/>
 
-        <Grid
-            ColumnDefinitions="Auto,Auto,*"
-            ColumnSpacing="8">
+        <navigation:NavigationRow
+            Icon="📚"
+            Text="Library Explorer"/>
 
-            <TextBlock
-                Grid.Column="0"
-                Classes="body"
-                VerticalAlignment="Center"
-                Text="📚 Library Explorer"/>
+        <navigation:NavigationRow
+            Icon="🔍"
+            Text="Analysis"/>
 
-               <Button
-                 Grid.Column="2"
-                 Width="24"
-                 Height="24"
-                 Padding="0"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 Cursor="Hand"
-                 HorizontalContentAlignment="Center"
-                 VerticalContentAlignment="Center"
-                 Content="❯"/>
+        <navigation:NavigationRow
+            Icon="🛠"
+            Text="Recovery"/>
 
-        </Grid>
+        <navigation:NavigationRow
+            Icon="📊"
+            Text="Reports"/>
 
-        <Grid
-            ColumnDefinitions="Auto,Auto,*"
-            ColumnSpacing="8">
-
-            <TextBlock
-                Grid.Column="0"
-                Classes="body"
-                VerticalAlignment="Center"
-                Text="🔍 Analysis"/>
-
-                <Button
-                  Grid.Column="2"
-                  Width="24"
-                  Height="24"
-                  Padding="0"
-                  Background="Transparent"
-                  BorderThickness="0"
-                  Cursor="Hand"
-                  HorizontalContentAlignment="Center"
-                  VerticalContentAlignment="Center"
-                  Content="❯"/>
-
-        </Grid>
-
-        <Grid
-            ColumnDefinitions="Auto,Auto,*"
-            ColumnSpacing="8">
-
-            <TextBlock
-                Grid.Column="0"
-                Classes="body"
-                VerticalAlignment="Center"
-                Text="🛠 Recovery"/>
-
-                <Button
-                  Grid.Column="2"
-                  Width="24"
-                  Height="24"
-                  Padding="0"
-                  Background="Transparent"
-                  BorderThickness="0"
-                  Cursor="Hand"
-                  HorizontalContentAlignment="Center"
-                  VerticalContentAlignment="Center"
-                  Content="❯"/>
-        </Grid>
-
-        <Grid
-            ColumnDefinitions="Auto,Auto,*"
-            ColumnSpacing="8">
-
-            <TextBlock
-                Grid.Column="0"
-                Classes="body"
-                VerticalAlignment="Center"
-                Text="📊 Reports"/>
-
-            <Button
-                Grid.Column="1"
-                Width="24"
-                Height="24"
-                Padding="0"
-                Background="Transparent"
-                BorderThickness="0"
-                Cursor="Hand"
-                HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Center"
-                Content="❯"/>
-
-        </Grid>
-
-        <Grid
-            ColumnDefinitions="Auto,Auto,*"
-            ColumnSpacing="8">
-
-            <TextBlock
-                Grid.Column="0"
-                Classes="body"
-                VerticalAlignment="Center"
-                Text="⚙ Settings"/>
-
-            <Button
-                Grid.Column="1"
-                Width="24"
-                Height="24"
-                Padding="0"
-                Background="Transparent"
-                BorderThickness="0"
-                Cursor="Hand"
-                HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Center"
-                Content="❯"/>
-
-        </Grid>
+        <navigation:NavigationRow
+            Icon="⚙"
+            Text="Settings"/>
 
     </StackPanel>
 
@@ -311,9 +171,11 @@
             <!-- ===================================================== -->
 
             <Border
+                Grid.Row="0"
                 Grid.Column="1"
                 Classes="card"
-                Padding="20">
+                Padding="20"
+                VerticalAlignment="Stretch">
 
             <ContentControl
                 Content="{Binding CurrentWorkspace}" />

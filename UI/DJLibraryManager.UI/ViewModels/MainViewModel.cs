@@ -21,7 +21,7 @@ public partial class MainViewModel : ViewModelBase
     /// Null when no provider has been selected.
     /// </summary>
     [ObservableProperty]
-    private ProviderWorkspaceViewModel? currentWorkspace;
+    private WorkspaceViewModel? currentWorkspace;
 
     /// <summary>
     /// Status text displayed in the footer.
@@ -37,6 +37,7 @@ public partial class MainViewModel : ViewModelBase
         Dashboard.CurrentWorkspace = null;
 
         Dashboard.ProviderSelected += Dashboard_ProviderSelected;
+        Dashboard.MediaLocationSelected += Dashboard_MediaLocationSelected;
     }
 
     /// <summary>
@@ -59,6 +60,21 @@ public partial class MainViewModel : ViewModelBase
         StatusText = $"Viewing {e.Provider.Name}";
     }
 
+    /// <summary>
+/// Opens the selected media location workspace.
+/// </summary>
+private void Dashboard_MediaLocationSelected(
+    object? sender,
+    MediaLocationSelectedEventArgs e)
+{
+    var workspace = new MediaLocationWorkspaceViewModel(
+        e.MediaLocation);
+
+    CurrentWorkspace = workspace;
+    Dashboard.CurrentWorkspace = workspace;
+
+    StatusText = $"Viewing {e.MediaLocation.Path}";
+}
     /// <summary>
     /// Called when a provider finishes importing its library.
     /// </summary>
