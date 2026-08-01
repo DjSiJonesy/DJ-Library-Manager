@@ -5,23 +5,29 @@
     x:Name="Root">
 
     <Border
-        Padding="4"
+        Height="40"
+        Padding="4,2"
         CornerRadius="6">
 
         <Grid
-            ColumnDefinitions="Auto,*,Auto"
-            ColumnSpacing="10">
+            ColumnDefinitions="32,*,32"
+            ColumnSpacing="8"
+            VerticalAlignment="Center">
 
-            <!-- Icon -->
+            <!-- ===================================================== -->
+            <!-- Left Icon -->
+            <!-- ===================================================== -->
 
             <Button
                 Grid.Column="0"
-                Width="28"
-                Height="28"
+                Width="32"
+                Height="32"
                 Padding="0"
                 Background="Transparent"
                 BorderThickness="0"
                 Cursor="Hand"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
                 Command="{Binding LeftCommand, ElementName=Root}"
                 CommandParameter="{Binding LeftCommandParameter, ElementName=Root}">
 
@@ -33,35 +39,45 @@
 
             </Button>
 
+            <!-- ===================================================== -->
             <!-- Description -->
+            <!-- ===================================================== -->
 
             <Button
                 Grid.Column="1"
+                Height="32"
                 Padding="0"
                 Background="Transparent"
                 BorderThickness="0"
                 Cursor="Hand"
+                HorizontalAlignment="Stretch"
                 HorizontalContentAlignment="Left"
+                VerticalContentAlignment="Center"
                 Command="{Binding LeftCommand, ElementName=Root}"
                 CommandParameter="{Binding LeftCommandParameter, ElementName=Root}">
 
                 <TextBlock
                     Classes="body"
                     VerticalAlignment="Center"
-                    Text="{Binding Text, ElementName=Root}"/>
+                    Text="{Binding Text, ElementName=Root}"
+                    TextTrimming="CharacterEllipsis"/>
 
             </Button>
 
+            <!-- ===================================================== -->
             <!-- Navigate -->
+            <!-- ===================================================== -->
 
             <Button
                 Grid.Column="2"
-                Width="28"
-                Height="28"
+                Width="32"
+                Height="32"
                 Padding="0"
                 Background="Transparent"
                 BorderThickness="0"
                 Cursor="Hand"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
                 Command="{Binding RightCommand, ElementName=Root}"
                 CommandParameter="{Binding RightCommandParameter, ElementName=Root}">
 

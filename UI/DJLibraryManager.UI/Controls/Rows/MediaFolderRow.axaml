@@ -1,0 +1,88 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Rows.MediaFolderRow"
+    x:Name="Root">
+
+    <Border
+        Height="40"
+        Padding="6,2"
+        CornerRadius="6">
+
+        <Grid
+            ColumnDefinitions="*,90,90,90"
+            ColumnSpacing="20"
+            VerticalAlignment="Center">
+
+            <!-- ===================================================== -->
+            <!-- Folder -->
+            <!-- ===================================================== -->
+
+            <Button
+                Grid.Column="0"
+                Padding="0"
+                Background="Transparent"
+                BorderThickness="0"
+                Cursor="Hand"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                VerticalContentAlignment="Center"
+                Click="FolderButton_Click">
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="8">
+
+                    <TextBlock
+                        FontSize="16"
+                        VerticalAlignment="Center"
+                        Text="📁"/>
+
+                    <TextBlock
+                        Classes="body"
+                        VerticalAlignment="Center"
+                        Text="{Binding Folder, ElementName=Root}"
+                        TextTrimming="CharacterEllipsis"/>
+
+                </StackPanel>
+
+            </Button>
+
+            <!-- ===================================================== -->
+            <!-- Audio -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Column="1"
+                Classes="body"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding AudioCount, ElementName=Root}"/>
+
+            <!-- ===================================================== -->
+            <!-- Video -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Column="2"
+                Classes="body"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding VideoCount, ElementName=Root}"/>
+
+            <!-- ===================================================== -->
+            <!-- Total -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Column="3"
+                Classes="body"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding TotalCount, ElementName=Root}"/>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

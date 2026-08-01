@@ -1,20 +1,22 @@
-<UserControl
+﻿<UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    xmlns:rows="using:DJLibraryManager.UI.Controls.Rows"
     x:Class="DJLibraryManager.UI.Views.MediaLocationWorkspaceView"
     x:DataType="vm:MediaLocationWorkspaceViewModel"
     mc:Ignorable="d">
 
-    <StackPanel Spacing="20">
+    <Grid
+        RowDefinitions="Auto,20,Auto,20,*">
 
         <!-- ===================================================== -->
         <!-- Header -->
         <!-- ===================================================== -->
 
-        <StackPanel>
+        <StackPanel Grid.Row="0">
 
             <TextBlock
                 Classes="heading"
@@ -26,196 +28,336 @@
 
         </StackPanel>
 
-<!-- ===================================================== -->
-<!-- Location Information -->
-<!-- ===================================================== -->
-
-<Border
-    Classes="card"
-    Padding="20">
-
-    <Grid
-        RowDefinitions="Auto,Auto"
-        RowSpacing="20">
-
-        <!-- Information -->
-
-        <Grid
-            Grid.Row="0"
-            RowDefinitions="Auto,Auto,Auto,Auto"
-            ColumnDefinitions="160,*"
-            RowSpacing="12">
-
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="0"
-                Classes="body"
-                Text="Name"/>
-
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="1"
-                Classes="body"
-                Text="{Binding Name}"/>
-
-            <TextBlock
-                Grid.Row="1"
-                Grid.Column="0"
-                Classes="body"
-                Text="Path"/>
-
-            <TextBlock
-                Grid.Row="1"
-                Grid.Column="1"
-                Classes="body"
-                Text="{Binding Path}"/>
-
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="0"
-                Classes="body"
-                Text="Drive"/>
-
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="1"
-                Classes="body"
-                Text="{Binding Drive}"/>
-
-            <TextBlock
-                Grid.Row="3"
-                Grid.Column="0"
-                Classes="body"
-                Text="Status"/>
-
-            <TextBlock
-                Grid.Row="3"
-                Grid.Column="1"
-                Classes="body"
-                Text="{Binding Status}"/>
-
-        </Grid>
-
-        <!-- Discover Button -->
-
-        <Button
-            Grid.Row="1"
-            Width="180"
-            HorizontalAlignment="Left"
-            Content="Discover Media"
-            Command="{Binding DiscoverMediaCommand}"/>
-
-    </Grid>
-
-</Border>
-
-       <!-- ===================================================== -->
-<!-- Discovered Media Folders -->
-<!-- ===================================================== -->
-
-<Border
-    Classes="card"
-    Padding="20">
-
-    <StackPanel Spacing="15">
-
-        <TextBlock
-            Classes="section"
-            Text="Discovered Media Folders"/>
-
-        <!-- Column Headings -->
-
-        <Grid
-            Margin="8,0,24,4"
-            ColumnDefinitions="*,90,90"
-            ColumnSpacing="20">
-
-            <TextBlock
-                Grid.Column="0"
-                FontWeight="Bold"
-                Text="Folder"/>
-
-            <TextBlock
-                Grid.Column="1"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                Text="Audio"/>
-
-            <TextBlock
-                Grid.Column="2"
-                FontWeight="Bold"
-                HorizontalAlignment="Center"
-                Text="Video"/>
-
-        </Grid>
+        <!-- ===================================================== -->
+        <!-- Location Information -->
+        <!-- ===================================================== -->
 
         <Border
-            Height="1"
-            Background="#555"/>
+            Grid.Row="2"
+            Classes="card"
+            Padding="20">
 
-        <ScrollViewer
-            Height="450"
-            Padding="0,0,0,12"
-            VerticalScrollBarVisibility="Auto"
-            HorizontalScrollBarVisibility="Disabled">
+            <Grid
+                ColumnDefinitions="*,240"
+                RowDefinitions="Auto,20,Auto">
 
-            <ItemsControl
-                ItemsSource="{Binding Libraries}">
+                <!-- ================================================= -->
+                <!-- Card Header -->
+                <!-- ================================================= -->
 
-                <ItemsControl.ItemTemplate>
+                <Grid
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    ColumnDefinitions="*,Auto">
 
-                    <DataTemplate>
+                    <TextBlock
+                        Classes="section"
+                        VerticalAlignment="Center"
+                        Text="Media Location"/>
 
-                        <Border
-                            Margin="0,0,0,4"
-                            Padding="8"
-                            CornerRadius="4">
+                    <Button
+                        Grid.Column="1"
+                        Width="180"
+                        Height="44"
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        Theme="{StaticResource DJLM.PrimaryButton}"
+                        Command="{Binding DiscoverMediaCommand}"
+                        Content="🔍 Discover Media"/>
 
-                            <Grid
-                                Margin="0,0,24,0"
-                                ColumnDefinitions="*,90,90"
-                                ColumnSpacing="20">
+                </Grid>
 
-                                <!-- Folder -->
+                <!-- ================================================= -->
+                <!-- Left Information -->
+                <!-- ================================================= -->
 
-                                <TextBlock
-                                    Grid.Column="0"
-                                    Classes="body"
-                                    Text="{Binding Path}"
-                                    TextTrimming="CharacterEllipsis"/>
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    ColumnDefinitions="110,*"
+                    RowDefinitions="Auto,Auto,Auto,Auto"
+                    RowSpacing="10">
 
-                                <!-- Audio -->
+                    <!-- ================================================= -->
+                    <!-- Name -->
+                    <!-- ================================================= -->
 
-                                <TextBlock
-                                    Grid.Column="1"
-                                    Classes="body"
-                                    HorizontalAlignment="Center"
-                                    Text="{Binding AudioFileCount}"/>
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Classes="body"
+                        Text="🏷️ Name"/>
 
-                                <!-- Video -->
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Classes="body"
+                        Text="{Binding Name}"/>
 
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Classes="body"
-                                    HorizontalAlignment="Center"
-                                    Text="{Binding VideoFileCount}"/>
+                    <!-- ================================================= -->
+                    <!-- Path -->
+                    <!-- ================================================= -->
 
-                            </Grid>
+                    <Grid
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        ColumnDefinitions="Auto,*"
+                        ColumnSpacing="6">
 
-                        </Border>
+                        <Button
+                            Width="20"
+                            Height="20"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            VerticalAlignment="Center"
+                            Command="{Binding OpenFolderCommand}">
 
-                    </DataTemplate>
+                            <TextBlock
+                                Text="📁"
+                                VerticalAlignment="Center"/>
 
-                </ItemsControl.ItemTemplate>
+                        </Button>
 
-            </ItemsControl>
+                        <TextBlock
+                            Grid.Column="1"
+                            Classes="body"
+                            VerticalAlignment="Center"
+                            Text="Path"/>
 
-        </ScrollViewer>
+                    </Grid>
 
-    </StackPanel>
+                    <Button
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        HorizontalAlignment="Left"
+                        HorizontalContentAlignment="Left"
+                        Command="{Binding OpenFolderCommand}">
 
-</Border>
+                        <TextBlock
+                            Classes="body"
+                            Text="{Binding Path}"
+                            TextTrimming="CharacterEllipsis"/>
 
-    </StackPanel>
+                    </Button>
+
+                    <!-- ================================================= -->
+                    <!-- Drive -->
+                    <!-- ================================================= -->
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Classes="body"
+                        Text="💽 Drive"/>
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Classes="body"
+                        Text="{Binding Drive}"/>
+
+                    <!-- ================================================= -->
+                    <!-- Status -->
+                    <!-- ================================================= -->
+
+                    <StackPanel
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="6"
+                        VerticalAlignment="Center">
+
+                        <Ellipse
+                            Width="10"
+                            Height="10"
+                            Fill="{Binding StatusBrush}"
+                            VerticalAlignment="Center"/>
+
+                        <TextBlock
+                            Classes="body"
+                            VerticalAlignment="Center"
+                            Text="Status"/>
+
+                    </StackPanel>
+
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Classes="body"
+                        VerticalAlignment="Center"
+                        Text="{Binding Status}"/>
+
+                </Grid>
+
+                <!-- ================================================= -->
+                <!-- Discovery Summary -->
+                <!-- ================================================= -->
+
+                <Grid
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="30,0,0,0"
+                    ColumnDefinitions="110,*"
+                    RowDefinitions="Auto,Auto,Auto,Auto"
+                    RowSpacing="10">
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="0"
+                        Classes="body"
+                        Text="Folders"/>
+
+                    <TextBlock
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        Classes="body"
+                        Text="{Binding FolderCount}"/>
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Classes="body"
+                        Text="Audio Files"/>
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Classes="body"
+                        Text="{Binding AudioFileCount}"/>
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="0"
+                        Classes="body"
+                        Text="Video Files"/>
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Grid.Column="1"
+                        Classes="body"
+                        Text="{Binding VideoFileCount}"/>
+
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="0"
+                        Classes="body"
+                        Text="Total Size"/>
+
+                    <TextBlock
+                        Grid.Row="3"
+                        Grid.Column="1"
+                        Classes="body"
+                        Text="{Binding TotalSize}"/>
+
+                </Grid>
+
+            </Grid>
+
+        </Border>
+
+        <!-- ===================================================== -->
+        <!-- Discovered Media Folders -->
+        <!-- ===================================================== -->
+
+        <Border
+            Grid.Row="4"
+            Classes="card"
+            Padding="20">
+
+            <Grid
+                RowDefinitions="Auto,Auto,Auto,*"
+                RowSpacing="12">
+
+                <!-- ================================================= -->
+                <!-- Heading -->
+                <!-- ================================================= -->
+
+                <TextBlock
+                    Grid.Row="0"
+                    Classes="section"
+                    Text="Discovered Media Folders"/>
+
+                <!-- ================================================= -->
+                <!-- Column Headings -->
+                <!-- ================================================= -->
+
+                <Grid
+                    Grid.Row="1"
+                    Margin="8,0,24,0"
+                    ColumnDefinitions="*,90,90,90"
+                    ColumnSpacing="20">
+
+                    <TextBlock
+                        Grid.Column="0"
+                        FontWeight="Bold"
+                        Text="Folder"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        FontWeight="Bold"
+                        HorizontalAlignment="Center"
+                        Text="Audio"/>
+
+                    <TextBlock
+                        Grid.Column="2"
+                        FontWeight="Bold"
+                        HorizontalAlignment="Center"
+                        Text="Video"/>
+
+                    <TextBlock
+                        Grid.Column="3"
+                        FontWeight="Bold"
+                        HorizontalAlignment="Center"
+                        Text="Total"/>
+
+                </Grid>
+
+                <Border
+                    Grid.Row="2"
+                    Height="1"
+                    Background="#555"/>
+
+                <!-- ================================================= -->
+                <!-- Folder List -->
+                <!-- ================================================= -->
+
+                <ScrollViewer
+                    Grid.Row="3"
+                    VerticalScrollBarVisibility="Auto"
+                    HorizontalScrollBarVisibility="Disabled">
+
+                    <ItemsControl
+                        ItemsSource="{Binding Libraries}">
+
+                        <ItemsControl.ItemTemplate>
+
+                            <DataTemplate>
+
+                                <rows:MediaFolderRow
+                                    Folder="{Binding Path}"
+                                    AudioCount="{Binding AudioFileCount}"
+                                    VideoCount="{Binding VideoFileCount}"
+                                    TotalCount="{Binding TotalMediaFiles}" />
+
+                            </DataTemplate>
+
+                        </ItemsControl.ItemTemplate>
+
+                    </ItemsControl>
+
+                </ScrollViewer>
+
+            </Grid>
+
+        </Border>
+
+    </Grid>
 
 </UserControl>

@@ -30,6 +30,7 @@ public partial class DashboardViewModel : ViewModelBase
         ["Serato"] = "Serato4.png",
         ["Traktor"] = "Traktor.jpeg",
         ["EngineDJ"] = "EngineDJ.png"
+
     };
 
     public event EventHandler<ProviderSelectedEventArgs>? ProviderSelected;

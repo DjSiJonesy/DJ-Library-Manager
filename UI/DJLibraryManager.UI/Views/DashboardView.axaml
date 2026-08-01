@@ -22,44 +22,42 @@
                 ColumnDefinitions="720,*"
                 ColumnSpacing="24">
 
-            <!-- ===================================================== -->
-            <!-- LEFT -->
-            <!-- ===================================================== -->
+    <!-- ===================================================== -->
+    <!-- LEFT -->
+    <!-- ===================================================== -->
 
-            <Grid
-                Grid.Row="0"
-                Grid.Column="0"
-                VerticalAlignment="Stretch">
+<Grid
+    Grid.Row="0"
+    Grid.Column="0"
+    RowDefinitions="Auto,Auto,*,12,Auto"
+    VerticalAlignment="Stretch">
 
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+    <!-- ===================================================== -->
+    <!-- Startup -->
+    <!-- ===================================================== -->
 
-    <TextBlock
-        Grid.Row="0"
-        Classes="heading"
-        Text="Startup Discovery"/>
+    <StackPanel
+        Grid.Row="0">
 
-    <TextBlock
+        <TextBlock
+            Classes="heading"
+            Text="Startup Discovery"/>
+
+        <TextBlock
+            Margin="0,10,0,0"
+            Classes="body"
+            Text="The application automatically discovers installed DJ software and media locations."/>
+
+    </StackPanel>
+
+    <!-- ===================================================== -->
+    <!-- Installed Providers -->
+    <!-- ===================================================== -->
+
+    <StackPanel
         Grid.Row="1"
-        Margin="0,10,0,0"
-        Classes="body"
-        Text="The application automatically discovers installed DJ software and media locations."/>
-
-        <ScrollViewer
-            Grid.Row="2"
-            Margin="0,15,0,0"
-            VerticalScrollBarVisibility="Auto"
-            HorizontalScrollBarVisibility="Disabled">
-
-            <StackPanel
-                Spacing="16">
-
-        <!-- ===================================================== -->
-        <!-- Installed Providers -->
-        <!-- ===================================================== -->
+        Margin="0,20,0,0"
+        Spacing="15">
 
         <TextBlock
             Classes="section"
@@ -69,80 +67,97 @@
             ItemsSource="{Binding InstalledProviders}">
 
             <ItemsControl.ItemsPanel>
+
                 <ItemsPanelTemplate>
+
                     <WrapPanel Orientation="Horizontal"/>
+
                 </ItemsPanelTemplate>
+
             </ItemsControl.ItemsPanel>
 
             <ItemsControl.ItemTemplate>
+
                 <DataTemplate>
+
                     <cards:ProviderCard/>
+
                 </DataTemplate>
+
             </ItemsControl.ItemTemplate>
 
         </ItemsControl>
 
-        <!-- ===================================================== -->
-        <!-- Media Locations -->
-        <!-- ===================================================== -->
+    </StackPanel>
 
-        <Border
-            Classes="card"
-            Padding="12">
-
-            <StackPanel Spacing="15">
-
-                <TextBlock
-                    Classes="section"
-                    Text="Media Locations"/>
-
-                <ItemsControl
-                    ItemsSource="{Binding MediaLocations}">
-
-                    <ItemsControl.ItemTemplate>
-
-                        <DataTemplate>
-
-                            <navigation:NavigationRow
-                                Icon="📁"
-                                Text="{Binding Path}"
-
-                                LeftCommand="{Binding $parent[views:DashboardView].OpenMediaLocationCommand}"
-                                LeftCommandParameter="{Binding}"
-
-                                RightCommand="{Binding $parent[views:DashboardView].SelectMediaLocationCommand}"
-                                RightCommandParameter="{Binding}" />
-
-                        </DataTemplate>
-
-                    </ItemsControl.ItemTemplate>
-
-                </ItemsControl>
-
-            </StackPanel>
-
-        </Border>
-
-<!-- ===================================================== -->
-<!-- Library Tools -->
-<!-- ===================================================== -->
-
-<Border
+    <Border
+    Grid.Row="2"
     Classes="card"
     Padding="12">
 
-    <StackPanel Spacing="10">
+    <Grid
+        RowDefinitions="Auto,*"
+        RowSpacing="12">
+
+        <TextBlock
+            Grid.Row="0"
+            Classes="section"
+            Text="Media Locations"/>
+
+        <ScrollViewer
+            Grid.Row="1"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
+
+            <ItemsControl
+                ItemsSource="{Binding MediaLocations}">
+
+                <ItemsControl.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <navigation:NavigationRow
+                            Icon="📁"
+                            Text="{Binding Path}"
+
+                            LeftCommand="{Binding $parent[views:DashboardView].OpenMediaLocationCommand}"
+                            LeftCommandParameter="{Binding}"
+
+                            RightCommand="{Binding $parent[views:DashboardView].SelectMediaLocationCommand}"
+                            RightCommandParameter="{Binding}" />
+
+                    </DataTemplate>
+
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+        </ScrollViewer>
+
+    </Grid>
+
+</Border>
+
+    <Border Grid.Row="3"/>
+
+    <Border
+    Grid.Row="4"
+    Classes="card"
+    Padding="12">
+
+    <StackPanel
+        Spacing="0">
 
         <TextBlock
             Classes="section"
             Text="Library Tools"/>
 
         <navigation:NavigationRow
-            Icon="📚"
+            Icon="🗂️"
             Text="Library Explorer"/>
 
         <navigation:NavigationRow
-            Icon="🔍"
+            Icon="🔄"
             Text="Analysis"/>
 
         <navigation:NavigationRow
@@ -161,9 +176,6 @@
 
 </Border>
 
-</StackPanel>
-
-</ScrollViewer>
 </Grid>
 
             <!-- ===================================================== -->

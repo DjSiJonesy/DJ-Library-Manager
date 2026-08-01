@@ -9,8 +9,6 @@
     x:DataType="vm:ProviderWorkspaceViewModel"
     mc:Ignorable="d">
 
-<ScrollViewer>
-
     <Grid>
 
         <StackPanel
@@ -326,7 +324,5 @@
        </StackPanel>
 
     </Grid>
-
-</ScrollViewer>
 
 </UserControl>
