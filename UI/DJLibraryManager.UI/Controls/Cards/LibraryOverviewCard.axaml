@@ -1,0 +1,95 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    xmlns:common="using:DJLibraryManager.UI.Controls.Common"
+    x:Class="DJLibraryManager.UI.Controls.Cards.LibraryOverviewCard"
+    x:DataType="vm:LibraryOverviewViewModel">
+
+    <StackPanel
+        Spacing="10">
+
+        <!-- ===================================================== -->
+        <!-- Summary -->
+        <!-- ===================================================== -->
+
+        <Grid
+            ColumnDefinitions="*,16,*"
+            RowDefinitions="Auto,Auto,Auto,Auto"
+            RowSpacing="4">
+
+            <!-- Row 1 -->
+
+            <common:PropertyRow
+                Grid.Row="0"
+                Grid.Column="0"
+                Icon="💽"
+                Label="Drives"
+                Value="{Binding DriveCount}" />
+
+            <common:PropertyRow
+                Grid.Row="0"
+                Grid.Column="2"
+                Icon="📁"
+                Label="Folders"
+                Value="{Binding FolderCount}" />
+
+            <!-- Row 2 -->
+
+            <common:PropertyRow
+                Grid.Row="1"
+                Grid.Column="0"
+                Icon="🎵"
+                Label="Audio"
+                Value="{Binding AudioFileCount}" />
+
+            <common:PropertyRow
+                Grid.Row="1"
+                Grid.Column="2"
+                Icon="🎬"
+                Label="Video"
+                Value="{Binding VideoFileCount}" />
+
+            <!-- Row 3 -->
+
+            <common:PropertyRow
+                Grid.Row="2"
+                Grid.Column="0"
+                Icon="⚠️"
+                Label="Missing"
+                Value="{Binding MissingFileCount}" />
+
+            <common:PropertyRow
+                Grid.Row="2"
+                Grid.Column="2"
+                Icon="📑"
+                Label="Duplicates"
+                Value="{Binding DuplicateFileCount}" />
+
+            <!-- Row 4 -->
+
+            <common:PropertyRow
+                Grid.Row="3"
+                Grid.ColumnSpan="3"
+                Icon="💾"
+                Label="Total Size"
+                Value="{Binding TotalSize}" />
+
+        </Grid>
+
+        <!-- ===================================================== -->
+        <!-- Health -->
+        <!-- ===================================================== -->
+
+        <Separator/>
+
+        <TextBlock
+            Classes="subheading"
+            Text="Library Health"/>
+
+        <common:HealthBar
+            Value="{Binding HealthScore}"/>
+
+    </StackPanel>
+
+</UserControl>

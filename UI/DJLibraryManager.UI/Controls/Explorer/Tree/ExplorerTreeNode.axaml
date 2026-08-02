@@ -1,0 +1,16 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:DJLibraryManager.UI.Models.Explorer"
+    x:Class="DJLibraryManager.UI.Controls.Explorer.Tree.ExplorerTreeNode"
+    x:DataType="models:ExplorerNode">
+
+    <StackPanel>
+
+        <TextBlock
+            Classes="body"
+            Text="{Binding Name}" />
+
+    </StackPanel>
+
+</UserControl>

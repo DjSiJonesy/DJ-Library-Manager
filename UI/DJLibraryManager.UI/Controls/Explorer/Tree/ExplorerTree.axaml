@@ -1,0 +1,25 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:DJLibraryManager.UI.Models.Explorer"
+    xmlns:explorer="using:DJLibraryManager.UI.Controls.Explorer.Tree"
+    x:Class="DJLibraryManager.UI.Controls.Explorer.Tree.ExplorerTree"
+    x:DataType="explorer:ExplorerTree">
+
+    <ItemsControl
+        ItemsSource="{Binding Nodes}">
+
+        <ItemsControl.ItemTemplate>
+
+            <DataTemplate
+                x:DataType="models:ExplorerNode">
+
+                <explorer:ExplorerTreeNode/>
+
+            </DataTemplate>
+
+        </ItemsControl.ItemTemplate>
+
+    </ItemsControl>
+
+</UserControl>

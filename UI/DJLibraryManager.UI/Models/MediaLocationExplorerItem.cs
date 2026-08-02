@@ -1,5 +1,6 @@
 ﻿using System;
 using Avalonia.Media;
+using System.Collections.Generic;
 
 namespace DJLibraryManager.Core.Models;
 
@@ -54,6 +55,14 @@ public sealed class MediaLocationExplorerItem
         DiscoveryDate is null
             ? "Never Discovered"
             : $"Discovered {DiscoveryDate:dd MMM yyyy HH:mm}";
+
+    /// <summary>
+    /// Libraries discovered beneath this media location.
+    /// Returns an empty collection until discovery has been performed.
+    /// </summary>
+    public IReadOnlyList<MediaLibrary> Libraries =>
+        DiscoverySession?.Libraries ??
+        Array.Empty<MediaLibrary>();
 
     /// <summary>
     /// Number of discovered folders.

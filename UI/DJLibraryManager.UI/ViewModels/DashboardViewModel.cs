@@ -41,6 +41,8 @@ public partial class DashboardViewModel : ViewModelBase
 
     public ObservableCollection<MediaLocation> MediaLocations { get; } = new();
 
+    public LibraryOverviewViewModel LibraryOverview { get; } = new();
+
     [ObservableProperty]
     private WorkspaceViewModel? currentWorkspace;
 

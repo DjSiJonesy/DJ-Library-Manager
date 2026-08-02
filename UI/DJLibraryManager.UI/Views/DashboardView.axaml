@@ -19,8 +19,8 @@
 
             <Grid
                 RowDefinitions="*"
-                ColumnDefinitions="720,*"
-                ColumnSpacing="24">
+                ColumnDefinitions="685,*"
+                ColumnSpacing="22">
 
     <!-- ===================================================== -->
     <!-- LEFT -->
@@ -56,8 +56,8 @@
 
     <StackPanel
         Grid.Row="1"
-        Margin="0,20,0,0"
-        Spacing="15">
+        Margin="0,22,0,0"
+        Spacing="22">
 
         <TextBlock
             Classes="section"
@@ -138,45 +138,30 @@
 
 </Border>
 
-    <Border Grid.Row="3"/>
+       <Border Grid.Row="3"/>
 
-    <Border
-    Grid.Row="4"
-    Classes="card"
-    Padding="12">
+    <!-- ===================================================== -->
+    <!-- Library Overview -->
+    <!-- ===================================================== -->
 
-    <StackPanel
-        Spacing="0">
+            <Border
+                Grid.Row="4"
+                Classes="card-secondary"
+                Padding="12">
 
-        <TextBlock
-            Classes="section"
-            Text="Library Tools"/>
+                <StackPanel
+                    Spacing="12">
 
-        <navigation:NavigationRow
-            Icon="🗂️"
-            Text="Library Explorer"
-            LeftCommand="{Binding OpenLibraryExplorerCommand}"
-            RightCommand="{Binding OpenLibraryExplorerCommand}"/>
+                    <TextBlock
+                        Classes="section"
+                        Text="Library Overview"/>
 
-        <navigation:NavigationRow
-            Icon="🔄"
-            Text="Analysis"/>
+                    <cards:LibraryOverviewCard
+                        DataContext="{Binding LibraryOverview}"/>
 
-        <navigation:NavigationRow
-            Icon="🛠"
-            Text="Recovery"/>
+                </StackPanel>
 
-        <navigation:NavigationRow
-            Icon="📊"
-            Text="Reports"/>
-
-        <navigation:NavigationRow
-            Icon="⚙"
-            Text="Settings"/>
-
-    </StackPanel>
-
-</Border>
+            </Border>
 
 </Grid>
 

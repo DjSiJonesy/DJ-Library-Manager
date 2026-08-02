@@ -38,6 +38,30 @@ public class MediaLibrary
     public long TotalSizeBytes { get; set; }
 
     /// <summary>
+    /// Total size formatted for display.
+    /// </summary>
+    public string TotalSize
+    {
+        get
+        {
+            const double kb = 1024;
+            const double mb = kb * 1024;
+            const double gb = mb * 1024;
+
+            if (TotalSizeBytes >= gb)
+                return $"{TotalSizeBytes / gb:N2} GB";
+
+            if (TotalSizeBytes >= mb)
+                return $"{TotalSizeBytes / mb:N2} MB";
+
+            if (TotalSizeBytes >= kb)
+                return $"{TotalSizeBytes / kb:N2} KB";
+
+            return $"{TotalSizeBytes:N0} Bytes";
+        }
+    }
+
+    /// <summary>
     /// Indicates this appears to be a top-level media library.
     /// </summary>
     public bool IsLibraryRoot { get; set; }
