@@ -8,6 +8,7 @@ using DJLibraryManager.UI.Models.Media;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.Models.Library;
+using DJLibraryManager.Core.Services;
 
 namespace DJLibraryManager.UI.Services;
 
@@ -38,17 +39,11 @@ public sealed class LibraryRepository
 
     public LibraryRepository()
     {
-        _applicationFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "DJLibraryManager");
+        ApplicationPaths.EnsureCreated();
 
-        _libraryFile = Path.Combine(
-            _applicationFolder,
-            "MediaLibrary.json");
-
-        _metadataFile = Path.Combine(
-            _applicationFolder,
-            "LibraryMetadata.json");
+        _applicationFolder = ApplicationPaths.Root;
+        _libraryFile = ApplicationPaths.MediaLibrary;
+        _metadataFile = ApplicationPaths.LibraryMetadata;
     }
 
     /// <summary>

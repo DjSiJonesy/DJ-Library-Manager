@@ -2,7 +2,10 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- Standard dashboard card -->
+    <!-- ========================================================= -->
+    <!-- Primary Card                                               -->
+    <!-- Used for workspace containers                              -->
+    <!-- ========================================================= -->
 
     <Style Selector="Border.card">
 
@@ -25,8 +28,45 @@
 
             <Transitions>
 
-                <BrushTransition Property="BorderBrush"
-                                 Duration="0:0:0.12"/>
+                <BrushTransition
+                    Property="BorderBrush"
+                    Duration="0:0:0.12"/>
+
+            </Transitions>
+
+        </Setter>
+
+    </Style>
+
+    <!-- ========================================================= -->
+    <!-- Secondary Card                                             -->
+    <!-- Used for content displayed inside a workspace              -->
+    <!-- ========================================================= -->
+
+    <Style Selector="Border.card-secondary">
+
+        <Setter Property="Background"
+                Value="{DynamicResource Brush.Panel.Secondary}" />
+
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource Brush.Panel.Secondary.Border}" />
+
+        <Setter Property="BorderThickness"
+                Value="1" />
+
+        <Setter Property="CornerRadius"
+                Value="14" />
+
+        <Setter Property="Padding"
+                Value="20" />
+
+        <Setter Property="Transitions">
+
+            <Transitions>
+
+                <BrushTransition
+                    Property="BorderBrush"
+                    Duration="0:0:0.12"/>
 
             </Transitions>
 

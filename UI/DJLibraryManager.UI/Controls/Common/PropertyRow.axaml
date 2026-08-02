@@ -5,28 +5,53 @@
     x:Name="Root">
 
     <Grid
-        ColumnDefinitions="36,180,*"
+        ColumnDefinitions="36,90,*"
         ColumnSpacing="16"
         Margin="0,4">
 
-        <!-- Icon -->
+        <!-- ===================================================== -->
+        <!-- Graphic -->
+        <!-- ===================================================== -->
 
-        <TextBlock
+        <Grid
             Grid.Column="0"
-            Text="{Binding Icon, ElementName=Root}"
-            FontSize="18"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center"/>
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
 
+            <!-- Status Indicator -->
+
+            <Ellipse
+                Width="10"
+                Height="10"
+                Fill="{Binding IndicatorBrush, ElementName=Root}"
+                IsVisible="{Binding ShowIndicator, ElementName=Root}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"/>
+
+            <!-- Icon -->
+
+            <TextBlock
+                FontSize="18"
+                Text="{Binding Icon, ElementName=Root}"
+                IsVisible="{Binding ShowIcon, ElementName=Root}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"/>
+
+        </Grid>
+
+        <!-- ===================================================== -->
         <!-- Label -->
+        <!-- ===================================================== -->
 
         <TextBlock
             Grid.Column="1"
-            Classes="subheading"
+            Classes="body"
             Text="{Binding Label, ElementName=Root}"
             VerticalAlignment="Center"/>
 
+        <!-- ===================================================== -->
         <!-- Value -->
+        <!-- ===================================================== -->
 
         <TextBlock
             Grid.Column="2"

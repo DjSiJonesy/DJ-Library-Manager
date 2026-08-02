@@ -34,7 +34,7 @@
 
         <Border
             Grid.Row="2"
-            Classes="card"
+            Classes="card-secondary"
             Padding="20">
 
             <Grid
@@ -69,132 +69,160 @@
                 </Grid>
 
                 <!-- ================================================= -->
-                <!-- Left Information -->
-                <!-- ================================================= -->
+<!-- Left Information -->
+<!-- ================================================= -->
 
-                <Grid
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    ColumnDefinitions="110,*"
-                    RowDefinitions="Auto,Auto,Auto,Auto"
-                    RowSpacing="10">
+<Grid
+    Grid.Row="2"
+    Grid.Column="0"
+    ColumnDefinitions="120,*"
+    RowDefinitions="Auto,Auto,Auto,Auto"
+    RowSpacing="10">
 
-                    <!-- ================================================= -->
-                    <!-- Name -->
-                    <!-- ================================================= -->
+    <!-- ================================================= -->
+    <!-- Name -->
+    <!-- ================================================= -->
 
-                    <TextBlock
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        Classes="body"
-                        Text="🏷️ Name"/>
+    <Grid
+        Grid.Row="0"
+        Grid.Column="0"
+        ColumnDefinitions="20,*"
+        ColumnSpacing="6">
 
-                    <TextBlock
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        Classes="body"
-                        Text="{Binding Name}"/>
+        <TextBlock
+            VerticalAlignment="Center"
+            Text="🏷️"/>
 
-                    <!-- ================================================= -->
-                    <!-- Path -->
-                    <!-- ================================================= -->
+        <TextBlock
+            Grid.Column="1"
+            Classes="body"
+            VerticalAlignment="Center"
+            Text="Name"/>
 
-                    <Grid
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        ColumnDefinitions="Auto,*"
-                        ColumnSpacing="6">
+    </Grid>
 
-                        <Button
-                            Width="20"
-                            Height="20"
-                            Padding="0"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            VerticalAlignment="Center"
-                            Command="{Binding OpenFolderCommand}">
+    <TextBlock
+        Grid.Row="0"
+        Grid.Column="1"
+        Classes="body"
+        VerticalAlignment="Center"
+        Text="{Binding Name}"/>
 
-                            <TextBlock
-                                Text="📁"
-                                VerticalAlignment="Center"/>
+    <!-- ================================================= -->
+    <!-- Path -->
+    <!-- ================================================= -->
 
-                        </Button>
+    <Grid
+        Grid.Row="1"
+        Grid.Column="0"
+        ColumnDefinitions="20,*"
+        ColumnSpacing="6">
 
-                        <TextBlock
-                            Grid.Column="1"
-                            Classes="body"
-                            VerticalAlignment="Center"
-                            Text="Path"/>
+        <Button
+            Width="20"
+            Height="20"
+            Padding="0"
+            Background="Transparent"
+            BorderThickness="0"
+            Cursor="Hand"
+            VerticalAlignment="Center"
+            Command="{Binding OpenFolderCommand}">
 
-                    </Grid>
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="📁"/>
 
-                    <Button
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Padding="0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Cursor="Hand"
-                        HorizontalAlignment="Left"
-                        HorizontalContentAlignment="Left"
-                        Command="{Binding OpenFolderCommand}">
+        </Button>
 
-                        <TextBlock
-                            Classes="body"
-                            Text="{Binding Path}"
-                            TextTrimming="CharacterEllipsis"/>
+        <TextBlock
+            Grid.Column="1"
+            Classes="body"
+            VerticalAlignment="Center"
+            Text="Path"/>
 
-                    </Button>
+    </Grid>
 
-                    <!-- ================================================= -->
-                    <!-- Drive -->
-                    <!-- ================================================= -->
+    <Button
+        Grid.Row="1"
+        Grid.Column="1"
+        Padding="0"
+        Background="Transparent"
+        BorderThickness="0"
+        Cursor="Hand"
+        HorizontalAlignment="Left"
+        HorizontalContentAlignment="Left"
+        Command="{Binding OpenFolderCommand}">
 
-                    <TextBlock
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        Classes="body"
-                        Text="💽 Drive"/>
+        <TextBlock
+            Classes="body"
+            VerticalAlignment="Center"
+            Text="{Binding Path}"
+            TextTrimming="CharacterEllipsis"/>
 
-                    <TextBlock
-                        Grid.Row="2"
-                        Grid.Column="1"
-                        Classes="body"
-                        Text="{Binding Drive}"/>
+    </Button>
 
-                    <!-- ================================================= -->
-                    <!-- Status -->
-                    <!-- ================================================= -->
+    <!-- ================================================= -->
+    <!-- Drive -->
+    <!-- ================================================= -->
 
-                    <StackPanel
-                        Grid.Row="3"
-                        Grid.Column="0"
-                        Orientation="Horizontal"
-                        Spacing="6"
-                        VerticalAlignment="Center">
+    <Grid
+        Grid.Row="2"
+        Grid.Column="0"
+        ColumnDefinitions="20,*"
+        ColumnSpacing="6">
 
-                        <Ellipse
-                            Width="10"
-                            Height="10"
-                            Fill="{Binding StatusBrush}"
-                            VerticalAlignment="Center"/>
+        <TextBlock
+            VerticalAlignment="Center"
+            Text="💽"/>
 
-                        <TextBlock
-                            Classes="body"
-                            VerticalAlignment="Center"
-                            Text="Status"/>
+        <TextBlock
+            Grid.Column="1"
+            Classes="body"
+            VerticalAlignment="Center"
+            Text="Drive"/>
 
-                    </StackPanel>
+    </Grid>
 
-                    <TextBlock
-                        Grid.Row="3"
-                        Grid.Column="1"
-                        Classes="body"
-                        VerticalAlignment="Center"
-                        Text="{Binding Status}"/>
+    <TextBlock
+        Grid.Row="2"
+        Grid.Column="1"
+        Classes="body"
+        VerticalAlignment="Center"
+        Text="{Binding Drive}"/>
 
-                </Grid>
+    <!-- ================================================= -->
+    <!-- Status -->
+    <!-- ================================================= -->
+
+    <Grid
+        Grid.Row="3"
+        Grid.Column="0"
+        ColumnDefinitions="20,*"
+        ColumnSpacing="6">
+
+        <Ellipse
+            Width="10"
+            Height="10"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Fill="{Binding StatusBrush}"/>
+
+        <TextBlock
+            Grid.Column="1"
+            Classes="body"
+            VerticalAlignment="Center"
+            Text="Status"/>
+
+    </Grid>
+
+    <TextBlock
+        Grid.Row="3"
+        Grid.Column="1"
+        Classes="body"
+        VerticalAlignment="Center"
+        Text="{Binding Status}"/>
+
+</Grid>
 
                 <!-- ================================================= -->
                 <!-- Discovery Summary -->

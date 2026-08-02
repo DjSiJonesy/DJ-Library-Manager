@@ -154,7 +154,9 @@
 
         <navigation:NavigationRow
             Icon="🗂️"
-            Text="Library Explorer"/>
+            Text="Library Explorer"
+            LeftCommand="{Binding OpenLibraryExplorerCommand}"
+            RightCommand="{Binding OpenLibraryExplorerCommand}"/>
 
         <navigation:NavigationRow
             Icon="🔄"

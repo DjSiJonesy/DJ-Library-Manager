@@ -1,0 +1,104 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    xmlns:cards="using:DJLibraryManager.UI.Controls.Cards"
+    xmlns:explorer="using:DJLibraryManager.UI.Controls.Explorer"
+    x:Class="DJLibraryManager.UI.Views.LibraryExplorerView"
+    x:DataType="vm:LibraryExplorerViewModel"
+    mc:Ignorable="d">
+
+    <Grid
+        RowDefinitions="Auto,20,Auto,20,*">
+
+        <!-- ===================================================== -->
+        <!-- Header -->
+        <!-- ===================================================== -->
+
+        <StackPanel Grid.Row="0">
+
+            <TextBlock
+                Classes="heading"
+                Text="Library Explorer"/>
+
+            <TextBlock
+                Classes="caption"
+                Text="Displays everything currently known by DIASISS DJ."/>
+
+        </StackPanel>
+
+        <!-- ===================================================== -->
+        <!-- Summary -->
+        <!-- ===================================================== -->
+
+        <cards:LibrarySummaryCard
+            Grid.Row="2"
+
+            MediaLocationText="{Binding Explorer.Summary.MediaLocationCount, StringFormat='{}{0:N0} Drives'}"
+
+            LibraryCountText="{Binding Explorer.Summary.LibraryCount, StringFormat='{}{0:N0} Folders'}"
+
+            AudioCountText="{Binding Explorer.Summary.AudioFileCount, StringFormat='{}{0:N0} Audio Files'}"
+
+            VideoCountText="{Binding Explorer.Summary.VideoFileCount, StringFormat='{}{0:N0} Video Files'}"
+
+            TotalMediaText="{Binding Explorer.Summary.TotalMediaFiles, StringFormat='{}{0:N0} Media Files'}"
+
+            TotalSizeText="{Binding Explorer.Summary.TotalSize}"/>
+
+        <!-- ===================================================== -->
+        <!-- Placeholder -->
+        <!-- ===================================================== -->
+
+        <Border
+    Grid.Row="4"
+    Classes="card"
+    Padding="20">
+
+    <Grid
+        RowDefinitions="Auto,16,*">
+
+        <!-- ===================================================== -->
+        <!-- Header -->
+        <!-- ===================================================== -->
+
+        <TextBlock
+            Grid.Row="0"
+            Classes="section"
+            Text="Discovered Media Locations"/>
+
+        <!-- ===================================================== -->
+        <!-- Media Locations -->
+        <!-- ===================================================== -->
+
+        <ScrollViewer
+            Grid.Row="2"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
+
+               <ItemsControl
+                    ItemsSource="{Binding Explorer.MediaLocations}">
+
+                <ItemsControl.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <explorer:MediaLocationExplorerCard/>
+
+                    </DataTemplate>
+
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+        </ScrollViewer>
+
+    </Grid>
+
+</Border>
+
+    </Grid>
+
+</UserControl>

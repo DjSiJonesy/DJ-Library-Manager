@@ -35,6 +35,7 @@ public partial class DashboardViewModel : ViewModelBase
 
     public event EventHandler<ProviderSelectedEventArgs>? ProviderSelected;
     public event EventHandler<MediaLocationSelectedEventArgs>? MediaLocationSelected;
+    public event EventHandler? LibraryExplorerSelected;
 
     public ObservableCollection<ProviderInfo> InstalledProviders { get; } = new();
 
@@ -87,8 +88,16 @@ public partial class DashboardViewModel : ViewModelBase
     private void LoadMediaLocations()
     {
         var discoveryService = new MediaLocationDiscoveryService();
+        var repository = App.Services.MediaLocationRepository;
 
-        foreach (var location in discoveryService.DiscoverLocations())
+        // Refresh the repository.
+        repository.Clear();
+        repository.Save(discoveryService.DiscoverLocations());
+
+        // Populate the Dashboard from the repository.
+        MediaLocations.Clear();
+
+        foreach (var location in repository.MediaLocations.OrderBy(x => x.Name))
         {
             MediaLocations.Add(location);
         }
@@ -132,6 +141,12 @@ public partial class DashboardViewModel : ViewModelBase
         MediaLocationSelected?.Invoke(
             this,
             new MediaLocationSelectedEventArgs(location));
+    }
+
+    [RelayCommand]
+    private void OpenLibraryExplorer()
+    {
+        LibraryExplorerSelected?.Invoke(this, EventArgs.Empty);
     }
 
     private ProviderInfo CreateProvider(ProviderDiscoveryResult provider)

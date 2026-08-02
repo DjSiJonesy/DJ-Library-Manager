@@ -9,8 +9,10 @@
     <!-- Backgrounds -->
 
     <Color x:Key="Colour.Background">#2B2B2B</Color>
-    <Color x:Key="Colour.Panel">#343434</Color>
-    <Color x:Key="Colour.Panel.Border">#555555</Color>
+    <Color x:Key="Colour.Panel">#3D3D3D</Color>
+    <Color x:Key="Colour.Panel.Secondary">#464646</Color>
+    <Color x:Key="Colour.Panel.Border">#666666</Color>
+    <Color x:Key="Colour.Panel.Secondary.Border">#727272</Color>
 
     <!-- Branding -->
 
@@ -61,8 +63,16 @@
         Color="{StaticResource Colour.Panel}" />
 
     <SolidColorBrush
+    x:Key="Brush.Panel.Secondary"
+    Color="{StaticResource Colour.Panel.Secondary}" />
+
+    <SolidColorBrush
         x:Key="Brush.Panel.Border"
         Color="{StaticResource Colour.Panel.Border}" />
+
+    <SolidColorBrush
+    x:Key="Brush.Panel.Secondary.Border"
+    Color="{StaticResource Colour.Panel.Secondary.Border}" />
 
     <SolidColorBrush
         x:Key="Brush.Accent"

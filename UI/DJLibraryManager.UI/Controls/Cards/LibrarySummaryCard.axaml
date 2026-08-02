@@ -1,0 +1,124 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Cards.LibrarySummaryCard"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="20">
+
+        <Grid
+            ColumnDefinitions="*,*"
+            RowDefinitions="Auto,18,Auto,Auto,Auto"
+            RowSpacing="10">
+
+            <!-- ================================================ -->
+            <!-- Title -->
+            <!-- ================================================ -->
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.ColumnSpan="2"
+                Classes="section"
+                Text="Library Summary"/>
+
+            <!-- ================================================ -->
+            <!-- Left -->
+            <!-- ================================================ -->
+
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="0"
+                Spacing="10">
+
+                <Grid ColumnDefinitions="Auto,*">
+
+                    <TextBlock Text="💽"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Classes="body"
+                        Text="{Binding MediaLocationText, ElementName=Root}"/>
+
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*">
+
+                    <TextBlock Text="🗂️"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Classes="body"
+                        Text="{Binding LibraryCountText, ElementName=Root}"/>
+
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*">
+
+                    <TextBlock Text="💾"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Classes="body"
+                        Text="{Binding TotalSizeText, ElementName=Root}"/>
+
+                </Grid>
+
+            </StackPanel>
+
+            <!-- ================================================ -->
+            <!-- Right -->
+            <!-- ================================================ -->
+
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="1"
+                Spacing="10">
+
+                <Grid ColumnDefinitions="Auto,*">
+
+                    <TextBlock Text="🎵"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Classes="body"
+                        Text="{Binding AudioCountText, ElementName=Root}"/>
+
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*">
+
+                    <TextBlock Text="🎬"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Classes="body"
+                        Text="{Binding VideoCountText, ElementName=Root}"/>
+
+                </Grid>
+
+                <Grid ColumnDefinitions="Auto,*">
+
+                    <TextBlock Text="📀"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="8,0,0,0"
+                        Classes="body"
+                        Text="{Binding TotalMediaText, ElementName=Root}"/>
+
+                </Grid>
+
+            </StackPanel>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

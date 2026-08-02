@@ -38,6 +38,7 @@ public partial class MainViewModel : ViewModelBase
 
         Dashboard.ProviderSelected += Dashboard_ProviderSelected;
         Dashboard.MediaLocationSelected += Dashboard_MediaLocationSelected;
+        Dashboard.LibraryExplorerSelected += Dashboard_LibraryExplorerSelected;
     }
 
     /// <summary>
@@ -75,6 +76,23 @@ private void Dashboard_MediaLocationSelected(
 
     StatusText = $"Viewing {e.MediaLocation.Path}";
 }
+
+    /// <summary>
+    /// Opens the Library Explorer workspace.
+    /// </summary>
+    private void Dashboard_LibraryExplorerSelected(
+        object? sender,
+        EventArgs e)
+    {
+        var workspace = new LibraryExplorerViewModel();
+
+        CurrentWorkspace = workspace;
+        Dashboard.CurrentWorkspace = workspace;
+
+        StatusText = "Viewing Library Explorer";
+    }
+
+
     /// <summary>
     /// Called when a provider finishes importing its library.
     /// </summary>

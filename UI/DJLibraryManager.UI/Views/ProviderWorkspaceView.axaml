@@ -34,7 +34,7 @@
 
 <Border
     Grid.Column="0"
-    Classes="card">
+    Classes="card-secondary">
 
     <StackPanel
         Margin="16"
@@ -101,7 +101,7 @@
 
                 <Border
                     Grid.Column="1"
-                    Classes="card">
+                    Classes="card-secondary">
 
                     <StackPanel Spacing="18">
 
@@ -201,7 +201,7 @@
 
                 <!-- Library -->
 
-                <Border Classes="card">
+                <Border Classes="card-secondary">
 
                     <StackPanel Spacing="20">
 
@@ -306,7 +306,7 @@
                                     Value="{Binding Provider.LastImported}"/>
 
                                 <common:PropertyRow
-                                    Icon="💿"
+                                    Icon="🎵"
                                     Label="Tracks"
                                     Value="{Binding Provider.TrackCount}"/>
 

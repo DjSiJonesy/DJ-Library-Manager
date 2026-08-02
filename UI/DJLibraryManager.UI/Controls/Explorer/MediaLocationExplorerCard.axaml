@@ -1,0 +1,107 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:DJLibraryManager.Core.Models"
+    xmlns:common="using:DJLibraryManager.UI.Controls.Common"
+    x:Class="DJLibraryManager.UI.Controls.Explorer.MediaLocationExplorerCard"
+    x:DataType="models:MediaLocationExplorerItem">
+
+    <Border
+        Classes="card-secondary"
+        Margin="0,0,0,12">
+
+        <Grid
+            RowDefinitions="Auto,16,Auto">
+
+            <!-- ===================================================== -->
+            <!-- Header -->
+            <!-- ===================================================== -->
+
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="*,Auto">
+
+                <TextBlock
+                    Grid.Column="0"
+                    Classes="section"
+                    Text="{Binding MediaLocation.Path}" />
+
+                <TextBlock
+                    Grid.Column="1"
+                    Classes="caption"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Text="{Binding DiscoveryDateText}" />
+
+            </Grid>
+
+            <!-- ===================================================== -->
+            <!-- Summary -->
+            <!-- ===================================================== -->
+
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="*,32,*"
+                ColumnSpacing="16">
+
+                <!-- ================================================= -->
+                <!-- LEFT COLUMN -->
+                <!-- ================================================= -->
+
+                <StackPanel
+                    Grid.Column="0">
+
+                    <common:PropertyRow
+                        ShowIndicator="True"
+                        ShowIcon="False"
+                        IndicatorBrush="{Binding StatusBrush}"
+                        Label="Status"
+                        Value="{Binding DiscoveryStatus}" />
+
+                    <common:PropertyRow
+                        Icon="💽"
+                        Label="Drive"
+                        Value="{Binding MediaLocation.Drive}" />
+
+                    <common:PropertyRow
+                        Icon="📁"
+                        Label="Folders"
+                        Value="{Binding FolderCount}" />
+
+                </StackPanel>
+
+                <!-- Spacer -->
+
+                <Border Grid.Column="1"/>
+
+                <!-- ================================================= -->
+                <!-- RIGHT COLUMN -->
+                <!-- ================================================= -->
+
+                <StackPanel
+                    Grid.Column="2">
+
+                    <common:PropertyRow
+                        Icon="🎵"
+                        Label="Audio Files"
+                        Value="{Binding AudioFileCount}" />
+
+                    <common:PropertyRow
+                        Icon="🎬"
+                        Label="Video Files"
+                        Value="{Binding VideoFileCount}" />
+
+                    <common:PropertyRow
+                        Icon="💾"
+                        Label="Total Size"
+                        Value="{Binding TotalSize}" />
+
+                </StackPanel>
+
+            </Grid>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

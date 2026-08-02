@@ -1,13 +1,15 @@
-﻿using Avalonia.Media;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+
+using Avalonia.Media;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using DJLibraryManager.Core.Models;
+using DJLibraryManager.Core.Services;
 using DJLibraryManager.UI.Services;
-
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace DJLibraryManager.UI.ViewModels;
 
@@ -17,6 +19,7 @@ namespace DJLibraryManager.UI.ViewModels;
 public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
 {
     private readonly MediaLibraryDiscoveryService _discoveryService = new();
+    private readonly DiscoveryRepository _discoveryRepository = App.Services.DiscoveryRepository;
 
     public MediaLocation MediaLocation { get; }
 
@@ -31,9 +34,29 @@ public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
     {
         MediaLocation = mediaLocation;
 
-        Status = Exists
-            ? "Ready to Discover"
-            : "Location Not Available";
+        if (!Exists)
+        {
+            Status = "Location Not Available";
+            return;
+        }
+
+        // Restore any previous discovery for this media location.
+        var session = _discoveryRepository.Get(Path);
+
+        if (session is not null)
+        {
+            foreach (var library in session.Libraries)
+            {
+                Libraries.Add(library);
+            }
+
+            Status = "Discovery Complete";
+            RefreshDiscoverySummary();
+        }
+        else
+        {
+            Status = "Ready to Discover";
+        }
     }
 
     #region Location Information
@@ -96,6 +119,25 @@ public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
 
     #endregion
 
+    #region Private Helpers
+
+    /// <summary>
+    /// Refreshes the calculated discovery summary properties.
+    /// </summary>
+    private void RefreshDiscoverySummary()
+    {
+        OnPropertyChanged(nameof(FolderCount));
+        OnPropertyChanged(nameof(AudioFileCount));
+        OnPropertyChanged(nameof(VideoFileCount));
+        OnPropertyChanged(nameof(TotalMediaFiles));
+        OnPropertyChanged(nameof(TotalSizeBytes));
+        OnPropertyChanged(nameof(TotalSize));
+    }
+
+    #endregion
+
+    #region Commands
+
     /// <summary>
     /// Opens the selected media location in Windows Explorer.
     /// </summary>
@@ -126,18 +168,24 @@ public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
 
         var libraries = _discoveryService.DiscoverLibraries(MediaLocation);
 
-        foreach (var library in libraries)
+        var session = new DiscoverySession
+        {
+            MediaLocation = MediaLocation,
+            Libraries = libraries,
+            DiscoveryDate = DateTime.Now
+        };
+
+        _discoveryRepository.Save(session);
+
+        foreach (var library in session.Libraries)
         {
             Libraries.Add(library);
         }
 
         Status = "Discovery Complete";
 
-        OnPropertyChanged(nameof(FolderCount));
-        OnPropertyChanged(nameof(AudioFileCount));
-        OnPropertyChanged(nameof(VideoFileCount));
-        OnPropertyChanged(nameof(TotalMediaFiles));
-        OnPropertyChanged(nameof(TotalSizeBytes));
-        OnPropertyChanged(nameof(TotalSize));
+        RefreshDiscoverySummary();
     }
+
+    #endregion
 }
