@@ -1,0 +1,131 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Dashboard.WorkflowCard"
+    x:Name="Root">
+
+    <Button
+        Theme="{StaticResource DJLM.CardButton}"
+        Command="{Binding ActionCommand, ElementName=Root}"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        PointerEntered="Button_PointerEntered"
+        PointerExited="Button_PointerExited">
+
+        <Border
+            x:Name="CardBorder"
+            Classes="card"
+            Height="190"
+            MinWidth="340"
+            Padding="18">
+
+            <Grid
+                RowDefinitions="Auto,10,Auto,*,Auto">
+
+            <!-- ===================================================== -->
+            <!-- Header -->
+            <!-- ===================================================== -->
+
+            <Grid
+                ColumnDefinitions="Auto,*,Auto"
+                VerticalAlignment="Center">
+
+                <StackPanel
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    VerticalAlignment="Center">
+
+                    <TextBlock
+                        FontSize="24"
+                        VerticalAlignment="Center"
+                        Text="{Binding Icon, ElementName=Root}" />
+
+                    <TextBlock
+                        Classes="section"
+                        VerticalAlignment="Center"
+                        Text="{Binding Title, ElementName=Root}" />
+
+                </StackPanel>
+
+                <StackPanel
+                    Grid.Column="2"
+                    Orientation="Horizontal"
+                    Spacing="6"
+                    VerticalAlignment="Center">
+
+                    <Ellipse
+                        Width="10"
+                        Height="10"
+                        Fill="{Binding StatusBrush, ElementName=Root}" />
+
+                    <TextBlock
+                        Classes="caption"
+                        FontWeight="SemiBold"
+                        Text="{Binding Status, ElementName=Root}" />
+
+                </StackPanel>
+
+            </Grid>
+
+            <!-- ===================================================== -->
+            <!-- Description -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="2"
+                Classes="caption"
+                TextWrapping="Wrap"
+                MaxLines="2"
+                Opacity="0.85"
+                Text="{Binding Description, ElementName=Root}" />
+
+            <!-- ===================================================== -->
+            <!-- Statistics -->
+            <!-- ===================================================== -->
+
+            <Grid
+                Grid.Row="4"
+                Margin="0,8,0,0"
+                ColumnDefinitions="*,Auto"
+                RowDefinitions="Auto,6,Auto">
+
+                <!-- Primary -->
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Classes="caption"
+                    Text="{Binding PrimaryStatisticTitle, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Right"
+                    Text="{Binding PrimaryStatisticValue, ElementName=Root}" />
+
+                <!-- Secondary -->
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Classes="caption"
+                    Text="{Binding SecondaryStatisticTitle, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    FontWeight="Bold"
+                    HorizontalAlignment="Right"
+                    Text="{Binding SecondaryStatisticValue, ElementName=Root}" />
+
+            </Grid>
+
+        </Grid>
+
+    </Border>
+</Button>
+
+</UserControl>

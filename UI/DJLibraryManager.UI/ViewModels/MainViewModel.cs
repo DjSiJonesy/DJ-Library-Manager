@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DJLibraryManager.UI.Models.Import;
+using DJLibraryManager.UI.ViewModels.Dashboard;
 using System;
 
 namespace DJLibraryManager.UI.ViewModels;
@@ -33,8 +34,11 @@ public partial class MainViewModel : ViewModelBase
     {
         Dashboard = new DashboardViewModel();
 
-        CurrentWorkspace = null;
-        Dashboard.CurrentWorkspace = null;
+        var workspace = new DashboardWorkspaceViewModel(Dashboard);
+
+        CurrentWorkspace = workspace;
+        Dashboard.CurrentWorkspace = workspace;
+        Dashboard.DashboardWorkspace = workspace;
 
         Dashboard.ProviderSelected += Dashboard_ProviderSelected;
         Dashboard.MediaLocationSelected += Dashboard_MediaLocationSelected;
@@ -62,20 +66,22 @@ public partial class MainViewModel : ViewModelBase
     }
 
     /// <summary>
-/// Opens the selected media location workspace.
-/// </summary>
-private void Dashboard_MediaLocationSelected(
-    object? sender,
-    MediaLocationSelectedEventArgs e)
-{
-    var workspace = new MediaLocationWorkspaceViewModel(
-        e.MediaLocation);
+    /// Opens the selected media location workspace.
+    /// </summary>
+    private void Dashboard_MediaLocationSelected(
+        object? sender,
+        MediaLocationSelectedEventArgs e)
+    {
+        var workspace = new MediaLocationWorkspaceViewModel(
+            e.MediaLocation);
 
-    CurrentWorkspace = workspace;
-    Dashboard.CurrentWorkspace = workspace;
+        workspace.GoBackRequested += Workspace_GoBackRequested;
 
-    StatusText = $"Viewing {e.MediaLocation.Path}";
-}
+        CurrentWorkspace = workspace;
+        Dashboard.CurrentWorkspace = workspace;
+
+        StatusText = $"Viewing {e.MediaLocation.Path}";
+    }
 
     /// <summary>
     /// Opens the Library Explorer workspace.
@@ -111,8 +117,10 @@ private void Dashboard_MediaLocationSelected(
         object? sender,
         EventArgs e)
     {
-        CurrentWorkspace = null;
-        Dashboard.CurrentWorkspace = null;
+        var workspace = new DashboardWorkspaceViewModel(Dashboard);
+
+        CurrentWorkspace = workspace;
+        Dashboard.CurrentWorkspace = workspace;
 
         StatusText = "Ready";
     }

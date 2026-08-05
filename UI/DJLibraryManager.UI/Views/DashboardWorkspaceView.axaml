@@ -1,0 +1,204 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels.Dashboard"
+    xmlns:dashboard="using:DJLibraryManager.UI.Controls.Dashboard"
+    x:Class="DJLibraryManager.UI.Views.Dashboard.DashboardWorkspaceView"
+    x:DataType="vm:DashboardWorkspaceViewModel">
+
+    <Grid
+        RowDefinitions="Auto,20,*">
+
+        <!-- ===================================================== -->
+        <!-- Header -->
+        <!-- ===================================================== -->
+
+        <StackPanel Grid.Row="0">
+
+            <TextBlock
+                Classes="heading"
+                Text="Dashboard"/>
+
+            <TextBlock
+                Classes="caption"
+                Text="Manage your DJ library through the DIASISS DJ workflow."/>
+
+        </StackPanel>
+
+
+        <!-- ===================================================== -->
+        <!-- Dashboard -->
+        <!-- ===================================================== -->
+
+                <Grid
+                    Grid.Row="2"
+                    RowDefinitions="190,16,190,16,190"
+                    ColumnDefinitions="340,16,340,16,340,16,*"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top">
+
+            <!-- ===================================================== -->
+            <!-- Row 1 -->
+            <!-- ===================================================== -->
+
+                <dashboard:WorkflowCard
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    DataContext="{Binding WorkflowCards[0]}"
+                    Icon="{Binding Icon}"
+                    Title="{Binding Title}"
+                    Description="{Binding Description}"
+                    Status="{Binding Status}"
+                    StatusBrush="{Binding StatusBrush}"
+                    PrimaryStatisticTitle="{Binding PrimaryStatisticTitle}"
+                    PrimaryStatisticValue="{Binding PrimaryStatisticValue}"
+                    SecondaryStatisticTitle="{Binding SecondaryStatisticTitle}"
+                    SecondaryStatisticValue="{Binding SecondaryStatisticValue}"
+                    Stage="{Binding Stage}"
+                    HoverAction="{Binding HoverAction}"
+                    ActionCommand="{Binding ActionCommand}" />
+
+                <dashboard:WorkflowCard
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    DataContext="{Binding WorkflowCards[1]}"
+                    Icon="{Binding Icon}"
+                    Title="{Binding Title}"
+                    Description="{Binding Description}"
+                    Status="{Binding Status}"
+                    StatusBrush="{Binding StatusBrush}"
+                    PrimaryStatisticTitle="{Binding PrimaryStatisticTitle}"
+                    PrimaryStatisticValue="{Binding PrimaryStatisticValue}"
+                    SecondaryStatisticTitle="{Binding SecondaryStatisticTitle}"
+                    SecondaryStatisticValue="{Binding SecondaryStatisticValue}"
+                    Stage="{Binding Stage}"
+                    HoverAction="{Binding HoverAction}"
+                    ActionCommand="{Binding ActionCommand}" />
+
+                <dashboard:WorkflowCard
+                    Grid.Row="0"
+                    Grid.Column="4"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    DataContext="{Binding WorkflowCards[2]}"
+                    Icon="{Binding Icon}"
+                    Title="{Binding Title}"
+                    Description="{Binding Description}"
+                    Status="{Binding Status}"
+                    StatusBrush="{Binding StatusBrush}"
+                    PrimaryStatisticTitle="{Binding PrimaryStatisticTitle}"
+                    PrimaryStatisticValue="{Binding PrimaryStatisticValue}"
+                    SecondaryStatisticTitle="{Binding SecondaryStatisticTitle}"
+                    SecondaryStatisticValue="{Binding SecondaryStatisticValue}"
+                    Stage="{Binding Stage}"
+                    HoverAction="{Binding HoverAction}"
+                    ActionCommand="{Binding ActionCommand}" />
+
+     
+            <!-- ===================================================== -->
+            <!-- Row 2 -->
+            <!-- ===================================================== -->
+
+                <dashboard:WorkflowCard
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    DataContext="{Binding WorkflowCards[3]}"
+                    Icon="{Binding Icon}"
+                    Title="{Binding Title}"
+                    Description="{Binding Description}"
+                    Status="{Binding Status}"
+                    StatusBrush="{Binding StatusBrush}"
+                    PrimaryStatisticTitle="{Binding PrimaryStatisticTitle}"
+                    PrimaryStatisticValue="{Binding PrimaryStatisticValue}"
+                    SecondaryStatisticTitle="{Binding SecondaryStatisticTitle}"
+                    SecondaryStatisticValue="{Binding SecondaryStatisticValue}"
+                    Stage="{Binding Stage}"
+                    HoverAction="{Binding HoverAction}"
+                    ActionCommand="{Binding ActionCommand}" />
+
+                <dashboard:WorkflowCard
+                    Grid.Row="2"
+                    Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    DataContext="{Binding WorkflowCards[4]}"
+                    Icon="{Binding Icon}"
+                    Title="{Binding Title}"
+                    Description="{Binding Description}"
+                    Status="{Binding Status}"
+                    StatusBrush="{Binding StatusBrush}"
+                    PrimaryStatisticTitle="{Binding PrimaryStatisticTitle}"
+                    PrimaryStatisticValue="{Binding PrimaryStatisticValue}"
+                    SecondaryStatisticTitle="{Binding SecondaryStatisticTitle}"
+                    SecondaryStatisticValue="{Binding SecondaryStatisticValue}"
+                    Stage="{Binding Stage}"
+                    HoverAction="{Binding HoverAction}"
+                    ActionCommand="{Binding ActionCommand}" />
+
+                <dashboard:WorkflowCard
+                    Grid.Row="2"
+                    Grid.Column="4"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    DataContext="{Binding WorkflowCards[5]}"
+                    Icon="{Binding Icon}"
+                    Title="{Binding Title}"
+                    Description="{Binding Description}"
+                    Status="{Binding Status}"
+                    StatusBrush="{Binding StatusBrush}"
+                    PrimaryStatisticTitle="{Binding PrimaryStatisticTitle}"
+                    PrimaryStatisticValue="{Binding PrimaryStatisticValue}"
+                    SecondaryStatisticTitle="{Binding SecondaryStatisticTitle}"
+                    SecondaryStatisticValue="{Binding SecondaryStatisticValue}"
+                    Stage="{Binding Stage}"
+                    HoverAction="{Binding HoverAction}"
+                    ActionCommand="{Binding ActionCommand}" />
+
+
+
+            <!-- ===================================================== -->
+            <!-- Row 3 -->
+            <!-- ===================================================== -->
+
+                <dashboard:WorkflowCard
+                    Grid.Row="4"
+                    Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    DataContext="{Binding WorkflowCards[6]}"
+                    Icon="{Binding Icon}"
+                    Title="{Binding Title}"
+                    Description="{Binding Description}"
+                    Status="{Binding Status}"
+                    StatusBrush="{Binding StatusBrush}"
+                    PrimaryStatisticTitle="{Binding PrimaryStatisticTitle}"
+                    PrimaryStatisticValue="{Binding PrimaryStatisticValue}"
+                    SecondaryStatisticTitle="{Binding SecondaryStatisticTitle}"
+                    SecondaryStatisticValue="{Binding SecondaryStatisticValue}"
+                    Stage="{Binding Stage}"
+                    HoverAction="{Binding HoverAction}"
+                    ActionCommand="{Binding ActionCommand}" />
+
+                <dashboard:WorkflowGuidanceCard
+                    Grid.Row="4"
+                    Grid.Column="2"
+                    Grid.ColumnSpan="3"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    IsWelcome="{Binding Guidance.IsWelcome}"
+                    Title="{Binding Guidance.Title}"
+                    Description="{Binding Guidance.Description}"
+                    NextStep="{Binding Guidance.NextStep}"
+                    WhatHappens="{Binding Guidance.WhatHappens}"
+                    GoodToKnow="{Binding Guidance.GoodToKnow}" />
+
+        </Grid>
+    </Grid>
+
+</UserControl>

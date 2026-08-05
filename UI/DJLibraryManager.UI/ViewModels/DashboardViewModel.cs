@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-
-using Avalonia.Media.Imaging;
+﻿using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
 using DJLibraryManager.Core.Models;
 using DJLibraryManager.Core.Services;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Services;
+using DJLibraryManager.UI.ViewModels.Dashboard;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DJLibraryManager.UI.ViewModels;
 
@@ -43,6 +41,12 @@ public partial class DashboardViewModel : ViewModelBase
 
     public LibraryOverviewViewModel LibraryOverview { get; } = new();
 
+    /// <summary>
+    /// The Dashboard workspace currently being displayed.
+    /// Used to update workflow cards as discovery progresses.
+    /// </summary>
+    public DashboardWorkspaceViewModel? DashboardWorkspace { get; set; }
+
     [ObservableProperty]
     private WorkspaceViewModel? currentWorkspace;
 
@@ -60,7 +64,11 @@ public partial class DashboardViewModel : ViewModelBase
     private async Task InitializeAsync()
     {
         await LoadProvidersAsync();
+
         LoadMediaLocations();
+
+        DashboardWorkspace?.UpdateDiscoveryStatus();
+        DashboardWorkspace?.UpdateImportStatus();
     }
 
     private async Task LoadProvidersAsync()
@@ -73,7 +81,7 @@ public partial class DashboardViewModel : ViewModelBase
             var provider = CreateProvider(discoveredProvider);
 
             var metadata =
-    await repository.GetProviderImportAsync(provider.Name);
+        await repository.GetProviderImportAsync(provider.Name);
 
             if (provider.Installed && metadata is not null)
             {
@@ -84,6 +92,7 @@ public partial class DashboardViewModel : ViewModelBase
             }
 
             InstalledProviders.Add(provider);
+            DashboardWorkspace?.UpdateImportStatus();
         }
     }
 

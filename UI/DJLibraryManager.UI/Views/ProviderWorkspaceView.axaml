@@ -11,24 +11,61 @@
 
     <Grid>
 
-        <StackPanel
-            Margin="30"
-            MaxWidth="1200"
-            HorizontalAlignment="Stretch"
-            Spacing="24">
+    <StackPanel
+        Margin="0"
+        MaxWidth="1200"
+        HorizontalAlignment="Stretch"
+        Spacing="20">
 
-            <!-- Navigation -->
+            <!-- ===================================================== -->
+            <!-- Workspace Header -->
+            <!-- ===================================================== -->
 
-            <Button
-                HorizontalAlignment="Left"
-                Command="{Binding GoBackCommand}"
-                Content="← Dashboard"/>
+           <Grid
+                ColumnDefinitions="*,Auto"
+                RowDefinitions="Auto,Auto"
+                ColumnSpacing="20">
 
-            <!-- Header -->
+                <!-- Heading -->
 
-            <Grid
-                ColumnDefinitions="220,*"
-                ColumnSpacing="24">
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Classes="heading"
+                    VerticalAlignment="Center"
+                    Text="{Binding ProviderName, StringFormat='{}{0} Provider'}"/>
+
+                <!-- Dashboard -->
+
+                <Button
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Theme="{StaticResource DJLM.SecondaryButton}"
+                    Padding="12,4"
+                    MinHeight="32"
+                    Command="{Binding GoBackCommand}"
+                    Content="← Dashboard"/>
+
+                <!-- Description -->
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Margin="0,2,0,0"
+                    Classes="caption"
+                    Text="Information about your installed DJ software, libraries and configuration."/>
+
+            </Grid>
+<!-- ===================================================== -->
+<!-- Workspace Content -->
+<!-- ===================================================== -->
+
+<Grid
+    ColumnDefinitions="220,*"
+    ColumnSpacing="24">
 
   <!-- Provider Summary -->
 

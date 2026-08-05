@@ -22,6 +22,7 @@ public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
     private readonly DiscoveryRepository _discoveryRepository = App.Services.DiscoveryRepository;
 
     public MediaLocation MediaLocation { get; }
+    public event EventHandler? GoBackRequested;
 
     /// <summary>
     /// Libraries discovered beneath this media location.
@@ -81,6 +82,15 @@ public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
             "Location Not Available" => Brushes.DarkOrange,
             _ => Brushes.Gray
         };
+
+    /// <summary>
+    /// Returns to the Dashboard.
+    /// </summary>
+    [RelayCommand]
+    private void GoBack()
+    {
+        GoBackRequested?.Invoke(this, EventArgs.Empty);
+    }
 
     #endregion
 

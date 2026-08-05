@@ -19,7 +19,7 @@
 
             <Grid
                 RowDefinitions="*"
-                ColumnDefinitions="685,*"
+                ColumnDefinitions="660,*"
                 ColumnSpacing="22">
 
     <!-- ===================================================== -->
@@ -50,43 +50,51 @@
 
     </StackPanel>
 
-    <!-- ===================================================== -->
-    <!-- Installed Providers -->
-    <!-- ===================================================== -->
+        <!-- ===================================================== -->
+        <!-- Installed Providers -->
+        <!-- ===================================================== -->
 
     <StackPanel
         Grid.Row="1"
         Margin="0,22,0,0"
-        Spacing="22">
+        Spacing="12">
 
         <TextBlock
             Classes="section"
             Text="Installed DJ Software"/>
 
-        <ItemsControl
-            ItemsSource="{Binding InstalledProviders}">
+        <Border
+            Classes="card"
+            Padding="12"
+            Margin="0,0,0,22">
 
-            <ItemsControl.ItemsPanel>
+            <ItemsControl
+                ItemsSource="{Binding InstalledProviders}">
 
-                <ItemsPanelTemplate>
+                <ItemsControl.ItemsPanel>
 
-                    <WrapPanel Orientation="Horizontal"/>
+                    <ItemsPanelTemplate>
 
-                </ItemsPanelTemplate>
+                        <WrapPanel
+                            Orientation="Horizontal"/>
 
-            </ItemsControl.ItemsPanel>
+                    </ItemsPanelTemplate>
 
-            <ItemsControl.ItemTemplate>
+                </ItemsControl.ItemsPanel>
 
-                <DataTemplate>
+                <ItemsControl.ItemTemplate>
 
-                    <cards:ProviderCard/>
+                    <DataTemplate>
 
-                </DataTemplate>
+                        <cards:ProviderCard/>
 
-            </ItemsControl.ItemTemplate>
+                    </DataTemplate>
 
-        </ItemsControl>
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+        </Border>
 
     </StackPanel>
 

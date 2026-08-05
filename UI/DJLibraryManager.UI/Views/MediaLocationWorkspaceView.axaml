@@ -16,17 +16,49 @@
         <!-- Header -->
         <!-- ===================================================== -->
 
-        <StackPanel Grid.Row="0">
+        <!-- ===================================================== -->
+        <!-- Workspace Header -->
+        <!-- ===================================================== -->
 
-            <TextBlock
-                Classes="heading"
-                Text="Media Location"/>
+<Grid
+    Grid.Row="0"
+    ColumnDefinitions="*,Auto"
+    RowDefinitions="Auto,Auto"
+    ColumnSpacing="20">
 
-            <TextBlock
-                Classes="caption"
-                Text="Discover and analyse media stored in this location."/>
+    <!-- Title -->
 
-        </StackPanel>
+    <TextBlock
+        Grid.Row="0"
+        Grid.Column="0"
+        Classes="heading"
+        VerticalAlignment="Center"
+        Text="Media Location"/>
+
+    <!-- Dashboard -->
+
+    <Button
+        Grid.Row="0"
+        Grid.Column="1"
+        HorizontalAlignment="Right"
+        VerticalAlignment="Center"
+        Theme="{StaticResource DJLM.SecondaryButton}"
+        Padding="12,4"
+        MinHeight="32"
+        Command="{Binding GoBackCommand}"
+        Content="← Dashboard"/>
+
+    <!-- Description -->
+
+    <TextBlock
+        Grid.Row="1"
+        Grid.Column="0"
+        Grid.ColumnSpan="2"
+        Margin="0,2,0,0"
+        Classes="caption"
+        Text="Discover and analyse media stored in this location."/>
+
+</Grid>
 
         <!-- ===================================================== -->
         <!-- Location Information -->

@@ -110,4 +110,68 @@
 
     </ControlTheme>
 
+    <!-- ========================================================= -->
+<!-- Card Button                                                -->
+<!-- ========================================================= -->
+
+<ControlTheme
+    x:Key="DJLM.CardButton"
+    TargetType="Button">
+
+    <Setter Property="Background"
+            Value="Transparent"/>
+
+    <Setter Property="BorderBrush"
+            Value="Transparent"/>
+
+    <Setter Property="BorderThickness"
+            Value="0"/>
+
+    <Setter Property="Padding"
+            Value="0"/>
+
+    <Setter Property="Template">
+
+        <ControlTemplate>
+
+            <ContentPresenter
+                x:Name="PART_ContentPresenter"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Padding="{TemplateBinding Padding}"
+                Content="{TemplateBinding Content}"
+                ContentTemplate="{TemplateBinding ContentTemplate}" />
+
+        </ControlTemplate>
+
+    </Setter>
+
+    <!-- Hover -->
+
+    <Style Selector="^:pointerover">
+
+        <Setter Property="Cursor"
+                Value="Hand"/>
+
+    </Style>
+
+    <Style Selector="^:pointerover">
+
+        <Setter Property="BorderBrush"
+                Value="{DynamicResource Brush.Accent}"/>
+
+    </Style>
+
+    <!-- Pressed -->
+
+    <Style Selector="^:pressed">
+
+        <Setter Property="RenderTransform"
+                Value="scale(0.985)"/>
+
+    </Style>
+
+</ControlTheme>
+
 </ResourceDictionary>
