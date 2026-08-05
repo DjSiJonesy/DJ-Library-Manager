@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.ViewModels.Dashboard;
+using DJLibraryManager.UI.ViewModels.Workspace;
+using DJLibraryManager.UI.ViewModels.Library;
 using System;
 
 namespace DJLibraryManager.UI.ViewModels;
@@ -43,6 +45,7 @@ public partial class MainViewModel : ViewModelBase
         Dashboard.ProviderSelected += Dashboard_ProviderSelected;
         Dashboard.MediaLocationSelected += Dashboard_MediaLocationSelected;
         Dashboard.LibraryExplorerSelected += Dashboard_LibraryExplorerSelected;
+        Dashboard.DiscoverySelected += Dashboard_DiscoverySelected;
     }
 
     /// <summary>
@@ -98,6 +101,20 @@ public partial class MainViewModel : ViewModelBase
         StatusText = "Viewing Library Explorer";
     }
 
+    /// <summary>
+    /// Opens the Discovery workflow.
+    /// </summary>
+    private void Dashboard_DiscoverySelected(
+        object? sender,
+        EventArgs e)
+    {
+        var workspace = new DiscoveryWorkspaceViewModel(Dashboard);
+
+        CurrentWorkspace = workspace;
+        Dashboard.CurrentWorkspace = workspace;
+
+        StatusText = "Viewing Discovery";
+    }
 
     /// <summary>
     /// Called when a provider finishes importing its library.
@@ -116,12 +133,14 @@ public partial class MainViewModel : ViewModelBase
     private void Workspace_GoBackRequested(
         object? sender,
         EventArgs e)
-    {
-        var workspace = new DashboardWorkspaceViewModel(Dashboard);
+        {
+            var workspace = new DashboardWorkspaceViewModel(Dashboard);
 
-        CurrentWorkspace = workspace;
-        Dashboard.CurrentWorkspace = workspace;
+            CurrentWorkspace = workspace;
 
-        StatusText = "Ready";
-    }
+            Dashboard.CurrentWorkspace = workspace;
+            Dashboard.DashboardWorkspace = workspace;
+
+            StatusText = "Ready";
+        }
 }

@@ -307,33 +307,42 @@
 
                             <StackPanel Spacing="8">
 
-                                <!-- Status -->
+                            <!-- ===================================================== -->
+                            <!-- Status -->
+                            <!-- ===================================================== -->
 
-                                <Grid
-                                    ColumnDefinitions="36,180,*"
-                                    ColumnSpacing="16"
-                                    Margin="0,4">
+                            <Grid
+                                ColumnDefinitions="36,110,*"
+                                ColumnSpacing="16"
+                                Margin="0,4">
 
-                                    <Ellipse
-                                        Width="18"
-                                        Height="18"
-                                        Fill="{Binding Provider.LibraryStatusBrush}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"/>
+                                <!-- Status Indicator -->
 
-                                    <TextBlock
-                                        Grid.Column="1"
-                                        Classes="subheading"
-                                        Text="Status"
-                                        VerticalAlignment="Center"/>
+                                <Ellipse
+                                    Width="16"
+                                    Height="16"
+                                    Fill="{Binding Provider.LibraryStatusBrush}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
 
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        Classes="body"
-                                        Text="{Binding Provider.LibraryStatus}"
-                                        VerticalAlignment="Center"/>
+                                <!-- Label -->
 
-                                </Grid>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Classes="subheading"
+                                    VerticalAlignment="Center"
+                                    Text="Status"/>
+
+                                <!-- Value -->
+
+                                <TextBlock
+                                    Grid.Column="2"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    FontSize="16"                                    
+                                    Text="{Binding Provider.LibraryStatus}"/>
+
+                            </Grid>
 
                                 <!-- Remaining Library Properties -->
 
@@ -345,12 +354,12 @@
                                 <common:PropertyRow
                                     Icon="🎵"
                                     Label="Tracks"
-                                    Value="{Binding Provider.TrackCount}"/>
+                                    Value="{Binding Provider.TrackCount, StringFormat={}{0:N0}}"/>
 
                                 <common:PropertyRow
                                     Icon="📂"
                                     Label="Playlists"
-                                    Value="{Binding Provider.PlaylistCount}"/>
+                                    Value="{Binding Provider.PlaylistCount, StringFormat={}{0:N0}}"/>
 
                             </StackPanel>
 

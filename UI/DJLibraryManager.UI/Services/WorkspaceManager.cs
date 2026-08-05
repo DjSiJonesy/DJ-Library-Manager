@@ -1,5 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using DJLibraryManager.UI.ViewModels;
+using DJLibraryManager.UI.ViewModels.Workspace;
 
 namespace DJLibraryManager.UI.Services;
 

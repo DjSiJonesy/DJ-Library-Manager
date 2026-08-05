@@ -51,7 +51,7 @@
         HorizontalAlignment="Left">
 
         <Image
-            Source="avares://DJLibraryManager.UI/Assets/DIASISS_Logo.png"
+            Source="avares://DJLibraryManager.UI/Assets/Logos/DIASISS_Logo.png"
             Stretch="Uniform"/>
 
     </Border>

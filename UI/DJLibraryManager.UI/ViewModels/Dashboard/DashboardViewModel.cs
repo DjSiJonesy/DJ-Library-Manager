@@ -7,6 +7,7 @@ using DJLibraryManager.Core.Services;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Services;
 using DJLibraryManager.UI.ViewModels.Dashboard;
+using DJLibraryManager.UI.ViewModels.Workspace;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -34,6 +35,7 @@ public partial class DashboardViewModel : ViewModelBase
     public event EventHandler<ProviderSelectedEventArgs>? ProviderSelected;
     public event EventHandler<MediaLocationSelectedEventArgs>? MediaLocationSelected;
     public event EventHandler? LibraryExplorerSelected;
+    public event EventHandler? DiscoverySelected;
 
     public ObservableCollection<ProviderInfo> InstalledProviders { get; } = new();
 
@@ -158,6 +160,15 @@ public partial class DashboardViewModel : ViewModelBase
     private void OpenLibraryExplorer()
     {
         LibraryExplorerSelected?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Opens the Discovery workflow.
+    /// </summary>
+    [RelayCommand]
+    private void OpenDiscovery()
+    {
+        DiscoverySelected?.Invoke(this, EventArgs.Empty);
     }
 
     private ProviderInfo CreateProvider(ProviderDiscoveryResult provider)

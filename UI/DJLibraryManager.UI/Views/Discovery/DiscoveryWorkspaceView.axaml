@@ -1,0 +1,91 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels"
+    xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
+    x:Class="DJLibraryManager.UI.Views.DiscoveryWorkspaceView"
+    x:DataType="vm:DiscoveryWorkspaceViewModel">
+
+    <Grid
+        RowDefinitions="Auto,20,*">
+
+        <!-- ===================================================== -->
+        <!-- Header -->
+        <!-- ===================================================== -->
+
+        <workflow:WorkflowHeader
+    Grid.Row="0"
+    Title="Discovery"
+    Description="Auto-Discovery of your installed DJ software and the route media locations on your computer."
+    PreviousText="← Dashboard"
+    NextText="Import →"/>
+
+        <!-- ===================================================== -->
+        <!-- Content -->
+        <!-- ===================================================== -->
+
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="420,20,*">
+
+    <!-- ===================================================== -->
+    <!-- Installed Providers -->
+    <!-- ===================================================== -->
+
+    <ItemsControl
+    Grid.Column="0"
+    ItemsSource="{Binding InstalledProviders}">
+
+    <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+            <StackPanel Spacing="10"/>
+        </ItemsPanelTemplate>
+    </ItemsControl.ItemsPanel>
+
+    <ItemsControl.ItemTemplate>
+
+        <DataTemplate>
+
+            <workflow:WorkflowProviderRow
+
+                ProviderLogo="{Binding ProviderLogo}"
+                ProviderName="{Binding Name}"
+                InstallationStatus="{Binding Status}"
+                InstallationBrush="{Binding StatusBrush}"
+                LibraryStatus="{Binding LibraryStatus}"
+                TrackCount="{Binding TrackCount}"
+                PlaylistCount="{Binding PlaylistCount}"
+                LastImported="{Binding LastImported}" />
+
+        </DataTemplate>
+
+    </ItemsControl.ItemTemplate>
+
+</ItemsControl>
+
+    <!-- ===================================================== -->
+    <!-- Temporary Summary -->
+    <!-- ===================================================== -->
+
+    <workflow:WorkflowSummaryCard
+        Grid.Column="2"
+
+        Title="Discovery Summary"
+
+        Label1="Providers Found"
+        Value1="4"
+
+        Label2="Media Locations"
+        Value2="3"
+
+        Label3="Discovery Status"
+        Value3="Complete"
+
+        Label4="Last Discovery"
+        Value4="Today"/>
+
+</Grid>
+
+    </Grid>
+
+</UserControl>

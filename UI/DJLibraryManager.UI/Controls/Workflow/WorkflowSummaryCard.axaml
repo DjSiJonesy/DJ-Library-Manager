@@ -1,0 +1,84 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowSummaryCard"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="20">
+
+        <StackPanel Spacing="18">
+
+            <!-- ===================================================== -->
+            <!-- Heading -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Classes="section"
+                Text="{Binding Title, ElementName=Root}" />
+
+            <!-- ===================================================== -->
+            <!-- Summary -->
+            <!-- ===================================================== -->
+
+            <Grid
+                ColumnDefinitions="150,*"
+                RowDefinitions="Auto,Auto,Auto,Auto"
+                RowSpacing="12">
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Classes="body"
+                    Text="{Binding Label1, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Classes="body"
+                    Text="{Binding Value1, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Classes="body"
+                    Text="{Binding Label2, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Classes="body"
+                    Text="{Binding Value2, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Classes="body"
+                    Text="{Binding Label3, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Classes="body"
+                    Text="{Binding Value3, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Classes="body"
+                    Text="{Binding Label4, ElementName=Root}" />
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Classes="body"
+                    Text="{Binding Value4, ElementName=Root}" />
+
+            </Grid>
+
+        </StackPanel>
+
+    </Border>
+
+</UserControl>

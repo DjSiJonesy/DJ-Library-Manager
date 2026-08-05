@@ -2,9 +2,9 @@
 
 namespace DJLibraryManager.UI.Views;
 
-public partial class LibraryExplorerView : UserControl
+public partial class DiscoveryWorkspaceView : UserControl
 {
-    public LibraryExplorerView()
+    public DiscoveryWorkspaceView()
     {
         InitializeComponent();
     }

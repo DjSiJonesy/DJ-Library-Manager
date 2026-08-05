@@ -1,0 +1,150 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowProviderRow"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="10,8">
+
+        <Grid
+            ColumnDefinitions="100,110,150"
+            RowDefinitions="Auto,Auto,Auto,Auto"
+            ColumnSpacing="14"
+            RowSpacing="5">
+
+                <!-- ===================================================== -->
+                <!-- Provider -->
+                <!-- ===================================================== -->
+
+                <Grid
+                    Grid.Column="0"
+                    Grid.Row="0"
+                    Grid.RowSpan="4"
+                    RowDefinitions="Auto,Auto,Auto,*,Auto"
+                    HorizontalAlignment="Center"
+                    Width="90">
+
+                    <!-- Logo -->
+
+                    <Border
+                        Grid.Row="0"
+                        Width="36"
+                        Height="36"
+                        CornerRadius="4"
+                        ClipToBounds="True"
+                        HorizontalAlignment="Center">
+
+                        <Image
+                            Stretch="UniformToFill"
+                            Source="{Binding ProviderLogo, ElementName=Root}" />
+
+                    </Border>
+
+                    <!-- Provider Name -->
+
+                    <TextBlock
+                        Grid.Row="1"
+                        Margin="0,4,0,0"
+                        HorizontalAlignment="Center"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Text="{Binding ProviderName, ElementName=Root}" />
+
+                    <!-- Installed Status -->
+
+                    <StackPanel
+                        Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,2,0,0"
+                        Spacing="4">
+
+                        <Ellipse
+                            Width="8"
+                            Height="8"
+                            Fill="{Binding InstallationBrush, ElementName=Root}" />
+
+                        <TextBlock
+                            FontSize="10"
+                            Text="{Binding InstallationStatus, ElementName=Root}" />
+
+                    </StackPanel>
+
+                    <!-- Import -->
+
+                    <Button
+                        Grid.Row="4"
+                        Margin="0,4,0,0"
+                        Theme="{StaticResource DJLM.SmallPrimaryButton}"
+                        HorizontalAlignment="Center"
+                        Content="Import"/>
+
+                </Grid>
+
+            <!-- ===================================================== -->
+            <!-- Labels -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Status"/>
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="1"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Last Imported"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="1"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Tracks"/>
+
+            <TextBlock
+                Grid.Row="3"
+                Grid.Column="1"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Playlists"/>
+
+            <!-- ===================================================== -->
+            <!-- Values -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="2"
+                FontSize="12"
+                Text="{Binding LibraryStatus, ElementName=Root}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="2"
+                FontSize="12"
+                Text="{Binding LastImported, ElementName=Root}" />
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="2"
+                FontSize="12"
+                Text="{Binding TrackCount, ElementName=Root}" />
+
+            <TextBlock
+                Grid.Row="3"
+                Grid.Column="2"
+                FontSize="12"
+                Text="{Binding PlaylistCount, ElementName=Root}" />
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 
-namespace DJLibraryManager.UI.ViewModels;
+namespace DJLibraryManager.UI.ViewModels.Providers;
 
 /// <summary>
 /// View model representing a provider card on the dashboard.

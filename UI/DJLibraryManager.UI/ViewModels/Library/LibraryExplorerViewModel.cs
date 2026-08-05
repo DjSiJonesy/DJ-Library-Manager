@@ -1,9 +1,10 @@
 ﻿using System.Linq;
-
 using DJLibraryManager.Core.Services;
 using DJLibraryManager.UI.Models.LibraryExplorer;
+using DJLibraryManager.UI.ViewModels.Workspace;
+using DJLibraryManager.UI.Views.Library;
 
-namespace DJLibraryManager.UI.ViewModels;
+namespace DJLibraryManager.UI.ViewModels.Library;
 
 /// <summary>
 /// ViewModel for the Library Explorer workspace.

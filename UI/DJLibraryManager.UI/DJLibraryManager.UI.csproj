@@ -40,13 +40,29 @@
 	  <Folder Include="Providers\Traktor\Models\" />
 	  <Folder Include="Providers\Traktor\Translators\" />
 	  <Folder Include="Providers\Traktor\Services\" />
+	  <Folder Include="ViewModels\Import\" />
+	  <Folder Include="ViewModels\Analysis\" />
+	  <Folder Include="ViewModels\Improve\" />
+	  <Folder Include="ViewModels\Controls\" />
+	  <Folder Include="ViewModels\Synchronise\" />
+	  <Folder Include="ViewModels\Structure\" />
+	  <Folder Include="ViewModels\Search\" />
+	  <Folder Include="Views\Import\" />
+	  <Folder Include="Views\Analysis\" />
+	  <Folder Include="Views\Improve\" />
+	  <Folder Include="Views\Synchronise\" />
+	  <Folder Include="Views\Structure\" />
+	  <Folder Include="Views\Search\" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Compile Update="Controls\Panels\ProviderWorkspacePanel.axaml.cs">
 	    <DependentUpon>ProviderWorkspacePanel.axaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Views\ProviderWorkspaceView.axaml.cs">
+	  <Compile Update="Controls\Workflow\WorkflowProviderRow.axaml.cs">
+	    <DependentUpon>WorkflowProviderRow.axaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\Provider\ProviderWorkspaceView.axaml.cs">
 	    <DependentUpon>ProviderWorkspaceView.axaml</DependentUpon>
 	  </Compile>
 	</ItemGroup>

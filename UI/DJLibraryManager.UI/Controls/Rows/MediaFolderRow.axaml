@@ -57,7 +57,7 @@
                 Classes="body"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="{Binding AudioCount, ElementName=Root}"/>
+                Text="{Binding AudioCount, ElementName=Root, StringFormat={}{0:N0}}"/>
 
             <!-- ===================================================== -->
             <!-- Video -->
@@ -68,7 +68,7 @@
                 Classes="body"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="{Binding VideoCount, ElementName=Root}"/>
+                Text="{Binding VideoCount, ElementName=Root, StringFormat={}{0:N0}}"/>
 
             <!-- ===================================================== -->
             <!-- Total -->
@@ -79,7 +79,7 @@
                 Classes="body"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Text="{Binding TotalCount, ElementName=Root}"/>
+                Text="{Binding TotalCount, ElementName=Root, StringFormat={}{0:N0}}"/>
 
         </Grid>
 

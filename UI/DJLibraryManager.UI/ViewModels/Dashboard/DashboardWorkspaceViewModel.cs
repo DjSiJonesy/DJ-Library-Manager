@@ -3,6 +3,7 @@ using DJLibraryManager.UI.Models;
 using System.Collections.ObjectModel;
 using DJLibraryManager.Core.Workflow;
 using System.Linq;
+using DJLibraryManager.UI.ViewModels.Workspace;
 
 namespace DJLibraryManager.UI.ViewModels.Dashboard;
 
@@ -113,19 +114,13 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
         {
             Definition = WorkflowDefinitions.Discovery,
             HoverAction = stage => Guidance.Show(stage),
-
-            Status = GetDiscoveryStatus(),
-            StatusBrush = GetDiscoveryStatusBrush(),
+            ActionCommand = _dashboard.OpenDiscoveryCommand,
 
             PrimaryStatisticTitle = "Providers Found",
-            PrimaryStatisticValue = _dashboard.InstalledProviders
-                .Count(x => x.Installed)
-                .ToString(),
+            PrimaryStatisticValue = string.Empty,
 
             SecondaryStatisticTitle = "Media Locations",
-            SecondaryStatisticValue = _dashboard.MediaLocations
-                .Count
-                .ToString()
+            SecondaryStatisticValue = string.Empty
         });
 
         WorkflowCards.Add(new WorkflowCardViewModel
@@ -222,6 +217,9 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             SecondaryStatisticValue = "No"
         });
 
+        UpdateDiscoveryStatus();
+        UpdateImportStatus();
+
         Guidance.Reset();
     }
 
@@ -240,32 +238,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
         }
 
         return ("Complete", Brushes.LimeGreen);
-    }
-
-    private string GetDiscoveryStatus()
-    {
-        var installedProviders =
-            _dashboard.InstalledProviders.Count(x => x.Installed);
-
-        var mediaLocations =
-            _dashboard.MediaLocations.Count;
-
-        return GetWorkflowStatus(
-            mediaLocations,
-            installedProviders).Status;
-    }
-
-    private IBrush GetDiscoveryStatusBrush()
-    {
-        var installedProviders =
-            _dashboard.InstalledProviders.Count(x => x.Installed);
-
-        var mediaLocations =
-            _dashboard.MediaLocations.Count;
-
-        return GetWorkflowStatus(
-            mediaLocations,
-            installedProviders).Brush;
     }
 
     private string GetImportStatus()

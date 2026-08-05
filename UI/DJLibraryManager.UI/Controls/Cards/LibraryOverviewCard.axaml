@@ -25,14 +25,14 @@
                 Grid.Column="0"
                 Icon="💽"
                 Label="Drives"
-                Value="{Binding DriveCount}" />
+                Value="{Binding DriveCountDisplay}" />
 
             <common:PropertyRow
                 Grid.Row="0"
                 Grid.Column="2"
                 Icon="📁"
                 Label="Folders"
-                Value="{Binding FolderCount}" />
+                Value="{Binding FolderCountDisplay}" />
 
             <!-- Row 2 -->
 
@@ -41,14 +41,14 @@
                 Grid.Column="0"
                 Icon="🎵"
                 Label="Audio"
-                Value="{Binding AudioFileCount}" />
+                Value="{Binding AudioFileCountDisplay}" />
 
             <common:PropertyRow
                 Grid.Row="1"
                 Grid.Column="2"
                 Icon="🎬"
                 Label="Video"
-                Value="{Binding VideoFileCount}" />
+                Value="{Binding VideoFileCountDisplay}" />
 
             <!-- Row 3 -->
 
@@ -57,14 +57,14 @@
                 Grid.Column="0"
                 Icon="⚠️"
                 Label="Missing"
-                Value="{Binding MissingFileCount}" />
+                Value="{Binding MissingFileCountDisplay}" />
 
             <common:PropertyRow
                 Grid.Row="2"
                 Grid.Column="2"
                 Icon="📑"
                 Label="Duplicates"
-                Value="{Binding DuplicateFileCount}" />
+                Value="{Binding DuplicateFileCountDisplay}" />
 
             <!-- Row 4 -->
 

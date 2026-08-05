@@ -33,17 +33,43 @@
                 <Grid
                     Grid.Row="2"
                     RowDefinitions="190,16,190,16,190"
-                    ColumnDefinitions="340,16,340,16,340,16,*"
+                    ColumnDefinitions="340,16,340,16,340"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Top">
 
-            <!-- ===================================================== -->
-            <!-- Row 1 -->
-            <!-- ===================================================== -->
+    <!-- ===================================================== -->
+    <!-- Row 1 -->
+    <!-- ===================================================== -->
+
+    <!-- Workflow Guidance / Welcome -->
+
+                <Grid
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="3">
+
+                    <dashboard:WelcomeCard
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        IsVisible="{Binding Guidance.IsWelcome}" />
+
+                    <dashboard:WorkflowGuidanceCard
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        IsVisible="{Binding !Guidance.IsWelcome}"
+                        Title="{Binding Guidance.Title}"
+                        Description="{Binding Guidance.Description}"
+                        NextStep="{Binding Guidance.NextStep}"
+                        WhatHappens="{Binding Guidance.WhatHappens}"
+                        GoodToKnow="{Binding Guidance.GoodToKnow}" />
+
+                </Grid>
+
+                <!-- Discovery -->
 
                 <dashboard:WorkflowCard
                     Grid.Row="0"
-                    Grid.Column="0"
+                    Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     DataContext="{Binding WorkflowCards[0]}"
@@ -60,9 +86,15 @@
                     HoverAction="{Binding HoverAction}"
                     ActionCommand="{Binding ActionCommand}" />
 
+                <!-- ===================================================== -->
+                <!-- Row 2 -->
+                <!-- ===================================================== -->
+
+                <!-- Import -->
+
                 <dashboard:WorkflowCard
-                    Grid.Row="0"
-                    Grid.Column="2"
+                    Grid.Row="2"
+                    Grid.Column="0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     DataContext="{Binding WorkflowCards[1]}"
@@ -79,9 +111,11 @@
                     HoverAction="{Binding HoverAction}"
                     ActionCommand="{Binding ActionCommand}" />
 
+                <!-- Analysis -->
+
                 <dashboard:WorkflowCard
-                    Grid.Row="0"
-                    Grid.Column="4"
+                    Grid.Row="2"
+                    Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     DataContext="{Binding WorkflowCards[2]}"
@@ -98,14 +132,11 @@
                     HoverAction="{Binding HoverAction}"
                     ActionCommand="{Binding ActionCommand}" />
 
-     
-            <!-- ===================================================== -->
-            <!-- Row 2 -->
-            <!-- ===================================================== -->
+                <!-- Search -->
 
                 <dashboard:WorkflowCard
                     Grid.Row="2"
-                    Grid.Column="0"
+                    Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     DataContext="{Binding WorkflowCards[3]}"
@@ -122,9 +153,15 @@
                     HoverAction="{Binding HoverAction}"
                     ActionCommand="{Binding ActionCommand}" />
 
+                <!-- ===================================================== -->
+                <!-- Row 3 -->
+                <!-- ===================================================== -->
+
+                <!-- Improve -->
+
                 <dashboard:WorkflowCard
-                    Grid.Row="2"
-                    Grid.Column="2"
+                    Grid.Row="4"
+                    Grid.Column="0"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     DataContext="{Binding WorkflowCards[4]}"
@@ -141,9 +178,11 @@
                     HoverAction="{Binding HoverAction}"
                     ActionCommand="{Binding ActionCommand}" />
 
+                <!-- Structure -->
+
                 <dashboard:WorkflowCard
-                    Grid.Row="2"
-                    Grid.Column="4"
+                    Grid.Row="4"
+                    Grid.Column="2"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     DataContext="{Binding WorkflowCards[5]}"
@@ -160,15 +199,11 @@
                     HoverAction="{Binding HoverAction}"
                     ActionCommand="{Binding ActionCommand}" />
 
-
-
-            <!-- ===================================================== -->
-            <!-- Row 3 -->
-            <!-- ===================================================== -->
+                <!-- Synchronise -->
 
                 <dashboard:WorkflowCard
                     Grid.Row="4"
-                    Grid.Column="0"
+                    Grid.Column="4"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
                     DataContext="{Binding WorkflowCards[6]}"
@@ -185,20 +220,8 @@
                     HoverAction="{Binding HoverAction}"
                     ActionCommand="{Binding ActionCommand}" />
 
-                <dashboard:WorkflowGuidanceCard
-                    Grid.Row="4"
-                    Grid.Column="2"
-                    Grid.ColumnSpan="3"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    IsWelcome="{Binding Guidance.IsWelcome}"
-                    Title="{Binding Guidance.Title}"
-                    Description="{Binding Guidance.Description}"
-                    NextStep="{Binding Guidance.NextStep}"
-                    WhatHappens="{Binding Guidance.WhatHappens}"
-                    GoodToKnow="{Binding Guidance.GoodToKnow}" />
+            </Grid>
 
         </Grid>
-    </Grid>
 
 </UserControl>

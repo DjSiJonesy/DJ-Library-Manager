@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using DJLibraryManager.Core.Models;
 using DJLibraryManager.Core.Services;
 using DJLibraryManager.UI.Services;
+using DJLibraryManager.UI.ViewModels.Workspace;
 
 namespace DJLibraryManager.UI.ViewModels;
 
@@ -104,6 +105,14 @@ public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
 
     public int TotalMediaFiles => AudioFileCount + VideoFileCount;
 
+    public string FolderCountDisplay => FolderCount.ToString("N0");
+
+    public string AudioFileCountDisplay => AudioFileCount.ToString("N0");
+
+    public string VideoFileCountDisplay => VideoFileCount.ToString("N0");
+
+    public string TotalMediaFilesDisplay => TotalMediaFiles.ToString("N0");
+
     public long TotalSizeBytes => Libraries.Sum(x => x.TotalSizeBytes);
 
     public string TotalSize
@@ -139,9 +148,15 @@ public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
         OnPropertyChanged(nameof(FolderCount));
         OnPropertyChanged(nameof(AudioFileCount));
         OnPropertyChanged(nameof(VideoFileCount));
+
+        OnPropertyChanged(nameof(FolderCountDisplay));
+        OnPropertyChanged(nameof(AudioFileCountDisplay));
+        OnPropertyChanged(nameof(VideoFileCountDisplay));
+
         OnPropertyChanged(nameof(TotalMediaFiles));
         OnPropertyChanged(nameof(TotalSizeBytes));
         OnPropertyChanged(nameof(TotalSize));
+        OnPropertyChanged(nameof(TotalMediaFilesDisplay));
     }
 
     #endregion

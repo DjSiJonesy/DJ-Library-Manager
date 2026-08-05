@@ -1,0 +1,115 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Dashboard.WelcomeCard">
+
+    <Border
+        Classes="card-secondary"
+        Padding="18"
+        MinWidth="340"
+        Height="190">
+
+        <Grid
+            RowDefinitions="Auto,8,Auto,24,Auto,12,*">
+
+            <!-- ===================================================== -->
+            <!-- Logo -->
+            <!-- ===================================================== -->
+
+            <Image
+                Grid.Row="0"
+                Width="230"
+                Height="42"
+                HorizontalAlignment="Center"
+                Source="avares://DJLibraryManager.UI/Assets/Logos/DIASISS_Logo.png"/>
+
+            <!-- ===================================================== -->
+            <!-- Tag Line -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="2"
+                HorizontalAlignment="Center"
+                TextAlignment="Center"
+                Classes="section"
+                FontSize="14"
+                Text="Intelligent DJ Library Management"/>
+
+            <!-- ===================================================== -->
+            <!-- Workflow -->
+            <!-- ===================================================== -->
+
+            <WrapPanel
+                Grid.Row="4"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+
+                <TextBlock FontWeight="SemiBold"
+                           Text="Discovery"/>
+                <TextBlock Margin="5,0"
+                           Foreground="{DynamicResource Brush.Accent}"
+                           Text="→"/>
+
+                <TextBlock FontWeight="SemiBold"
+                           Text="Import"/>
+                <TextBlock Margin="5,0"
+                           Foreground="{DynamicResource Brush.Accent}"
+                           Text="→"/>
+
+                <TextBlock FontWeight="SemiBold"
+                           Text="Analysis"/>
+                <TextBlock Margin="5,0"
+                           Foreground="{DynamicResource Brush.Accent}"
+                           Text="→"/>
+
+                <TextBlock FontWeight="SemiBold"
+                           Text="Search"/>
+                <TextBlock Margin="5,0"
+                           Foreground="{DynamicResource Brush.Accent}"
+                           Text="→"/>
+
+                <TextBlock FontWeight="SemiBold"
+                           Text="Improve"/>
+                <TextBlock Margin="5,0"
+                           Foreground="{DynamicResource Brush.Accent}"
+                           Text="→"/>
+
+                <TextBlock FontWeight="SemiBold"
+                           Text="Structure"/>
+                <TextBlock Margin="5,0"
+                           Foreground="{DynamicResource Brush.Accent}"
+                           Text="→"/>
+
+                <TextBlock FontWeight="SemiBold"
+                           Text="Synchronise"/>
+
+            </WrapPanel>
+
+            <!-- ===================================================== -->
+            <!-- Footer -->
+            <!-- ===================================================== -->
+
+            <StackPanel
+                Grid.Row="6"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Spacing="6">
+
+                <TextBlock
+                    FontSize="15"
+                    Foreground="{DynamicResource Brush.Accent}"
+                    Text="▶"/>
+
+                <TextBlock
+                    FontStyle="Italic"
+                    Text="Select the Discovery workflow stage to begin."/>
+
+            </StackPanel>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

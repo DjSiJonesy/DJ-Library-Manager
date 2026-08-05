@@ -5,6 +5,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
     xmlns:rows="using:DJLibraryManager.UI.Controls.Rows"
+    xmlns:common="using:DJLibraryManager.UI.Controls.Common"
     x:Class="DJLibraryManager.UI.Views.MediaLocationWorkspaceView"
     x:DataType="vm:MediaLocationWorkspaceViewModel"
     mc:Ignorable="d">
@@ -67,10 +68,10 @@
         <Border
             Grid.Row="2"
             Classes="card-secondary"
-            Padding="20">
+            Padding="16">
 
             <Grid
-                ColumnDefinitions="*,240"
+                ColumnDefinitions="*,320"
                 RowDefinitions="Auto,20,Auto">
 
                 <!-- ================================================= -->
@@ -100,223 +101,69 @@
 
                 </Grid>
 
-                <!-- ================================================= -->
-<!-- Left Information -->
-<!-- ================================================= -->
+                    <!-- ================================================= -->
+                    <!-- Left Information -->
+                    <!-- ================================================= -->
 
-<Grid
-    Grid.Row="2"
-    Grid.Column="0"
-    ColumnDefinitions="120,*"
-    RowDefinitions="Auto,Auto,Auto,Auto"
-    RowSpacing="10">
-
-    <!-- ================================================= -->
-    <!-- Name -->
-    <!-- ================================================= -->
-
-    <Grid
-        Grid.Row="0"
-        Grid.Column="0"
-        ColumnDefinitions="20,*"
-        ColumnSpacing="6">
-
-        <TextBlock
-            VerticalAlignment="Center"
-            Text="🏷️"/>
-
-        <TextBlock
-            Grid.Column="1"
-            Classes="body"
-            VerticalAlignment="Center"
-            Text="Name"/>
-
-    </Grid>
-
-    <TextBlock
-        Grid.Row="0"
-        Grid.Column="1"
-        Classes="body"
-        VerticalAlignment="Center"
-        Text="{Binding Name}"/>
-
-    <!-- ================================================= -->
-    <!-- Path -->
-    <!-- ================================================= -->
-
-    <Grid
-        Grid.Row="1"
-        Grid.Column="0"
-        ColumnDefinitions="20,*"
-        ColumnSpacing="6">
-
-        <Button
-            Width="20"
-            Height="20"
-            Padding="0"
-            Background="Transparent"
-            BorderThickness="0"
-            Cursor="Hand"
-            VerticalAlignment="Center"
-            Command="{Binding OpenFolderCommand}">
-
-            <TextBlock
-                VerticalAlignment="Center"
-                Text="📁"/>
-
-        </Button>
-
-        <TextBlock
-            Grid.Column="1"
-            Classes="body"
-            VerticalAlignment="Center"
-            Text="Path"/>
-
-    </Grid>
-
-    <Button
-        Grid.Row="1"
-        Grid.Column="1"
-        Padding="0"
-        Background="Transparent"
-        BorderThickness="0"
-        Cursor="Hand"
-        HorizontalAlignment="Left"
-        HorizontalContentAlignment="Left"
-        Command="{Binding OpenFolderCommand}">
-
-        <TextBlock
-            Classes="body"
-            VerticalAlignment="Center"
-            Text="{Binding Path}"
-            TextTrimming="CharacterEllipsis"/>
-
-    </Button>
-
-    <!-- ================================================= -->
-    <!-- Drive -->
-    <!-- ================================================= -->
-
-    <Grid
-        Grid.Row="2"
-        Grid.Column="0"
-        ColumnDefinitions="20,*"
-        ColumnSpacing="6">
-
-        <TextBlock
-            VerticalAlignment="Center"
-            Text="💽"/>
-
-        <TextBlock
-            Grid.Column="1"
-            Classes="body"
-            VerticalAlignment="Center"
-            Text="Drive"/>
-
-    </Grid>
-
-    <TextBlock
-        Grid.Row="2"
-        Grid.Column="1"
-        Classes="body"
-        VerticalAlignment="Center"
-        Text="{Binding Drive}"/>
-
-    <!-- ================================================= -->
-    <!-- Status -->
-    <!-- ================================================= -->
-
-    <Grid
-        Grid.Row="3"
-        Grid.Column="0"
-        ColumnDefinitions="20,*"
-        ColumnSpacing="6">
-
-        <Ellipse
-            Width="10"
-            Height="10"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Fill="{Binding StatusBrush}"/>
-
-        <TextBlock
-            Grid.Column="1"
-            Classes="body"
-            VerticalAlignment="Center"
-            Text="Status"/>
-
-    </Grid>
-
-    <TextBlock
-        Grid.Row="3"
-        Grid.Column="1"
-        Classes="body"
-        VerticalAlignment="Center"
-        Text="{Binding Status}"/>
-
-</Grid>
-
-                <!-- ================================================= -->
-                <!-- Discovery Summary -->
-                <!-- ================================================= -->
-
-                <Grid
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Margin="30,0,0,0"
-                    ColumnDefinitions="110,*"
-                    RowDefinitions="Auto,Auto,Auto,Auto"
-                    RowSpacing="10">
-
-                    <TextBlock
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        Classes="body"
-                        Text="Folders"/>
-
-                    <TextBlock
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        Classes="body"
-                        Text="{Binding FolderCount}"/>
-
-                    <TextBlock
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Classes="body"
-                        Text="Audio Files"/>
-
-                    <TextBlock
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Classes="body"
-                        Text="{Binding AudioFileCount}"/>
-
-                    <TextBlock
+                    <StackPanel
                         Grid.Row="2"
                         Grid.Column="0"
-                        Classes="body"
-                        Text="Video Files"/>
+                        Spacing="8">
 
-                    <TextBlock
-                        Grid.Row="2"
-                        Grid.Column="1"
-                        Classes="body"
-                        Text="{Binding VideoFileCount}"/>
+                        <common:PropertyRow
+                            Icon="🏷️"
+                            Label="Name"
+                            Value="{Binding Name}" />
 
-                    <TextBlock
-                        Grid.Row="3"
-                        Grid.Column="0"
-                        Classes="body"
-                        Text="Total Size"/>
+                        <common:PropertyRow
+                            Icon="📁"
+                            Label="Path"
+                            Value="{Binding Path}" />
 
-                    <TextBlock
-                        Grid.Row="3"
-                        Grid.Column="1"
-                        Classes="body"
-                        Text="{Binding TotalSize}"/>
+                        <common:PropertyRow
+                            Icon="💽"
+                            Label="Drive"
+                            Value="{Binding Drive}" />
 
-                </Grid>
+                        <common:PropertyRow
+                            ShowIndicator="True"
+                            IndicatorBrush="{Binding StatusBrush}"
+                            Label="Status"
+                            Value="{Binding Status}" />
+
+                    </StackPanel>
+
+                        <!-- ================================================= -->
+                        <!-- Discovery Summary -->
+                        <!-- ================================================= -->
+
+                        <StackPanel
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="16,0,0,0"
+                            Spacing="8">
+
+                            <common:PropertyRow
+                                Icon="📁"
+                                Label="Folders"
+                                Value="{Binding FolderCountDisplay}" />
+
+                            <common:PropertyRow
+                                Icon="🎵"
+                                Label="Audio Files"
+                                Value="{Binding AudioFileCountDisplay}" />
+
+                            <common:PropertyRow
+                                Icon="🎬"
+                                Label="Video Files"
+                                Value="{Binding VideoFileCountDisplay}" />
+
+                            <common:PropertyRow
+                                Icon="💾"
+                                Label="Total Size"
+                                Value="{Binding TotalSize}" />
+
+                        </StackPanel>
 
             </Grid>
 

@@ -1,4 +1,4 @@
-﻿namespace DJLibraryManager.UI.ViewModels;
+﻿namespace DJLibraryManager.UI.ViewModels.Workspace;
 
 /// <summary>
 /// Base class for all workspaces hosted within the application's

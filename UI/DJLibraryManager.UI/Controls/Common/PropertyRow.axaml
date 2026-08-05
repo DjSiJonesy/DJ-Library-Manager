@@ -5,7 +5,7 @@
     x:Name="Root">
 
     <Grid
-        ColumnDefinitions="36,90,*"
+        ColumnDefinitions="36,110,*"
         ColumnSpacing="16"
         Margin="0,4">
 
@@ -21,8 +21,8 @@
             <!-- Status Indicator -->
 
             <Ellipse
-                Width="10"
-                Height="10"
+                Width="16"
+                Height="16"
                 Fill="{Binding IndicatorBrush, ElementName=Root}"
                 IsVisible="{Binding ShowIndicator, ElementName=Root}"
                 HorizontalAlignment="Center"
@@ -45,9 +45,9 @@
 
         <TextBlock
             Grid.Column="1"
-            Classes="body"
-            Text="{Binding Label, ElementName=Root}"
-            VerticalAlignment="Center"/>
+            Classes="subheading"
+            VerticalAlignment="Center"
+            Text="{Binding Label, ElementName=Root}"/>
 
         <!-- ===================================================== -->
         <!-- Value -->
@@ -55,9 +55,9 @@
 
         <TextBlock
             Grid.Column="2"
-            Classes="body"
-            Text="{Binding Value, ElementName=Root}"
             VerticalAlignment="Center"
+            FontSize="16"            
+            Text="{Binding Value, ElementName=Root}"
             TextWrapping="Wrap"/>
 
     </Grid>

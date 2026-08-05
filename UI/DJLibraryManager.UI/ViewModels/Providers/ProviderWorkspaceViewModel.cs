@@ -9,6 +9,7 @@ using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.Models.Operations;
 using DJLibraryManager.UI.Services;
+using DJLibraryManager.UI.ViewModels.Workspace;
 
 namespace DJLibraryManager.UI.ViewModels;
 

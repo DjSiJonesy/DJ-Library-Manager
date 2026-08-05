@@ -15,7 +15,7 @@ public static class WorkflowDefinitions
         Order = 1,
         Name = "Discovery",
         Icon = "🔍",
-        Description = "Discover installed DJ software and music locations."
+        Description = "Discover installed DJ software and your music collection."
     };
 
     public static readonly WorkflowDefinition Import = new()
@@ -69,7 +69,7 @@ public static class WorkflowDefinitions
         Order = 7,
         Name = "Synchronise",
         Icon = "💾",
-        Description = "Apply approved changes and synchronise them back to your DJ software."
+        Description = "Apply approved changes to your DJ software."
     };
 
     /// <summary>

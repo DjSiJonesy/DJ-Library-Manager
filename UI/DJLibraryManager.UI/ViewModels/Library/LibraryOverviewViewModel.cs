@@ -15,21 +15,27 @@ public partial class LibraryOverviewViewModel : ViewModelBase
     }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DriveCountDisplay))]
     private int driveCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FolderCountDisplay))]
     private int folderCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AudioFileCountDisplay))]
     private int audioFileCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(VideoFileCountDisplay))]
     private int videoFileCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MissingFileCountDisplay))]
     private int missingFileCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DuplicateFileCountDisplay))]
     private int duplicateFileCount;
 
     [ObservableProperty]
@@ -37,6 +43,22 @@ public partial class LibraryOverviewViewModel : ViewModelBase
 
     [ObservableProperty]
     private int healthScore = 100;
+
+    // ============================================================
+    // Display Properties
+    // ============================================================
+
+    public string DriveCountDisplay => DriveCount.ToString("N0");
+
+    public string FolderCountDisplay => FolderCount.ToString("N0");
+
+    public string AudioFileCountDisplay => AudioFileCount.ToString("N0");
+
+    public string VideoFileCountDisplay => VideoFileCount.ToString("N0");
+
+    public string MissingFileCountDisplay => MissingFileCount.ToString("N0");
+
+    public string DuplicateFileCountDisplay => DuplicateFileCount.ToString("N0");
 
     /// <summary>
     /// Refreshes the library overview.
