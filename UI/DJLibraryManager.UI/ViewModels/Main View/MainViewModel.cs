@@ -3,6 +3,8 @@ using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.ViewModels.Dashboard;
 using DJLibraryManager.UI.ViewModels.Workspace;
 using DJLibraryManager.UI.ViewModels.Library;
+using DJLibraryManager.UI.Models;
+using DJLibraryManager.UI.ViewModels.Import;
 using System;
 
 namespace DJLibraryManager.UI.ViewModels;
@@ -45,7 +47,7 @@ public partial class MainViewModel : ViewModelBase
         Dashboard.ProviderSelected += Dashboard_ProviderSelected;
         Dashboard.MediaLocationSelected += Dashboard_MediaLocationSelected;
         Dashboard.LibraryExplorerSelected += Dashboard_LibraryExplorerSelected;
-        Dashboard.DiscoverySelected += Dashboard_DiscoverySelected;
+        App.Services.ApplicationState.NavigateRequested += ApplicationState_NavigateRequested;
     }
 
     /// <summary>
@@ -101,19 +103,60 @@ public partial class MainViewModel : ViewModelBase
         StatusText = "Viewing Library Explorer";
     }
 
+
     /// <summary>
-    /// Opens the Discovery workflow.
+    /// Opens the Discovery workspace.
     /// </summary>
-    private void Dashboard_DiscoverySelected(
-        object? sender,
-        EventArgs e)
+    private void OpenDiscovery()
     {
-        var workspace = new DiscoveryWorkspaceViewModel(Dashboard);
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Discovery);
+    }
 
-        CurrentWorkspace = workspace;
-        Dashboard.CurrentWorkspace = workspace;
+    /// <summary>
+    /// Handles application-wide workspace navigation requests.
+    /// </summary>
+    private void ApplicationState_NavigateRequested(
+        object? sender,
+        WorkspaceType workspace)
+    {
+        switch (workspace)
+        {
+            case WorkspaceType.Dashboard:
+                {
+                    var dashboardWorkspace = new DashboardWorkspaceViewModel(Dashboard);
 
-        StatusText = "Viewing Discovery";
+                    CurrentWorkspace = dashboardWorkspace;
+
+                    Dashboard.CurrentWorkspace = dashboardWorkspace;
+                    Dashboard.DashboardWorkspace = dashboardWorkspace;
+
+                    StatusText = "Ready";
+                    break;
+                }
+
+            case WorkspaceType.Discovery:
+                {
+                    var discoveryWorkspace = new DiscoveryWorkspaceViewModel(Dashboard);
+
+                    CurrentWorkspace = discoveryWorkspace;
+                    Dashboard.CurrentWorkspace = discoveryWorkspace;
+
+                    StatusText = "Viewing Discovery";
+                    break;
+                }
+
+            case WorkspaceType.Import:
+                {
+                    var importWorkspace = new ImportWorkspaceViewModel(Dashboard);
+
+                    CurrentWorkspace = importWorkspace;
+                    Dashboard.CurrentWorkspace = importWorkspace;
+
+                    StatusText = "Viewing Import";
+                    break;
+                }
+        }
     }
 
     /// <summary>

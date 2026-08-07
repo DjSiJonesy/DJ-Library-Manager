@@ -13,6 +13,12 @@ public sealed class ApplicationServices
     public ProgressReporter ProgressReporter { get; }
 
     /// <summary>
+    /// Represents the current application state and
+    /// broadcasts application-wide change notifications.
+    /// </summary>
+    public ApplicationState ApplicationState { get; }
+
+    /// <summary>
     /// Stores and retrieves the application's media library.
     /// </summary>
     public LibraryRepository LibraryRepository { get; }
@@ -20,7 +26,7 @@ public sealed class ApplicationServices
     /// <summary>
     /// Stores the application's known media locations.
     /// </summary>
-    public MediaLocationRepository MediaLocationRepository { get; } = new();
+    public MediaLocationRepository MediaLocationRepository { get; }
 
     /// <summary>
     /// Stores the current media discovery session.
@@ -36,11 +42,13 @@ public sealed class ApplicationServices
     {
         ProgressReporter = new ProgressReporter();
 
+        ApplicationState = new ApplicationState();
+
         LibraryRepository = new LibraryRepository();
 
         MediaLocationRepository = new MediaLocationRepository();
 
-        DiscoveryRepository = new DiscoveryRepository();
+        DiscoveryRepository = new DiscoveryRepository(ApplicationState);
 
         LibraryImportService = new LibraryImportService(
             ProgressReporter,

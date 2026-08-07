@@ -22,14 +22,15 @@
         <!-- Previous -->
         <!-- ===================================================== -->
 
-        <Button
+       <Button
             Grid.Row="0"
             Grid.Column="1"
+            IsVisible="{Binding ShowPrevious, ElementName=Root}"
             Theme="{StaticResource DJLM.SecondaryButton}"
             Padding="12,4"
             MinHeight="32"
             Command="{Binding PreviousCommand, ElementName=Root}"
-            Content="{Binding PreviousText, ElementName=Root}" />
+            Content="{Binding PreviousText, ElementName=Root}" /> 
 
         <!-- ===================================================== -->
         <!-- Next -->
@@ -38,6 +39,7 @@
         <Button
             Grid.Row="0"
             Grid.Column="3"
+            IsVisible="{Binding ShowNext, ElementName=Root}"
             Theme="{StaticResource DJLM.PrimaryButton}"
             Padding="12,4"
             MinHeight="32"

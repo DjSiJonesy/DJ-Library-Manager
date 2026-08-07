@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using DJLibraryManager.UI.Models.Import;
 
 namespace DJLibraryManager.UI.ViewModels;
 
@@ -34,8 +35,7 @@ public partial class DashboardViewModel : ViewModelBase
 
     public event EventHandler<ProviderSelectedEventArgs>? ProviderSelected;
     public event EventHandler<MediaLocationSelectedEventArgs>? MediaLocationSelected;
-    public event EventHandler? LibraryExplorerSelected;
-    public event EventHandler? DiscoverySelected;
+    public event EventHandler? LibraryExplorerSelected;    
 
     public ObservableCollection<ProviderInfo> InstalledProviders { get; } = new();
 
@@ -60,6 +60,8 @@ public partial class DashboardViewModel : ViewModelBase
 
     public DashboardViewModel()
     {
+        App.Services.ApplicationState.DiscoveryChanged += OnDiscoveryChanged;
+
         _ = InitializeAsync();
     }
 
@@ -71,6 +73,13 @@ public partial class DashboardViewModel : ViewModelBase
 
         DashboardWorkspace?.UpdateDiscoveryStatus();
         DashboardWorkspace?.UpdateImportStatus();
+    }
+
+    private void OnDiscoveryChanged(object? sender, EventArgs e)
+    {
+        LibraryOverview.Refresh();
+
+        DashboardWorkspace?.UpdateDiscoveryStatus();
     }
 
     private async Task LoadProvidersAsync()
@@ -168,7 +177,45 @@ public partial class DashboardViewModel : ViewModelBase
     [RelayCommand]
     private void OpenDiscovery()
     {
-        DiscoverySelected?.Invoke(this, EventArgs.Empty);
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Discovery);
+    }
+
+    /// <summary>
+    /// Returns to the Dashboard workspace.
+    /// </summary>
+    [RelayCommand]
+    private void GoDashboard()
+    {
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Dashboard);
+    }
+
+    /// <summary>
+    /// Imports the selected provider's library.
+    /// </summary>
+    [RelayCommand]
+    private async Task ImportProviderAsync(ProviderInfo? provider)
+    {
+        if (provider is null)
+            return;
+
+        if (!provider.Installed)
+            return;
+
+        var result = await App.Services
+            .LibraryImportService
+            .ImportAsync(provider);
+
+        if (!result.Success)
+            return;
+
+        provider.ImportState = ImportState.Imported;
+        provider.TrackCount = result.TrackCount;
+        provider.PlaylistCount = result.PlaylistCount;
+        provider.LastImported = DateTime.Now;
+
+        DashboardWorkspace?.UpdateImportStatus();
     }
 
     private ProviderInfo CreateProvider(ProviderDiscoveryResult provider)

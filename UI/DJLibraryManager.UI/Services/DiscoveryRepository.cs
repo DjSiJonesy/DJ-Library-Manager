@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using DJLibraryManager.Core.Models;
+using DJLibraryManager.Core.Models.Discovery;
 
 namespace DJLibraryManager.Core.Services;
 
@@ -17,9 +18,13 @@ public sealed class DiscoveryRepository
         new(StringComparer.OrdinalIgnoreCase);
 
     private readonly DiscoveryPersistenceService _persistenceService;
+    private readonly ApplicationState _applicationState;
 
-    public DiscoveryRepository()
+    public DiscoveryRepository(ApplicationState applicationState)
     {
+        ArgumentNullException.ThrowIfNull(applicationState);
+
+        _applicationState = applicationState;
         _persistenceService = new DiscoveryPersistenceService();
 
         // Restore any previously saved discovery sessions.
@@ -45,9 +50,13 @@ public sealed class DiscoveryRepository
     /// </summary>
     public void Save(DiscoverySession session)
     {
+        ArgumentNullException.ThrowIfNull(session);
+
         _discoveries[session.MediaLocation.Path] = session;
 
         Persist();
+
+        _applicationState.NotifyDiscoveryChanged();
     }
 
     /// <summary>
@@ -55,6 +64,8 @@ public sealed class DiscoveryRepository
     /// </summary>
     public bool HasDiscovery(string mediaLocationPath)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mediaLocationPath);
+
         return _discoveries.ContainsKey(mediaLocationPath);
     }
 
@@ -64,9 +75,61 @@ public sealed class DiscoveryRepository
     /// </summary>
     public DiscoverySession? Get(string mediaLocationPath)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mediaLocationPath);
+
         return _discoveries.TryGetValue(mediaLocationPath, out var session)
             ? session
             : null;
+    }
+
+    /// <summary>
+    /// Returns a discovery summary for the specified media location.
+    /// If no discovery has been performed a default summary is returned.
+    /// </summary>
+    public MediaLocationDiscoverySummary GetSummary(MediaLocation mediaLocation)
+    {
+        ArgumentNullException.ThrowIfNull(mediaLocation);
+
+        if (!_discoveries.TryGetValue(mediaLocation.Path, out var session))
+        {
+            return new MediaLocationDiscoverySummary
+            {
+                MediaLocation = mediaLocation,
+                DiscoveryDate = null,
+                FolderCount = 0,
+                AudioFileCount = 0,
+                VideoFileCount = 0,
+                TotalSizeBytes = 0,
+                Status = mediaLocation.Exists
+                    ? "Ready to Discover"
+                    : "Location Not Available"
+            };
+        }
+
+        return new MediaLocationDiscoverySummary
+        {
+            MediaLocation = mediaLocation,
+            DiscoveryDate = session.DiscoveryDate,
+            FolderCount = session.Libraries.Count,
+            AudioFileCount = session.Libraries.Sum(x => x.AudioFileCount),
+            VideoFileCount = session.Libraries.Sum(x => x.VideoFileCount),
+            TotalSizeBytes = session.Libraries.Sum(x => x.TotalSizeBytes),
+            Status = "Discovery Complete"
+        };
+    }
+
+    /// <summary>
+    /// Returns discovery summaries for every known media location.
+    /// </summary>
+    public IReadOnlyCollection<MediaLocationDiscoverySummary> GetSummaries(
+        IEnumerable<MediaLocation> mediaLocations)
+    {
+        ArgumentNullException.ThrowIfNull(mediaLocations);
+
+        return mediaLocations
+            .Select(GetSummary)
+            .ToList()
+            .AsReadOnly();
     }
 
     /// <summary>
@@ -74,9 +137,13 @@ public sealed class DiscoveryRepository
     /// </summary>
     public void Remove(string mediaLocationPath)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(mediaLocationPath);
+
         if (_discoveries.Remove(mediaLocationPath))
         {
             Persist();
+
+            _applicationState.NotifyDiscoveryChanged();
         }
     }
 
@@ -88,6 +155,8 @@ public sealed class DiscoveryRepository
         _discoveries.Clear();
 
         Persist();
+
+        _applicationState.NotifyDiscoveryChanged();
     }
 
     /// <summary>

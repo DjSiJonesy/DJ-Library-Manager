@@ -62,8 +62,8 @@
                 <!-- Provider Logo -->
 
                 <Border
-                    Width="56"
-                    Height="56"
+                    Width="52"
+                    Height="52"
                     CornerRadius="8"
                     ClipToBounds="True"
                     BorderBrush="{DynamicResource Brush.Border}"

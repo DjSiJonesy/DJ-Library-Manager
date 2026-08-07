@@ -1,0 +1,132 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.DiscoveryProviderRow"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="10">
+
+        <Grid
+            ColumnDefinitions="60,85,*"
+            RowDefinitions="Auto,Auto,Auto"
+            ColumnSpacing="4"
+            RowSpacing="8">
+
+            <!-- ===================================================== -->
+            <!-- Provider Logo -->
+            <!-- ===================================================== -->
+
+            <Border
+                Grid.Row="0"
+                Grid.Column="0"
+                Grid.RowSpan="3"
+                Width="44"
+                Height="44"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                CornerRadius="4"
+                ClipToBounds="True">
+
+                <Image
+                    Stretch="UniformToFill"
+                    Source="{Binding Provider.ProviderLogo, ElementName=Root}" />
+
+            </Border>
+
+            <!-- ===================================================== -->
+            <!-- Provider -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="{Binding Provider.Name, ElementName=Root}" />
+
+            <StackPanel
+                Grid.Row="0"
+                Grid.Column="2"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Spacing="6">
+
+                <Ellipse
+                    Width="8"
+                    Height="8"
+                    Fill="{Binding Provider.StatusBrush, ElementName=Root}" />
+
+                <TextBlock
+                    FontSize="12"
+                    Text="{Binding Provider.Status, ElementName=Root}" />
+
+            </StackPanel>
+
+            <!-- ===================================================== -->
+            <!-- Version -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Version" />
+
+            <StackPanel
+                Grid.Row="1"
+                Grid.Column="2"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Spacing="6">
+
+                <Ellipse
+                    Width="8"
+                    Height="8"
+                    Fill="#f5f5f5" />
+
+                <TextBlock
+                    FontSize="12"
+                    Text="{Binding Provider.Version, ElementName=Root}" />
+
+            </StackPanel>
+
+            <!-- ===================================================== -->
+            <!-- Database -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Database" />
+
+            <StackPanel
+                Grid.Row="2"
+                Grid.Column="2"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Spacing="6">
+
+                <Ellipse
+                    Width="8"
+                    Height="8"
+                    Fill="{Binding Provider.DatabaseStatusBrush, ElementName=Root}" />
+
+                <TextBlock
+                    FontSize="12"
+                    Text="{Binding Provider.DatabaseStatus, ElementName=Root}" />
+
+            </StackPanel>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

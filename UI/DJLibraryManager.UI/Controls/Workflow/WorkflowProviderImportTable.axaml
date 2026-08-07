@@ -1,0 +1,285 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:DJLibraryManager.UI.Models"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowProviderImportTable"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="12">
+
+        <!--
+            One master grid owns the entire table.
+            Every row in the table uses these same columns.
+        -->
+
+        <Grid
+            ColumnDefinitions="150,150,90,110,170,*"
+            RowDefinitions="
+                Auto,
+                12,
+                Auto,
+                6,
+                Auto,
+                Auto,
+                Auto,
+                8,
+                Auto">
+
+            <!-- ===================================================== -->
+            <!-- Heading -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.ColumnSpan="6"
+                Classes="subheading"
+                Text="Providers"/>
+
+            <!-- ===================================================== -->
+            <!-- Column Headings -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Provider"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="1"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Status"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="2"
+                HorizontalAlignment="Right"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Tracks"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="3"
+                HorizontalAlignment="Right"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Playlists"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="4"
+                Margin="12,0,0,0"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Last Imported"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="5"
+                HorizontalAlignment="Center"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Action"/>
+
+            <!-- ===================================================== -->
+            <!-- Divider -->
+            <!-- ===================================================== -->
+
+            <Border
+                Grid.Row="4"
+                Grid.ColumnSpan="6"
+                Height="1"
+                Background="#303030"/>
+
+            <!-- ===================================================== -->
+            <!-- Provider Rows -->
+            <!-- ===================================================== -->
+
+            <ItemsControl
+                Grid.Row="5"
+                Grid.ColumnSpan="6"
+                ItemsSource="{Binding Providers, ElementName=Root}">
+
+                <ItemsControl.ItemsPanel>
+
+                    <ItemsPanelTemplate>
+                        <StackPanel/>
+                    </ItemsPanelTemplate>
+
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+
+                    <DataTemplate
+                        x:DataType="models:ProviderInfo">
+
+                        <Border
+                            Padding="0,6">
+
+                            <Grid
+                                ColumnDefinitions="150,150,90,110,170,*">
+
+                                <!-- ========================================= -->
+                                <!-- Provider -->
+                                <!-- ========================================= -->
+
+                                <StackPanel
+                                    Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    Spacing="8"
+                                    VerticalAlignment="Center">
+
+                                    <Border
+                                        Width="20"
+                                        Height="20"
+                                        CornerRadius="3"
+                                        ClipToBounds="True">
+
+                                        <Image
+                                            Width="20"
+                                            Height="20"
+                                            Stretch="Uniform"
+                                            Source="{Binding ProviderLogo}" />
+
+                                    </Border>
+
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontWeight="SemiBold"
+                                        Text="{Binding Name}" />
+
+                                </StackPanel>
+
+                                <!-- ========================================= -->
+                                <!-- Status -->
+                                <!-- ========================================= -->
+
+                                <StackPanel
+                                    Grid.Column="1"
+                                    Orientation="Horizontal"
+                                    Spacing="6"
+                                    VerticalAlignment="Center">
+
+                                    <Ellipse
+                                        Width="8"
+                                        Height="8"
+                                        Fill="{Binding LibraryStatusBrush}" />
+
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Text="{Binding LibraryStatus}" />
+
+                                </StackPanel>
+
+                                <!-- ========================================= -->
+                                <!-- Tracks -->
+                                <!-- ========================================= -->
+
+                                <TextBlock
+                                    Grid.Column="2"
+                                    FontSize="12"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding TrackCount, StringFormat={}{0:N0}}" />
+
+                                <!-- ========================================= -->
+                                <!-- Playlists -->
+                                <!-- ========================================= -->
+
+                                <TextBlock
+                                    Grid.Column="3"
+                                    FontSize="12"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding PlaylistCount, StringFormat={}{0:N0}}" />
+
+                                <!-- ========================================= -->
+                                <!-- Last Imported -->
+                                <!-- ========================================= -->
+
+                                <TextBlock
+                                    Grid.Column="4"
+                                    FontSize="12"
+                                    Margin="20,0,0,0"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding LastImported, TargetNullValue=Never}" />
+
+                                <!-- ========================================= -->
+                                <!-- Action -->
+                                <!-- ========================================= -->
+
+                                <Button
+                                    Grid.Column="5"
+                                    Width="90"
+                                    HorizontalAlignment="Center"
+                                    Theme="{StaticResource DJLM.SmallPrimaryButton}"
+                                    Command="{Binding ImportCommand, ElementName=Root}"
+                                    CommandParameter="{Binding}"
+                                    Content="{Binding ImportActionText}" />
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </ItemsControl.ItemTemplate>
+
+            </ItemsControl>
+
+            <!-- ===================================================== -->
+            <!-- Divider -->
+            <!-- ===================================================== -->
+
+            <Border
+                Grid.Row="6"
+                Grid.ColumnSpan="6"
+                Margin="0,6"
+                Height="1"
+                Background="#303030"/>
+
+            <!-- ===================================================== -->
+            <!-- Totals -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="8"
+                Grid.Column="0"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="{Binding ProviderCount,
+                               ElementName=Root,
+                               StringFormat={}Total Providers: {0}}"/>
+
+            <TextBlock
+                Grid.Row="8"
+                Grid.Column="2"
+                FontSize="12"
+                HorizontalAlignment="Right"
+                FontWeight="SemiBold"
+                Text="{Binding TotalTracks,
+                               ElementName=Root,
+                               StringFormat={}{0:N0}}"/>
+
+            <TextBlock
+                Grid.Row="8"
+                Grid.Column="3"
+                FontSize="12"
+                HorizontalAlignment="Right"
+                FontWeight="SemiBold"
+                Text="{Binding TotalPlaylists,
+                               ElementName=Root,
+                               StringFormat={}{0:N0}}"/>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

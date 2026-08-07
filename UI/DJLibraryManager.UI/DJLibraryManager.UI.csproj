@@ -40,14 +40,12 @@
 	  <Folder Include="Providers\Traktor\Models\" />
 	  <Folder Include="Providers\Traktor\Translators\" />
 	  <Folder Include="Providers\Traktor\Services\" />
-	  <Folder Include="ViewModels\Import\" />
 	  <Folder Include="ViewModels\Analysis\" />
-	  <Folder Include="ViewModels\Improve\" />
 	  <Folder Include="ViewModels\Controls\" />
+	  <Folder Include="ViewModels\Improve\" />
 	  <Folder Include="ViewModels\Synchronise\" />
 	  <Folder Include="ViewModels\Structure\" />
 	  <Folder Include="ViewModels\Search\" />
-	  <Folder Include="Views\Import\" />
 	  <Folder Include="Views\Analysis\" />
 	  <Folder Include="Views\Improve\" />
 	  <Folder Include="Views\Synchronise\" />
@@ -59,8 +57,14 @@
 	  <Compile Update="Controls\Panels\ProviderWorkspacePanel.axaml.cs">
 	    <DependentUpon>ProviderWorkspacePanel.axaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Controls\Workflow\WorkflowProviderRow.axaml.cs">
-	    <DependentUpon>WorkflowProviderRow.axaml</DependentUpon>
+	  <Compile Update="Controls\Workflow\WorkflowMediaLocationRow.axaml.cs">
+	    <DependentUpon>WorkflowMediaLocationRow.axaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Controls\Workflow\ImportProviderRow.axaml.cs">
+	    <DependentUpon>ImportProviderRow.axaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Controls\Workflow\DiscoveryProviderRow.axaml.cs">
+	    <DependentUpon>DiscoveryProviderRow.axaml</DependentUpon>
 	  </Compile>
 	  <Compile Update="Views\Provider\ProviderWorkspaceView.axaml.cs">
 	    <DependentUpon>ProviderWorkspaceView.axaml</DependentUpon>

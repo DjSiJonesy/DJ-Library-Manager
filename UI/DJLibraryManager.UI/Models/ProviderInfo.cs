@@ -108,6 +108,14 @@ public partial class ProviderInfo : ObservableObject
         };
 
     /// <summary>
+    /// Text displayed on the import action button.
+    /// </summary>
+    public string ImportActionText =>
+        ImportState == ImportState.Imported
+            ? "Re-import"
+            : "Import";
+
+    /// <summary>
     /// Colour used for the library status indicator.
     /// </summary>
     public IBrush LibraryStatusBrush =>
@@ -168,8 +176,37 @@ public partial class ProviderInfo : ObservableObject
         OnPropertyChanged(nameof(LibraryImported));
         OnPropertyChanged(nameof(LibraryStatus));
         OnPropertyChanged(nameof(LibraryStatusBrush));
+        OnPropertyChanged(nameof(ImportActionText));
         OnPropertyChanged(nameof(IsImporting));
         OnPropertyChanged(nameof(CanImport));
         OnPropertyChanged(nameof(CanAnalyse));
+    }
+
+    /// <summary>
+    /// Indicates whether the provider database was located.
+    /// </summary>
+    public bool DatabaseFound =>
+        !string.IsNullOrWhiteSpace(DatabasePath);
+
+    /// <summary>
+    /// Friendly database discovery status.
+    /// </summary>
+    public string DatabaseStatus =>
+        DatabaseFound
+            ? "Found"
+            : "Not Found";
+
+    /// <summary>
+    /// Colour used for the database discovery indicator.
+    /// </summary>
+    public IBrush DatabaseStatusBrush =>
+        DatabaseFound
+            ? Brushes.LimeGreen
+            : Brushes.Orange;
+    partial void OnDatabasePathChanged(string? value)
+    {
+        OnPropertyChanged(nameof(DatabaseFound));
+        OnPropertyChanged(nameof(DatabaseStatus));
+        OnPropertyChanged(nameof(DatabaseStatusBrush));
     }
 }

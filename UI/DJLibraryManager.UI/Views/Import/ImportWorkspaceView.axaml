@@ -1,0 +1,67 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels.Import"
+    xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
+    x:Class="DJLibraryManager.UI.Views.Import.ImportWorkspaceView"
+    x:DataType="vm:ImportWorkspaceViewModel">
+
+    <Grid RowDefinitions="Auto,20,*">
+
+        <!-- ===================================================== -->
+        <!-- Header -->
+        <!-- ===================================================== -->
+
+        <workflow:WorkflowHeader
+            Grid.Row="0"
+            Title="Import"
+            Description="Import DJ provider libraries and discovered media into the DIASISS master library."
+            PreviousText="← Discovery"
+            PreviousCommand="{Binding GoDiscoveryCommand}"
+            NextText="Analysis →"/>
+
+        <!-- ===================================================== -->
+        <!-- Content -->
+        <!-- ===================================================== -->
+
+        <Grid
+            Grid.Row="2"
+            RowDefinitions="Auto,20,*">
+
+            <!-- ===================================================== -->
+            <!-- Providers -->
+            <!-- ===================================================== -->
+
+            <workflow:WorkflowProviderImportTable
+                Grid.Row="0"
+
+                Providers="{Binding InstalledProviders}"
+
+                ProviderCount="{Binding ProviderCount}"
+                TotalTracks="{Binding TotalTracks}"
+                TotalPlaylists="{Binding TotalPlaylists}"
+
+                ImportCommand="{Binding ImportProviderCommand}" />
+
+            <!-- ===================================================== -->
+            <!-- Media Locations -->
+            <!-- ===================================================== -->
+
+            <workflow:WorkflowMediaLocationTable
+                Grid.Row="2"
+
+                MediaLocations="{Binding MediaLocations}"
+
+                TotalFolders="{Binding TotalFolders}"
+                TotalAudioFiles="{Binding TotalAudioFiles}"
+                TotalVideoFiles="{Binding TotalVideoFiles}"
+                TotalDrives="{Binding TotalDrives}"
+
+                ViewCommand="{Binding ViewMediaLocationCommand}"
+                DiscoverCommand="{Binding ImportMediaCommand}" />
+
+        </Grid>
+
+    </Grid>
+
+</UserControl>

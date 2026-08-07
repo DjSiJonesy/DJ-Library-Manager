@@ -35,19 +35,6 @@
                     VerticalAlignment="Center"
                     Text="{Binding ProviderName, StringFormat='{}{0} Provider'}"/>
 
-                <!-- Dashboard -->
-
-                <Button
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Theme="{StaticResource DJLM.SecondaryButton}"
-                    Padding="12,4"
-                    MinHeight="32"
-                    Command="{Binding GoBackCommand}"
-                    Content="← Dashboard"/>
-
                 <!-- Description -->
 
                 <TextBlock

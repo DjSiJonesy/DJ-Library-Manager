@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Input;
 using DJLibraryManager.Core.Models;
 using DJLibraryManager.Core.Services;
 using DJLibraryManager.UI.Services;
+using DJLibraryManager.UI.Services.Discovery;
 using DJLibraryManager.UI.ViewModels.Workspace;
 
 namespace DJLibraryManager.UI.ViewModels;
@@ -19,7 +20,7 @@ namespace DJLibraryManager.UI.ViewModels;
 /// </summary>
 public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
 {
-    private readonly MediaLibraryDiscoveryService _discoveryService = new();
+    private readonly MediaDiscoveryService _discoveryService = new();
     private readonly DiscoveryRepository _discoveryRepository = App.Services.DiscoveryRepository;
 
     public MediaLocation MediaLocation { get; }
@@ -191,16 +192,7 @@ public partial class MediaLocationWorkspaceViewModel : WorkspaceViewModel
 
         Status = "Discovering...";
 
-        var libraries = _discoveryService.DiscoverLibraries(MediaLocation);
-
-        var session = new DiscoverySession
-        {
-            MediaLocation = MediaLocation,
-            Libraries = libraries,
-            DiscoveryDate = DateTime.Now
-        };
-
-        _discoveryRepository.Save(session);
+        var session = _discoveryService.Discover(MediaLocation);
 
         foreach (var library in session.Libraries)
         {

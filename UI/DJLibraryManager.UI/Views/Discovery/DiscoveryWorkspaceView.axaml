@@ -3,22 +3,23 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
     xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
+    xmlns:models="using:DJLibraryManager.UI.Models"
     x:Class="DJLibraryManager.UI.Views.DiscoveryWorkspaceView"
     x:DataType="vm:DiscoveryWorkspaceViewModel">
 
-    <Grid
-        RowDefinitions="Auto,20,*">
+    <Grid RowDefinitions="Auto,20,*">
 
         <!-- ===================================================== -->
         <!-- Header -->
         <!-- ===================================================== -->
 
         <workflow:WorkflowHeader
-    Grid.Row="0"
-    Title="Discovery"
-    Description="Auto-Discovery of your installed DJ software and the route media locations on your computer."
-    PreviousText="← Dashboard"
-    NextText="Import →"/>
+            Grid.Row="0"
+            Title="Discovery"
+            Description="Auto-Discovery of your installed DJ software and the route media locations on your computer."
+            ShowPrevious="False"
+            NextText="Import →"
+            NextCommand="{Binding GoImportCommand}" />
 
         <!-- ===================================================== -->
         <!-- Content -->
@@ -26,65 +27,56 @@
 
         <Grid
             Grid.Row="2"
-            ColumnDefinitions="420,20,*">
+            ColumnDefinitions="260,20,*">
 
-    <!-- ===================================================== -->
-    <!-- Installed Providers -->
-    <!-- ===================================================== -->
+            <!-- ===================================================== -->
+            <!-- Installed Providers -->
+            <!-- ===================================================== -->
 
-    <ItemsControl
-    Grid.Column="0"
-    ItemsSource="{Binding InstalledProviders}">
+            <ItemsControl
+                Grid.Column="0"
+                ItemsSource="{Binding InstalledProviders}">
 
-    <ItemsControl.ItemsPanel>
-        <ItemsPanelTemplate>
-            <StackPanel Spacing="10"/>
-        </ItemsPanelTemplate>
-    </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemsPanel>
 
-    <ItemsControl.ItemTemplate>
+                    <ItemsPanelTemplate>
+                        <StackPanel Spacing="10"/>
+                    </ItemsPanelTemplate>
 
-        <DataTemplate>
+                </ItemsControl.ItemsPanel>
 
-            <workflow:WorkflowProviderRow
+                <ItemsControl.ItemTemplate>
 
-                ProviderLogo="{Binding ProviderLogo}"
-                ProviderName="{Binding Name}"
-                InstallationStatus="{Binding Status}"
-                InstallationBrush="{Binding StatusBrush}"
-                LibraryStatus="{Binding LibraryStatus}"
-                TrackCount="{Binding TrackCount}"
-                PlaylistCount="{Binding PlaylistCount}"
-                LastImported="{Binding LastImported}" />
+                    <DataTemplate
+                        x:DataType="models:ProviderInfo">
 
-        </DataTemplate>
+                        <workflow:DiscoveryProviderRow
+                            Provider="{Binding}" />
 
-    </ItemsControl.ItemTemplate>
+                    </DataTemplate>
 
-</ItemsControl>
+                </ItemsControl.ItemTemplate>
 
-    <!-- ===================================================== -->
-    <!-- Temporary Summary -->
-    <!-- ===================================================== -->
+            </ItemsControl>
 
-    <workflow:WorkflowSummaryCard
-        Grid.Column="2"
+            <!-- ===================================================== -->
+            <!-- Media Locations -->
+            <!-- ===================================================== -->
 
-        Title="Discovery Summary"
+            <workflow:WorkflowMediaLocationTable
+                Grid.Column="2"
 
-        Label1="Providers Found"
-        Value1="4"
+                MediaLocations="{Binding MediaLocations}"
 
-        Label2="Media Locations"
-        Value2="3"
+                TotalFolders="{Binding TotalFolders}"
+                TotalAudioFiles="{Binding TotalAudioFiles}"
+                TotalVideoFiles="{Binding TotalVideoFiles}"
+                TotalDrives="{Binding TotalDrives}"
 
-        Label3="Discovery Status"
-        Value3="Complete"
+                DiscoverCommand="{Binding DiscoverMediaCommand}"
+                ViewCommand="{Binding ViewMediaLocationCommand}" />
 
-        Label4="Last Discovery"
-        Value4="Today"/>
-
-</Grid>
+        </Grid>
 
     </Grid>
 

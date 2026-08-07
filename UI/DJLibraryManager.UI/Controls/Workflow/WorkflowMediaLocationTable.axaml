@@ -1,0 +1,176 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
+    xmlns:discovery="using:DJLibraryManager.Core.Models.Discovery"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowMediaLocationTable"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="12">
+
+        <Grid
+            RowDefinitions="Auto,12,Auto,8,*,8,Auto">
+
+            <!-- ===================================================== -->
+            <!-- Heading -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="0"
+                Classes="subheading"
+                Text="Media Locations"/>
+
+            <!-- ===================================================== -->
+            <!-- Column Headings -->
+            <!-- ===================================================== -->
+
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="60,*,95,95,95,220">
+
+                <TextBlock
+                    Grid.Column="0"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Drive"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="18,0,0,0"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Path"/>
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Center"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Folders"/>
+
+                <TextBlock
+                    Grid.Column="3"
+                    HorizontalAlignment="Center"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Audio"/>
+
+                <TextBlock
+                    Grid.Column="4"
+                    HorizontalAlignment="Center"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Video"/>
+
+                <TextBlock
+                    Grid.Column="5"
+                    Margin="12,0,0,0"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Status"/>
+
+            </Grid>
+
+            <!-- ===================================================== -->
+            <!-- Rows -->
+            <!-- ===================================================== -->
+
+            <Border
+                Grid.Row="4"
+                BorderBrush="#303030"
+                BorderThickness="0,1,0,1"
+                Padding="0,6">
+
+                <ItemsControl
+                    ItemsSource="{Binding MediaLocations, ElementName=Root}">
+
+                    <ItemsControl.ItemsPanel>
+
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+
+                        <DataTemplate
+                            x:DataType="discovery:MediaLocationDiscoverySummary">
+
+                            <workflow:WorkflowMediaLocationRow
+                                Drive="{Binding MediaLocation.Drive}"
+                                Path="{Binding MediaLocation.Path}"
+                                FolderCount="{Binding FolderCount}"
+                                AudioFileCount="{Binding AudioFileCount}"
+                                VideoFileCount="{Binding VideoFileCount}"
+                                Status="{Binding Status}"
+                                StatusBrush="{Binding StatusBrush}"
+                                CanDiscover="{Binding CanDiscover}"
+                                CanView="{Binding CanView}"
+
+                                DiscoverCommand="{Binding DiscoverCommand, ElementName=Root}"
+                                DiscoverCommandParameter="{Binding}"
+
+                                ViewCommand="{Binding ViewCommand, ElementName=Root}"
+                                ViewCommandParameter="{Binding}" />
+
+                        </DataTemplate>
+
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+            </Border>
+
+            <!-- ===================================================== -->
+            <!-- Totals -->
+            <!-- ===================================================== -->
+
+            <Grid
+                Grid.Row="6"
+                ColumnDefinitions="60,*,95,95,95,220">
+
+                <TextBlock
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Totals"/>
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Center"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding TotalFolders, ElementName=Root, StringFormat={}{0:N0}}"/>
+
+                <TextBlock
+                    Grid.Column="3"
+                    HorizontalAlignment="Center"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding TotalAudioFiles, ElementName=Root, StringFormat={}{0:N0}}"/>
+
+                <TextBlock
+                    Grid.Column="4"
+                    HorizontalAlignment="Center"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding TotalVideoFiles, ElementName=Root, StringFormat={}{0:N0}}"/>
+
+                <TextBlock
+                    Grid.Column="5"
+                    Margin="12,0,0,0"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding TotalDrives, ElementName=Root, StringFormat={}Drives: {0}}"/>
+
+            </Grid>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

@@ -110,7 +110,7 @@ public sealed class LibraryRepository
             library,
             JsonOptions);
     }
-
+    
     /// <summary>
     /// Loads the persisted media library.
     /// </summary>
@@ -128,7 +128,52 @@ public sealed class LibraryRepository
 
         return mediaItems ?? new List<DJLMMediaItem>();
     }
+    /// <summary>
+    /// Returns true if a media item already exists in the library.
+    /// </summary>
+    public async Task<bool> MediaExistsAsync(string filePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
+        var library = await LoadAsync();
+
+        return library.Any(item =>
+            item.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Returns the media item for the specified file path.
+    /// </summary>
+    public async Task<DJLMMediaItem?> GetMediaItemAsync(string filePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+
+        var library = await LoadAsync();
+
+        return library.FirstOrDefault(item =>
+            item.FilePath.Equals(filePath, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Adds a single media item to the library.
+    /// </summary>
+    public async Task AddMediaItemAsync(DJLMMediaItem mediaItem)
+    {
+        ArgumentNullException.ThrowIfNull(mediaItem);
+
+        Directory.CreateDirectory(_applicationFolder);
+
+        var library = (await LoadAsync()).ToList();
+
+        library.Add(mediaItem);
+
+        await using var stream = File.Create(_libraryFile);
+
+        await JsonSerializer.SerializeAsync(
+            stream,
+            library,
+            JsonOptions);
+    }
     /// <summary>
     /// Returns all media belonging to a specific provider.
     /// </summary>

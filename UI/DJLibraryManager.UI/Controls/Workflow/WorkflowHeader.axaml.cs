@@ -68,6 +68,32 @@ public partial class WorkflowHeader : UserControl
     }
 
     // ============================================================
+    // Visibility
+    // ============================================================
+
+    public static readonly StyledProperty<bool> ShowPreviousProperty =
+        AvaloniaProperty.Register<WorkflowHeader, bool>(
+            nameof(ShowPrevious),
+            true);
+
+    public bool ShowPrevious
+    {
+        get => GetValue(ShowPreviousProperty);
+        set => SetValue(ShowPreviousProperty, value);
+    }
+
+    public static readonly StyledProperty<bool> ShowNextProperty =
+        AvaloniaProperty.Register<WorkflowHeader, bool>(
+            nameof(ShowNext),
+            true);
+
+    public bool ShowNext
+    {
+        get => GetValue(ShowNextProperty);
+        set => SetValue(ShowNextProperty, value);
+    }
+
+    // ============================================================
     // Next
     // ============================================================
 

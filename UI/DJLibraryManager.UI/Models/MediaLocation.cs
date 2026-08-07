@@ -1,4 +1,5 @@
 ﻿using System;
+using Avalonia.Media;
 
 namespace DJLibraryManager.Core.Models;
 
@@ -43,6 +44,50 @@ public sealed class MediaLocation
     /// Date and time the location was discovered.
     /// </summary>
     public DateTime DiscoveredOn { get; set; } = DateTime.Now;
+
+    // ============================================================
+    // Discovery Statistics
+    // ============================================================
+
+    /// <summary>
+    /// Number of folders discovered beneath this location.
+    /// </summary>
+    public int FolderCount { get; set; }
+
+    /// <summary>
+    /// Number of audio files discovered.
+    /// </summary>
+    public int AudioFileCount { get; set; }
+
+    /// <summary>
+    /// Number of video files discovered.
+    /// </summary>
+    public int VideoFileCount { get; set; }
+
+    // ============================================================
+    // Discovery Status
+    // ============================================================
+
+    /// <summary>
+    /// Indicates whether this location has been scanned.
+    /// </summary>
+    public bool DiscoveryComplete { get; set; }
+
+    /// <summary>
+    /// Friendly discovery status.
+    /// </summary>
+    public string DiscoveryStatus =>
+        DiscoveryComplete
+            ? "Discovery Complete"
+            : "Ready to Discover";
+
+    /// <summary>
+    /// Colour used by the workflow status indicator.
+    /// </summary>
+    public IBrush DiscoveryStatusBrush =>
+        DiscoveryComplete
+            ? Brushes.LimeGreen
+            : Brushes.Orange;
 
     /// <summary>
     /// Returns the display name.
