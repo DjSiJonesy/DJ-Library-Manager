@@ -1,0 +1,154 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
+    xmlns:discovery="using:DJLibraryManager.Core.Models.Discovery"
+    xmlns:import="using:DJLibraryManager.UI.Models.Import"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowMediaLocationImportTable"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="12">
+
+        <Grid
+            RowDefinitions="Auto,12,Auto,8,*,8,Auto">
+
+            <!-- ===================================================== -->
+            <!-- Heading -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="0"
+                Classes="subheading"
+                Text="Media Locations"/>
+
+            <!-- ===================================================== -->
+            <!-- Column Headings -->
+            <!-- ===================================================== -->
+
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="220,170,100,100,180,*">
+
+                <TextBlock
+                    Grid.Column="0"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Text="Main Path"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Text="Status"/>
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Text="Tracks"/>
+
+                <TextBlock
+                    Grid.Column="3"
+                    HorizontalAlignment="Right"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Text="Folders"/>
+
+                <TextBlock
+                    Grid.Column="4"
+                    Margin="12,0,0,0"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Text="Last Imported"/>
+
+                <TextBlock
+                    Grid.Column="5"
+                    HorizontalAlignment="Center"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Text="Action"/>
+
+            </Grid>
+
+            <!-- ===================================================== -->
+            <!-- Media Location Rows -->
+            <!-- ===================================================== -->
+
+            <Border
+                Grid.Row="4"
+                BorderBrush="#303030"
+                BorderThickness="0,1,0,1"
+                Padding="0,6">
+
+                <ItemsControl
+                    ItemsSource="{Binding MediaLocations, ElementName=Root}">
+
+                    <ItemsControl.ItemsPanel>
+
+                        <ItemsPanelTemplate>
+                            <StackPanel/>
+                        </ItemsPanelTemplate>
+
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+
+                        <DataTemplate
+                            x:DataType="import:MediaLocationImportInfo">
+
+                            <workflow:WorkflowMediaLocationImportRow
+                                MediaLocation="{Binding}"
+                                ImportCommand="{Binding ImportCommand, ElementName=Root}" />
+
+                        </DataTemplate>
+
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+            </Border>
+
+            <!-- ===================================================== -->
+            <!-- Totals -->
+            <!-- ===================================================== -->
+
+            <Grid
+                Grid.Row="6"
+                ColumnDefinitions="220,170,100,100,180,*">
+
+                <TextBlock
+                    Grid.Column="0"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding LocationCount,
+                                   ElementName=Root,
+                                   StringFormat={}Total Locations: {0}}" />
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding TotalTracks,
+                                   ElementName=Root,
+                                   StringFormat={}{0:N0}}" />
+
+                <TextBlock
+                    Grid.Column="3"
+                    HorizontalAlignment="Right"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding TotalFolders,
+                                   ElementName=Root,
+                                   StringFormat={}{0:N0}}" />
+
+            </Grid>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

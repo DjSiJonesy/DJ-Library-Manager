@@ -182,6 +182,16 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Opens the Import workflow.
+    /// </summary>
+    [RelayCommand]
+    private void OpenImport()
+    {
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Import);
+    }
+
+    /// <summary>
     /// Returns to the Dashboard workspace.
     /// </summary>
     [RelayCommand]

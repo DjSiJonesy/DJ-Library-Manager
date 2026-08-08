@@ -4,12 +4,19 @@ using DJLibraryManager.Core.Models;
 using DJLibraryManager.Core.Models.Discovery;
 
 using DJLibraryManager.UI.Models;
+using DJLibraryManager.UI.Models.Import;
+using DJLibraryManager.UI.Models.Operations;
 using DJLibraryManager.UI.Services.Import;
 using DJLibraryManager.UI.ViewModels.Workspace;
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+
+using DJLibraryManager.UI.Models.Import;
+using System.Collections.ObjectModel;
 
 namespace DJLibraryManager.UI.ViewModels.Import;
 
@@ -26,12 +33,32 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
         _dashboard = dashboard;
 
         _mediaImportService = new MediaImportService(
+            App.Services.ProgressReporter,
             App.Services.LibraryRepository);
+
+        LoadMediaLocations();
+
+        App.Services.ProgressReporter.CurrentOperation.PropertyChanged +=
+            CurrentOperation_PropertyChanged;
     }
 
     /// <summary>
-    /// Installed providers only.
+    /// Current application operation.
     /// </summary>
+    public OperationProgress CurrentOperation =>
+        App.Services.ProgressReporter.CurrentOperation;
+
+    private void CurrentOperation_PropertyChanged(
+        object? sender,
+        PropertyChangedEventArgs e)
+    {
+        OnPropertyChanged(nameof(CurrentOperation));
+    }
+
+    // ============================================================
+    // Provider Import
+    // ============================================================
+
     public IEnumerable<ProviderInfo> InstalledProviders =>
         _dashboard.InstalledProviders
                   .Where(x => x.Installed);
@@ -40,29 +67,52 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
         InstalledProviders.Count();
 
     public int TotalTracks =>
-    InstalledProviders.Sum(provider => provider.TrackCount);
+        InstalledProviders.Sum(provider => provider.TrackCount);
 
     public int TotalPlaylists =>
         InstalledProviders.Sum(provider => provider.PlaylistCount);
 
-    /// <summary>
-    /// Discovery summaries for each media location.
-    /// </summary>
-    public IEnumerable<MediaLocationDiscoverySummary> MediaLocations =>
-        App.Services.DiscoveryRepository
-            .GetSummaries(_dashboard.MediaLocations);
+    // ============================================================
+    // Media Import
+    // ============================================================
+
+    public ObservableCollection<MediaLocationImportInfo> MediaLocations { get; }
+        = new();
+
+    private void LoadMediaLocations()
+    {
+        MediaLocations.Clear();
+
+        foreach (var summary in App.Services
+                     .DiscoveryRepository
+                     .GetSummaries(_dashboard.MediaLocations))
+        {
+            MediaLocations.Add(new MediaLocationImportInfo
+            {
+                Summary = summary
+            });
+        }
+
+        OnPropertyChanged(nameof(TotalDrives));
+        OnPropertyChanged(nameof(TotalFolders));
+        OnPropertyChanged(nameof(TotalAudioFiles));
+        OnPropertyChanged(nameof(TotalVideoFiles));
+    }
 
     public int TotalDrives =>
-        MediaLocations.Count();
+        MediaLocations.Count;
 
     public int TotalFolders =>
         MediaLocations.Sum(x => x.FolderCount);
 
+    /// <summary>
+    /// Total media files (Audio + Video).
+    /// </summary>
     public int TotalAudioFiles =>
-        MediaLocations.Sum(x => x.AudioFileCount);
+        MediaLocations.Sum(x => x.TotalMediaFiles);
 
     public int TotalVideoFiles =>
-        MediaLocations.Sum(x => x.VideoFileCount);
+        MediaLocations.Sum(x => x.Summary.VideoFileCount);
 
     /// <summary>
     /// Return to Discovery.
@@ -79,13 +129,13 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
     /// </summary>
     [RelayCommand]
     private void ViewMediaLocation(
-        MediaLocationDiscoverySummary summary)
+        MediaLocationImportInfo mediaLocation)
     {
-        if (summary is null)
+        if (mediaLocation is null)
             return;
 
         _dashboard.SelectMediaLocationCommand.Execute(
-            summary.MediaLocation);
+            mediaLocation.Summary.MediaLocation);
     }
 
     /// <summary>
@@ -98,11 +148,41 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
         if (provider is null)
             return;
 
-        await App.Services
-            .LibraryImportService
-            .ImportAsync(provider);
+        if (provider.IsImporting)
+            return;
 
-        OnPropertyChanged(nameof(InstalledProviders));
+        provider.ImportState = ImportState.Importing;
+
+        try
+        {
+            var result = await App.Services
+                .LibraryImportService
+                .ImportAsync(provider);
+
+            if (!result.Success)
+            {
+                provider.ImportState = ImportState.Failed;
+                return;
+            }
+
+            provider.LastImported = result.ImportedAt;
+            provider.TrackCount = result.TrackCount;
+            provider.PlaylistCount = result.PlaylistCount;
+            provider.ImportState = ImportState.Imported;
+
+            OnPropertyChanged(nameof(InstalledProviders));
+            OnPropertyChanged(nameof(ProviderCount));
+            OnPropertyChanged(nameof(TotalTracks));
+            OnPropertyChanged(nameof(TotalPlaylists));
+
+            _dashboard.LibraryOverview.Refresh();
+            _dashboard.DashboardWorkspace?.UpdateImportStatus();
+        }
+        catch
+        {
+            provider.ImportState = ImportState.Failed;
+            throw;
+        }
     }
 
     /// <summary>
@@ -110,13 +190,36 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
     /// </summary>
     [RelayCommand]
     private async Task ImportMedia(
-        MediaLocationDiscoverySummary summary)
+        MediaLocationImportInfo mediaLocation)
     {
-        if (summary is null)
+        if (mediaLocation is null)
             return;
 
-        await _mediaImportService.ImportAsync(
-            new[] { summary.MediaLocation });
+        if (mediaLocation.IsImporting)
+            return;
+
+        mediaLocation.ImportState = MediaImportState.Importing;
+
+        try
+        {
+            var result = await _mediaImportService.ImportAsync(
+                new[] { mediaLocation.Summary.MediaLocation });
+
+            mediaLocation.LastImported = System.DateTime.Now;
+            mediaLocation.ImportState = MediaImportState.Imported;
+
+            System.Diagnostics.Debug.WriteLine(
+                $"Media Import - " +
+                $"Scanned={result.Scanned}, " +
+                $"Imported={result.Imported}, " +
+                $"Skipped={result.Skipped}, " +
+                $"Failed={result.Failed}");
+        }
+        catch
+        {
+            mediaLocation.ImportState = MediaImportState.Failed;
+            throw;
+        }
 
         OnPropertyChanged(nameof(MediaLocations));
         OnPropertyChanged(nameof(TotalDrives));

@@ -127,19 +127,20 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
         {
             Definition = WorkflowDefinitions.Import,
             HoverAction = stage => Guidance.Show(stage),
+            ActionCommand = _dashboard.OpenImportCommand,
 
             Status = GetImportStatus(),
             StatusBrush = GetImportStatusBrush(),
 
             PrimaryStatisticTitle = "Tracks Imported",
             PrimaryStatisticValue = _dashboard.InstalledProviders
-                .Sum(x => x.TrackCount)
-                .ToString("N0"),
+        .Sum(x => x.TrackCount)
+        .ToString("N0"),
 
             SecondaryStatisticTitle = "Playlists",
             SecondaryStatisticValue = _dashboard.InstalledProviders
-                .Sum(x => x.PlaylistCount)
-                .ToString("N0")
+        .Sum(x => x.PlaylistCount)
+        .ToString("N0")
         });
 
         WorkflowCards.Add(new WorkflowCardViewModel

@@ -1,46 +1,27 @@
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowProviderImportRow"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowMediaLocationImportRow"
     x:Name="Root">
 
     <Border
-        Padding="8,6">
+        Padding="0"
+        Margin="0,2">
 
         <Grid
             ColumnDefinitions="220,170,100,100,180,*"
             VerticalAlignment="Center">
 
             <!-- ===================================================== -->
-            <!-- Provider -->
+            <!-- Main Path -->
             <!-- ===================================================== -->
 
-            <StackPanel
+            <TextBlock
                 Grid.Column="0"
-                Orientation="Horizontal"
                 VerticalAlignment="Center"
-                Spacing="8">
-
-                <Border
-                    Width="20"
-                    Height="20"
-                    CornerRadius="3"
-                    ClipToBounds="True">
-
-                    <Image
-                        Width="20"
-                        Height="20"
-                        Stretch="Uniform"
-                        Source="{Binding Provider.ProviderLogo, ElementName=Root}" />
-
-                </Border>
-
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontWeight="SemiBold"
-                    Text="{Binding Provider.Name, ElementName=Root}" />
-
-            </StackPanel>
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="{Binding MediaLocation.Path, ElementName=Root}" />
 
             <!-- ===================================================== -->
             <!-- Status -->
@@ -55,11 +36,13 @@
                 <Ellipse
                     Width="8"
                     Height="8"
-                    Fill="{Binding Provider.LibraryStatusBrush, ElementName=Root}" />
+                    Fill="{Binding MediaLocation.ImportStatusBrush,
+                                   ElementName=Root}" />
 
                 <TextBlock
-                    VerticalAlignment="Center"
-                    Text="{Binding Provider.LibraryStatus, ElementName=Root}" />
+                    FontSize="12"
+                    Text="{Binding MediaLocation.ImportStatus,
+                                   ElementName=Root}" />
 
             </StackPanel>
 
@@ -71,26 +54,36 @@
                 Grid.Column="2"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                Text="{Binding Provider.TrackCount, ElementName=Root, StringFormat={}{0:N0}}" />
+                FontSize="12"
+                Text="{Binding MediaLocation.TotalMediaFiles,
+                               ElementName=Root,
+                               StringFormat={}{0:N0}}" />
 
             <!-- ===================================================== -->
-            <!-- Playlists -->
+            <!-- Folders -->
             <!-- ===================================================== -->
 
             <TextBlock
                 Grid.Column="3"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                Text="{Binding Provider.PlaylistCount, ElementName=Root, StringFormat={}{0:N0}}" />
+                FontSize="12"
+                Text="{Binding MediaLocation.FolderCount,
+                               ElementName=Root,
+                               StringFormat={}{0:N0}}" />
 
             <!-- ===================================================== -->
-            <!-- Last Import -->
+            <!-- Last Imported -->
             <!-- ===================================================== -->
 
             <TextBlock
                 Grid.Column="4"
+                Margin="12,0,0,0"
                 VerticalAlignment="Center"
-                Text="{Binding Provider.LastImported, ElementName=Root, TargetNullValue=Never}" />
+                FontSize="12"
+                Text="{Binding MediaLocation.LastImported,
+                               ElementName=Root,
+                               TargetNullValue=Never}" />
 
             <!-- ===================================================== -->
             <!-- Action -->
@@ -102,8 +95,11 @@
                 HorizontalAlignment="Center"
                 Theme="{StaticResource DJLM.SmallPrimaryButton}"
                 Command="{Binding ImportCommand, ElementName=Root}"
-                CommandParameter="{Binding Provider, ElementName=Root}"
-                Content="{Binding Provider.ImportActionText, ElementName=Root}" />
+                CommandParameter="{Binding MediaLocation, ElementName=Root}"
+                IsEnabled="{Binding MediaLocation.CanImport,
+                                    ElementName=Root}"
+                Content="{Binding MediaLocation.ImportActionText,
+                                  ElementName=Root}" />
 
         </Grid>
 

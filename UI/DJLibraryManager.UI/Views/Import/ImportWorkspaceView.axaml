@@ -15,7 +15,7 @@
         <workflow:WorkflowHeader
             Grid.Row="0"
             Title="Import"
-            Description="Import DJ provider libraries and discovered media into the DIASISS master library."
+            Description="1st: Import DJ provider libraries. 2nd: Import the discovered media into the DIASISS master library."
             PreviousText="← Discovery"
             PreviousCommand="{Binding GoDiscoveryCommand}"
             NextText="Analysis →"/>
@@ -26,7 +26,7 @@
 
         <Grid
             Grid.Row="2"
-            RowDefinitions="Auto,20,*">
+            RowDefinitions="Auto,20,Auto,20,Auto">
 
             <!-- ===================================================== -->
             <!-- Providers -->
@@ -47,18 +47,58 @@
             <!-- Media Locations -->
             <!-- ===================================================== -->
 
-            <workflow:WorkflowMediaLocationTable
+            <workflow:WorkflowMediaLocationImportTable
                 Grid.Row="2"
 
                 MediaLocations="{Binding MediaLocations}"
 
+                LocationCount="{Binding TotalDrives}"
+                TotalTracks="{Binding TotalAudioFiles}"
                 TotalFolders="{Binding TotalFolders}"
-                TotalAudioFiles="{Binding TotalAudioFiles}"
-                TotalVideoFiles="{Binding TotalVideoFiles}"
-                TotalDrives="{Binding TotalDrives}"
 
-                ViewCommand="{Binding ViewMediaLocationCommand}"
-                DiscoverCommand="{Binding ImportMediaCommand}" />
+                ImportCommand="{Binding ImportMediaCommand}" />
+
+            <!-- ===================================================== -->
+            <!-- Current Import Operation -->
+            <!-- ===================================================== -->
+
+            <Border
+                Grid.Row="4"
+                Classes="card-secondary"
+                Padding="12"
+                IsVisible="{Binding CurrentOperation.IsRunning}">
+
+                <StackPanel Spacing="8">
+
+                    <TextBlock
+                        Classes="subheading"
+                        Text="Current Import"/>
+
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Text="{Binding CurrentOperation.OperationName}"/>
+
+                    <TextBlock
+                        Text="{Binding CurrentOperation.CurrentStage}"/>
+
+                    <ProgressBar
+                        Minimum="0"
+                        Maximum="100"
+                        Value="{Binding CurrentOperation.Percentage}"
+                        IsIndeterminate="{Binding CurrentOperation.IsIndeterminate}"/>
+
+                    <TextBlock
+                        FontSize="12"
+                        Text="{Binding CurrentOperation.CurrentItem}"/>
+
+                    <TextBlock
+                        FontSize="12"
+                        Text="{Binding CurrentOperation.CurrentValue,
+                                       StringFormat={}Processed: {0:N0}}"/>
+
+                </StackPanel>
+
+            </Border>
 
         </Grid>
 

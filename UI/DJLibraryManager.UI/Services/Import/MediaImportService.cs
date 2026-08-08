@@ -1,11 +1,13 @@
 ﻿using DJLibraryManager.Core.Models;
 using DJLibraryManager.Core.Services;
 
+using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.Models.Media;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DJLibraryManager.UI.Services.Import;
@@ -15,11 +17,16 @@ namespace DJLibraryManager.UI.Services.Import;
 /// </summary>
 public sealed class MediaImportService
 {
+    private readonly IProgressReporter _progressReporter;
     private readonly LibraryRepository _libraryRepository;
 
     public MediaImportService(
+        IProgressReporter progressReporter,
         LibraryRepository libraryRepository)
     {
+        _progressReporter = progressReporter
+            ?? throw new ArgumentNullException(nameof(progressReporter));
+
         _libraryRepository = libraryRepository
             ?? throw new ArgumentNullException(nameof(libraryRepository));
     }
@@ -27,56 +34,86 @@ public sealed class MediaImportService
     /// <summary>
     /// Imports all supported media from one or more media locations.
     /// </summary>
-    public async Task ImportAsync(
+    public async Task<MediaImportResult> ImportAsync(
         IEnumerable<MediaLocation> mediaLocations)
     {
         ArgumentNullException.ThrowIfNull(mediaLocations);
 
-        foreach (var location in mediaLocations)
+        var result = new MediaImportResult();
+
+        _progressReporter.BeginOperation("Import Media Library");
+
+        try
         {
-            if (!location.Exists)
-                continue;
-
-            if (!Directory.Exists(location.Path))
-                continue;
-
-            foreach (var file in EnumerateFiles(location))
+            foreach (var location in mediaLocations)
             {
-                //
-                // Ignore anything that DIASISS doesn't support.
-                //
-
-                if (!MediaFileTypes.IsSupported(file))
+                if (!location.Exists)
                     continue;
 
-                //
-                // Skip files already imported.
-                //
-
-                if (await _libraryRepository.MediaExistsAsync(file))
+                if (!Directory.Exists(location.Path))
                     continue;
 
+                _progressReporter.ReportStage(
+                    $"Scanning {location.Name}...");
+
                 //
-                // Create a basic library item.
-                // Metadata enrichment will happen later.
+                // Build the list once so we know the total.
                 //
 
-                var mediaItem = new DJLMMediaItem
+                var files = EnumerateFiles(location)
+                    .Where(MediaFileTypes.IsSupported)
+                    .ToList();
+
+                var totalFiles = files.Count;
+
+                foreach (var file in files)
                 {
-                    Provider = "Discovery",
-                    FilePath = file,
-                    FileSize = new FileInfo(file).Length,
-                    MediaType = MediaFileTypes.IsAudio(file)
-                        ? "Audio"
-                        : "Video"
-                };
+                    result.Scanned++;
 
-                //
-                // Save into the DIASISS library.
-                //
+                    _progressReporter.ReportProgress(
+                        result.Scanned,
+                        totalFiles,
+                        Path.GetFileName(file));
 
-                await _libraryRepository.AddMediaItemAsync(mediaItem);
+                    if (await _libraryRepository.MediaExistsAsync(file))
+                    {
+                        result.Skipped++;
+                        continue;
+                    }
+
+                    try
+                    {
+                        var mediaItem = new DJLMMediaItem
+                        {
+                            Provider = "Discovery",
+                            FilePath = file,
+                            FileSize = new FileInfo(file).Length,
+                            MediaType = MediaFileTypes.IsAudio(file)
+                                ? "Audio"
+                                : "Video"
+                        };
+
+                        await _libraryRepository.AddMediaItemAsync(mediaItem);
+
+                        result.Imported++;
+                    }
+                    catch
+                    {
+                        result.Failed++;
+                    }
+                }
             }
+
+            _progressReporter.ReportStage("Finalising...");
+
+            _progressReporter.Complete();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _progressReporter.Fail(ex.Message);
+            throw;
         }
     }
 
