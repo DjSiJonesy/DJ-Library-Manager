@@ -257,6 +257,49 @@ public sealed class LibraryRepository
     }
 
     /// <summary>
+    /// Loads the media library into a mutable list.
+    /// Intended for bulk import operations.
+    /// </summary>
+    public async Task<List<DJLMMediaItem>> LoadLibraryAsync()
+    {
+        return (await LoadAsync()).ToList();
+    }
+
+    /// <summary>
+    /// Saves the complete media library.
+    /// Intended for bulk import operations.
+    /// </summary>
+    public async Task SaveLibraryAsync(
+        IEnumerable<DJLMMediaItem> mediaItems)
+    {
+        ArgumentNullException.ThrowIfNull(mediaItems);
+
+        Directory.CreateDirectory(_applicationFolder);
+
+        await using var stream = File.Create(_libraryFile);
+
+        await JsonSerializer.SerializeAsync(
+            stream,
+            mediaItems,
+            JsonOptions);
+    }
+
+    /// <summary>
+    /// Builds a fast lookup index of every media file currently
+    /// stored in the DIASISS library.
+    /// </summary>
+    public async Task<HashSet<string>> BuildPathIndexAsync()
+    {
+        var library = await LoadAsync();
+
+        return library
+            .Where(item => !string.IsNullOrWhiteSpace(item.FilePath))
+            .Select(item => item.FilePath)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+
+    /// <summary>
     /// Removes all imported media.
     /// </summary>
     public Task ClearAsync()

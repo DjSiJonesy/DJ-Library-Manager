@@ -34,6 +34,11 @@ public sealed class ApplicationServices
     public DiscoveryRepository DiscoveryRepository { get; }
 
     /// <summary>
+    /// Stores Media Location import history.
+    /// </summary>
+    public MediaImportRepository MediaImportRepository { get; }
+
+    /// <summary>
     /// Coordinates provider library imports.
     /// </summary>
     public LibraryImportService LibraryImportService { get; }
@@ -49,6 +54,8 @@ public sealed class ApplicationServices
         MediaLocationRepository = new MediaLocationRepository();
 
         DiscoveryRepository = new DiscoveryRepository(ApplicationState);
+
+        MediaImportRepository = new MediaImportRepository();
 
         LibraryImportService = new LibraryImportService(
             ProgressReporter,

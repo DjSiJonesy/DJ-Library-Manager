@@ -43,6 +43,14 @@ public sealed class MediaImportService
 
         _progressReporter.BeginOperation("Import Media Library");
 
+        //
+        // Load the library once and build a fast lookup index.
+        //
+
+        var library = await _libraryRepository.LoadLibraryAsync();
+
+        var existingPaths = await _libraryRepository.BuildPathIndexAsync();
+
         try
         {
             foreach (var location in mediaLocations)
@@ -75,7 +83,7 @@ public sealed class MediaImportService
                         totalFiles,
                         Path.GetFileName(file));
 
-                    if (await _libraryRepository.MediaExistsAsync(file))
+                    if (existingPaths.Contains(file))
                     {
                         result.Skipped++;
                         continue;
@@ -93,7 +101,9 @@ public sealed class MediaImportService
                                 : "Video"
                         };
 
-                        await _libraryRepository.AddMediaItemAsync(mediaItem);
+                        library.Add(mediaItem);
+
+                        existingPaths.Add(file);
 
                         result.Imported++;
                     }
@@ -103,6 +113,12 @@ public sealed class MediaImportService
                     }
                 }
             }
+
+            //
+            // Save the library once.
+            //
+
+            await _libraryRepository.SaveLibraryAsync(library);
 
             _progressReporter.ReportStage("Finalising...");
 

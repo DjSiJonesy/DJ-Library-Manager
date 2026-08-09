@@ -28,6 +28,12 @@ public static class ApplicationPaths
     public static string MediaLibrary =>
         Path.Combine(Root, "MediaLibrary.json");
 
+    /// <summary> 
+    /// Imported Media.
+    /// </summary> 
+    public static string MediaImports =>
+        Path.Combine(Root,"MediaImports.json");
+
     /// <summary>
     /// Provider import metadata.
     /// </summary>

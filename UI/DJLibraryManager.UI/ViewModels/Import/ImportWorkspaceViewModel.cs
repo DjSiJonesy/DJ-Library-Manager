@@ -1,22 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-
 using DJLibraryManager.Core.Models;
 using DJLibraryManager.Core.Models.Discovery;
-
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.Models.Operations;
 using DJLibraryManager.UI.Services.Import;
 using DJLibraryManager.UI.ViewModels.Workspace;
-
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-
-using DJLibraryManager.UI.Models.Import;
-using System.Collections.ObjectModel;
 
 namespace DJLibraryManager.UI.ViewModels.Import;
 
@@ -87,10 +82,21 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
                      .DiscoveryRepository
                      .GetSummaries(_dashboard.MediaLocations))
         {
-            MediaLocations.Add(new MediaLocationImportInfo
+            var mediaLocation = new MediaLocationImportInfo
             {
                 Summary = summary
-            });
+            };
+
+            var record = App.Services.MediaImportRepository.Get(
+                summary.MediaLocation.Path);
+
+            if (record is not null)
+            {
+                mediaLocation.ImportState = record.ImportState;
+                mediaLocation.LastImported = record.LastImported;
+            }
+
+            MediaLocations.Add(mediaLocation);
         }
 
         OnPropertyChanged(nameof(TotalDrives));
@@ -205,8 +211,19 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
             var result = await _mediaImportService.ImportAsync(
                 new[] { mediaLocation.Summary.MediaLocation });
 
-            mediaLocation.LastImported = System.DateTime.Now;
+            mediaLocation.LastImported = DateTime.Now;
             mediaLocation.ImportState = MediaImportState.Imported;
+
+            App.Services.MediaImportRepository.Save(
+                new MediaImportRecord
+                {
+                    LocationPath = mediaLocation.Path,
+                    ImportState = mediaLocation.ImportState,
+                    LastImported = mediaLocation.LastImported,
+                    ImportedFiles = result.Imported,
+                    SkippedFiles = result.Skipped,
+                    FailedFiles = result.Failed
+                });
 
             System.Diagnostics.Debug.WriteLine(
                 $"Media Import - " +
