@@ -16,7 +16,7 @@ namespace DJLibraryManager.UI
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-#if DEBUG
+      #if DEBUG
                 .WithDeveloperTools()
 #endif
                 .WithInterFont()

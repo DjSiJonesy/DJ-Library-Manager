@@ -35,6 +35,12 @@ public static class ApplicationPaths
         Path.Combine(Root,"MediaImports.json");
 
     /// <summary>
+    /// Discovery validation history.
+    /// </summary>
+    public static string DiscoveryValidation =>
+        Path.Combine(Root, "DiscoveryValidation.json");
+
+    /// <summary>
     /// Provider import metadata.
     /// </summary>
     public static string LibraryMetadata =>

@@ -1,5 +1,5 @@
 ﻿using DJLibraryManager.Core.Services;
-using DJLibraryManager.UI.Models.Import;
+using DJLibraryManager.UI.Models.Discovery;
 
 using System;
 using System.Collections.Generic;
@@ -7,12 +7,12 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 
-namespace DJLibraryManager.UI.Services.Import;
+namespace DJLibraryManager.UI.Services.Discovery;
 
 /// <summary>
-/// Persists Media Location import history.
+/// Persists Discovery validation results.
 /// </summary>
-public sealed class MediaImportRepository
+public sealed class DiscoveryValidationRepository
 {
     private readonly string _filePath;
 
@@ -22,43 +22,33 @@ public sealed class MediaImportRepository
             WriteIndented = true
         };
 
-    public MediaImportRepository()
+    public DiscoveryValidationRepository()
     {
         ApplicationPaths.EnsureCreated();
 
-        _filePath = ApplicationPaths.MediaImports;
+        _filePath = ApplicationPaths.DiscoveryValidation;
     }
 
     /// <summary>
-    /// Returns every persisted import record.
+    /// Returns every persisted validation record.
     /// </summary>
-    public IReadOnlyList<MediaImportRecord> Load()
+    public IReadOnlyList<DiscoveryValidationRecord> Load()
     {
         if (!File.Exists(_filePath))
             return [];
 
         var json = File.ReadAllText(_filePath);
 
-        return JsonSerializer.Deserialize<List<MediaImportRecord>>(
+        return JsonSerializer.Deserialize<List<DiscoveryValidationRecord>>(
                    json,
                    _jsonOptions)
                ?? [];
     }
 
     /// <summary>
-    /// Returns all media import records.
-    /// This is used by the Library Statistics service to build
-    /// application-wide import statistics.
+    /// Returns the validation record for a media location.
     /// </summary>
-    public IReadOnlyList<MediaImportRecord> GetAll()
-    {
-        return Load();
-    }
-
-    /// <summary>
-    /// Returns the persisted record for a media location.
-    /// </summary>
-    public MediaImportRecord? Get(string locationPath)
+    public DiscoveryValidationRecord? Get(string locationPath)
     {
         return Load().FirstOrDefault(x =>
             x.LocationPath.Equals(
@@ -67,9 +57,9 @@ public sealed class MediaImportRepository
     }
 
     /// <summary>
-    /// Saves or updates a media location import record.
+    /// Saves or updates a validation record.
     /// </summary>
-    public void Save(MediaImportRecord record)
+    public void Save(DiscoveryValidationRecord record)
     {
         ArgumentNullException.ThrowIfNull(record);
 
@@ -86,6 +76,22 @@ public sealed class MediaImportRepository
         }
 
         records.Add(record);
+
+        var json = JsonSerializer.Serialize(
+            records,
+            _jsonOptions);
+
+        File.WriteAllText(
+            _filePath,
+            json);
+    }
+
+    /// <summary>
+    /// Replaces every validation record.
+    /// </summary>
+    public void SaveAll(IEnumerable<DiscoveryValidationRecord> records)
+    {
+        ArgumentNullException.ThrowIfNull(records);
 
         var json = JsonSerializer.Serialize(
             records,

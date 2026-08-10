@@ -298,6 +298,25 @@ public sealed class LibraryRepository
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
+    /// <summary>
+    /// Returns the total number of media items currently stored
+    /// in the DIASISS library.
+    /// </summary>
+    public async Task<int> GetTrackCountAsync()
+    {
+        return (await LoadAsync()).Count;
+    }
+
+    /// <summary>
+    /// Returns the total number of playlists imported from
+    /// all provider libraries.
+    /// </summary>
+    public async Task<int> GetPlaylistCountAsync()
+    {
+        var metadata = await LoadProviderMetadataAsync();
+
+        return metadata.Sum(x => x.PlaylistCount);
+    }
 
     /// <summary>
     /// Removes all imported media.

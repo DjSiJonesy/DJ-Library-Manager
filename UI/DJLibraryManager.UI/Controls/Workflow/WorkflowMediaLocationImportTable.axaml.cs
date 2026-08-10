@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
 using System.Windows.Input;
 
 using Avalonia;
@@ -58,17 +58,45 @@ public partial class WorkflowMediaLocationImportTable : UserControl
     }
 
     // ============================================================
-    // Total Folders
+    // Total Existing
     // ============================================================
 
-    public static readonly StyledProperty<int> TotalFoldersProperty =
+    public static readonly StyledProperty<int> TotalExistingProperty =
         AvaloniaProperty.Register<WorkflowMediaLocationImportTable, int>(
-            nameof(TotalFolders));
+            nameof(TotalExisting));
 
-    public int TotalFolders
+    public int TotalExisting
     {
-        get => GetValue(TotalFoldersProperty);
-        set => SetValue(TotalFoldersProperty, value);
+        get => GetValue(TotalExistingProperty);
+        set => SetValue(TotalExistingProperty, value);
+    }
+
+    // ============================================================
+    // Total Imported
+    // ============================================================
+
+    public static readonly StyledProperty<int> TotalImportedProperty =
+        AvaloniaProperty.Register<WorkflowMediaLocationImportTable, int>(
+            nameof(TotalImported));
+
+    public int TotalImported
+    {
+        get => GetValue(TotalImportedProperty);
+        set => SetValue(TotalImportedProperty, value);
+    }
+
+    // ============================================================
+    // Total Failed
+    // ============================================================
+
+    public static readonly StyledProperty<int> TotalFailedProperty =
+        AvaloniaProperty.Register<WorkflowMediaLocationImportTable, int>(
+            nameof(TotalFailed));
+
+    public int TotalFailed
+    {
+        get => GetValue(TotalFailedProperty);
+        set => SetValue(TotalFailedProperty, value);
     }
 
     // ============================================================

@@ -2,6 +2,8 @@
 
 using DJLibraryManager.UI.Providers.VirtualDJ.Services;
 using DJLibraryManager.UI.Services.Import;
+using DJLibraryManager.Core.Services.Library;
+using DJLibraryManager.UI.Services.Discovery;
 
 namespace DJLibraryManager.UI.Services;
 
@@ -24,6 +26,11 @@ public sealed class ApplicationServices
     public LibraryRepository LibraryRepository { get; }
 
     /// <summary>
+    /// Provides consolidated statistics for the DIASISS Library.
+    /// </summary>
+    public LibraryStatisticsService LibraryStatisticsService { get; }
+
+    /// <summary>
     /// Stores the application's known media locations.
     /// </summary>
     public MediaLocationRepository MediaLocationRepository { get; }
@@ -32,6 +39,16 @@ public sealed class ApplicationServices
     /// Stores the current media discovery session.
     /// </summary>
     public DiscoveryRepository DiscoveryRepository { get; }
+
+    /// <summary>
+    /// Stores Discovery validation history.
+    /// </summary>
+    public DiscoveryValidationRepository DiscoveryValidationRepository { get; }
+
+    /// <summary>
+    /// Coordinates Discovery validation operations.
+    /// </summary>
+    public DiscoveryValidationWorkflowService DiscoveryValidationWorkflowService { get; }
 
     /// <summary>
     /// Stores Media Location import history.
@@ -55,13 +72,16 @@ public sealed class ApplicationServices
 
         DiscoveryRepository = new DiscoveryRepository(ApplicationState);
 
+        DiscoveryValidationRepository = new DiscoveryValidationRepository();
+
+        DiscoveryValidationWorkflowService = new DiscoveryValidationWorkflowService(DiscoveryValidationRepository);
+
         MediaImportRepository = new MediaImportRepository();
 
-        LibraryImportService = new LibraryImportService(
-            ProgressReporter,
-            LibraryRepository);
+        LibraryStatisticsService = new LibraryStatisticsService(LibraryRepository, MediaImportRepository);
 
-        LibraryImportService.Register(
-            new VirtualDJImporter(ProgressReporter));
+        LibraryImportService = new LibraryImportService(ProgressReporter, LibraryRepository);
+
+        LibraryImportService.Register(new VirtualDJImporter(ProgressReporter));
     }
 }

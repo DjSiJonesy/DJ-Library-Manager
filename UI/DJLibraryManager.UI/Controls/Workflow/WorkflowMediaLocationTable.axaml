@@ -2,7 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
-    xmlns:discovery="using:DJLibraryManager.Core.Models.Discovery"
+    xmlns:discovery="using:DJLibraryManager.UI.Models.Discovery"
     x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowMediaLocationTable"
     x:Name="Root">
 
@@ -97,11 +97,11 @@
                     <ItemsControl.ItemTemplate>
 
                         <DataTemplate
-                            x:DataType="discovery:MediaLocationDiscoverySummary">
+                            x:DataType="discovery:MediaLocationDiscoveryInfo">
 
                             <workflow:WorkflowMediaLocationRow
-                                Drive="{Binding MediaLocation.Drive}"
-                                Path="{Binding MediaLocation.Path}"
+                                Drive="{Binding Summary.MediaLocation.Drive}"
+                                Path="{Binding Summary.MediaLocation.Path}"
                                 FolderCount="{Binding FolderCount}"
                                 AudioFileCount="{Binding AudioFileCount}"
                                 VideoFileCount="{Binding VideoFileCount}"

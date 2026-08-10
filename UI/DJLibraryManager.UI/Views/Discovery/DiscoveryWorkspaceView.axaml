@@ -9,15 +9,17 @@
 
     <Grid RowDefinitions="Auto,20,*">
 
-        <!-- ===================================================== -->
-        <!-- Header -->
-        <!-- ===================================================== -->
-
         <workflow:WorkflowHeader
             Grid.Row="0"
             Title="Discovery"
             Description="Auto-Discovery of your installed DJ software and the route media locations on your computer."
+
             ShowPrevious="False"
+
+            ShowSecondary="True"
+            SecondaryText="↻ Re-Scan"
+            SecondaryCommand="{Binding ValidateDiscoveryCommand}"
+
             NextText="Import →"
             NextCommand="{Binding GoImportCommand}" />
 

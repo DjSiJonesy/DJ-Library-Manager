@@ -40,7 +40,7 @@
                 ProviderCount="{Binding ProviderCount}"
                 TotalTracks="{Binding TotalTracks}"
                 TotalPlaylists="{Binding TotalPlaylists}"
-
+                
                 ImportCommand="{Binding ImportProviderCommand}" />
 
             <!-- ===================================================== -->
@@ -54,7 +54,9 @@
 
                 LocationCount="{Binding TotalDrives}"
                 TotalTracks="{Binding TotalAudioFiles}"
-                TotalFolders="{Binding TotalFolders}"
+                TotalExisting="{Binding TotalExisting}"
+                TotalImported="{Binding TotalImported}"
+                TotalFailed="{Binding TotalFailed}"
 
                 ImportCommand="{Binding ImportMediaCommand}" />
 

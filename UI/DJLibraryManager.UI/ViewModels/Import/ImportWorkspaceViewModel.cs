@@ -92,15 +92,33 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
 
             if (record is not null)
             {
-                mediaLocation.ImportState = record.ImportState;
+                // Populate all comparison values FIRST
                 mediaLocation.LastImported = record.LastImported;
+                mediaLocation.LastDiscoveryDate = record.DiscoveryDate;
+                mediaLocation.ImportedTotalFiles = record.TotalFiles;
+
+                // Import statistics
+                mediaLocation.ImportedFiles = record.ImportedFiles;
+                mediaLocation.SkippedFiles = record.SkippedFiles;
+                mediaLocation.FailedFiles = record.FailedFiles;
+
+                // Set ImportState LAST so HasChanges evaluates correctly
+                mediaLocation.ImportState = record.ImportState;
             }
 
             MediaLocations.Add(mediaLocation);
         }
 
+        OnPropertyChanged(nameof(MediaLocations));
+
         OnPropertyChanged(nameof(TotalDrives));
         OnPropertyChanged(nameof(TotalFolders));
+
+        OnPropertyChanged(nameof(TotalDiscovered));
+        OnPropertyChanged(nameof(TotalExisting));
+        OnPropertyChanged(nameof(TotalImported));
+        OnPropertyChanged(nameof(TotalFailed));
+
         OnPropertyChanged(nameof(TotalAudioFiles));
         OnPropertyChanged(nameof(TotalVideoFiles));
     }
@@ -109,7 +127,31 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
         MediaLocations.Count;
 
     public int TotalFolders =>
-        MediaLocations.Sum(x => x.FolderCount);
+    MediaLocations.Sum(x => x.FolderCount);
+
+    /// <summary>
+    /// Total media files currently discovered.
+    /// </summary>
+    public int TotalDiscovered =>
+        MediaLocations.Sum(x => x.DiscoveredFiles);
+
+    /// <summary>
+    /// Total files already present in the DIASISS Library.
+    /// </summary>
+    public int TotalExisting =>
+        MediaLocations.Sum(x => x.AlreadyInLibrary);
+
+    /// <summary>
+    /// Total files imported.
+    /// </summary>
+    public int TotalImported =>
+        MediaLocations.Sum(x => x.ImportedFiles);
+
+    /// <summary>
+    /// Total files that failed to import.
+    /// </summary>
+    public int TotalFailed =>
+        MediaLocations.Sum(x => x.FailedFiles);
 
     /// <summary>
     /// Total media files (Audio + Video).
@@ -182,7 +224,7 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
             OnPropertyChanged(nameof(TotalPlaylists));
 
             _dashboard.LibraryOverview.Refresh();
-            _dashboard.DashboardWorkspace?.UpdateImportStatus();
+            _ = _dashboard.DashboardWorkspace?.UpdateImportStatus();
         }
         catch
         {
@@ -212,14 +254,32 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
                 new[] { mediaLocation.Summary.MediaLocation });
 
             mediaLocation.LastImported = DateTime.Now;
+
+            mediaLocation.LastDiscoveryDate = mediaLocation.Summary.DiscoveryDate;
+            mediaLocation.ImportedTotalFiles = mediaLocation.Summary.TotalMediaFiles;
+            mediaLocation.ImportedFiles = result.Imported;
+            mediaLocation.SkippedFiles = result.Skipped;
+            mediaLocation.FailedFiles = result.Failed;
+
             mediaLocation.ImportState = MediaImportState.Imported;
 
             App.Services.MediaImportRepository.Save(
                 new MediaImportRecord
                 {
                     LocationPath = mediaLocation.Path,
+
                     ImportState = mediaLocation.ImportState,
+
                     LastImported = mediaLocation.LastImported,
+
+                    // Informational only
+                    DiscoveryDate = mediaLocation.Summary.DiscoveryDate,
+
+                    // Discovery snapshot
+                    FolderCount = mediaLocation.Summary.FolderCount,
+                    AudioFileCount = mediaLocation.Summary.AudioFileCount,
+                    VideoFileCount = mediaLocation.Summary.VideoFileCount,
+
                     ImportedFiles = result.Imported,
                     SkippedFiles = result.Skipped,
                     FailedFiles = result.Failed

@@ -8,7 +8,7 @@
         Padding="8,6">
 
         <Grid
-            ColumnDefinitions="220,170,100,100,180,*"
+            ColumnDefinitions="170,150,90,90,90,90,180,*"
             VerticalAlignment="Center">
 
             <!-- ===================================================== -->
@@ -88,7 +88,7 @@
             <!-- ===================================================== -->
 
             <TextBlock
-                Grid.Column="4"
+                Grid.Column="6"
                 VerticalAlignment="Center"
                 Text="{Binding Provider.LastImported, ElementName=Root, TargetNullValue=Never}" />
 
@@ -97,7 +97,7 @@
             <!-- ===================================================== -->
 
             <Button
-                Grid.Column="5"
+                Grid.Column="7"
                 Width="90"
                 HorizontalAlignment="Center"
                 Theme="{StaticResource DJLM.SmallPrimaryButton}"

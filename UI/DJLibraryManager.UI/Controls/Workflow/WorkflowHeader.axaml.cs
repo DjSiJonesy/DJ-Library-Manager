@@ -94,6 +94,42 @@ public partial class WorkflowHeader : UserControl
     }
 
     // ============================================================
+    // Secondary
+    // ============================================================
+
+    public static readonly StyledProperty<bool> ShowSecondaryProperty =
+        AvaloniaProperty.Register<WorkflowHeader, bool>(
+            nameof(ShowSecondary),
+            false);
+
+    public bool ShowSecondary
+    {
+        get => GetValue(ShowSecondaryProperty);
+        set => SetValue(ShowSecondaryProperty, value);
+    }
+
+    public static readonly StyledProperty<string> SecondaryTextProperty =
+        AvaloniaProperty.Register<WorkflowHeader, string>(
+            nameof(SecondaryText),
+            string.Empty);
+
+    public string SecondaryText
+    {
+        get => GetValue(SecondaryTextProperty);
+        set => SetValue(SecondaryTextProperty, value);
+    }
+
+    public static readonly StyledProperty<ICommand?> SecondaryCommandProperty =
+        AvaloniaProperty.Register<WorkflowHeader, ICommand?>(
+            nameof(SecondaryCommand));
+
+    public ICommand? SecondaryCommand
+    {
+        get => GetValue(SecondaryCommandProperty);
+        set => SetValue(SecondaryCommandProperty, value);
+    }
+
+    // ============================================================
     // Next
     // ============================================================
 

@@ -25,6 +25,33 @@ public sealed class MediaImportRecord
     public DateTime? LastImported { get; set; }
 
     /// <summary>
+    /// Discovery date that this import was based on.
+    /// Informational only - not used for change detection.
+    /// </summary>
+    public DateTime? DiscoveryDate { get; set; }
+
+    /// <summary>
+    /// Number of folders discovered when this location was imported.
+    /// </summary>
+    public int FolderCount { get; set; }
+
+    /// <summary>
+    /// Number of audio files discovered when this location was imported.
+    /// </summary>
+    public int AudioFileCount { get; set; }
+
+    /// <summary>
+    /// Number of video files discovered when this location was imported.
+    /// </summary>
+    public int VideoFileCount { get; set; }
+
+    /// <summary>
+    /// Total media files discovered at the time of import.
+    /// </summary>
+    public int TotalFiles =>
+        AudioFileCount + VideoFileCount;
+
+    /// <summary>
     /// Number of files imported during the last successful import.
     /// </summary>
     public int ImportedFiles { get; set; }

@@ -5,8 +5,8 @@
     x:Name="Root">
 
     <Grid
-        RowDefinitions="Auto,6,Auto"
-        ColumnDefinitions="*,Auto,10,Auto">
+    RowDefinitions="Auto,6,Auto"
+    ColumnDefinitions="*,Auto,10,Auto,10,Auto">
 
         <!-- ===================================================== -->
         <!-- Title -->
@@ -29,8 +29,26 @@
             Theme="{StaticResource DJLM.SecondaryButton}"
             Padding="12,4"
             MinHeight="32"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
             Command="{Binding PreviousCommand, ElementName=Root}"
             Content="{Binding PreviousText, ElementName=Root}" /> 
+
+        <!-- ===================================================== -->
+        <!-- Secondary -->
+        <!-- ===================================================== -->
+
+        <Button
+            Grid.Row="0"
+            Grid.Column="3"
+            IsVisible="{Binding ShowSecondary, ElementName=Root}"
+            Theme="{StaticResource DJLM.SecondaryButton}"
+            Padding="12,4"
+            MinHeight="32"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
+            Command="{Binding SecondaryCommand, ElementName=Root}"
+            Content="{Binding SecondaryText, ElementName=Root}" />
 
         <!-- ===================================================== -->
         <!-- Next -->
@@ -38,11 +56,13 @@
 
         <Button
             Grid.Row="0"
-            Grid.Column="3"
+            Grid.Column="5"
             IsVisible="{Binding ShowNext, ElementName=Root}"
             Theme="{StaticResource DJLM.PrimaryButton}"
             Padding="12,4"
             MinHeight="32"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
             Command="{Binding NextCommand, ElementName=Root}"
             Content="{Binding NextText, ElementName=Root}" />
 
@@ -53,7 +73,7 @@
         <TextBlock
             Grid.Row="2"
             Grid.Column="0"
-            Grid.ColumnSpan="4"
+            Grid.ColumnSpan="6"
             Classes="caption"
             Text="{Binding Description, ElementName=Root}" />
 

@@ -4,7 +4,7 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 
-using DJLibraryManager.Core.Models.Discovery;
+using DJLibraryManager.UI.Models.Discovery;
 
 namespace DJLibraryManager.UI.Controls.Workflow;
 
@@ -19,11 +19,11 @@ public partial class WorkflowMediaLocationTable : UserControl
     // Media Locations
     // ============================================================
 
-    public static readonly StyledProperty<IEnumerable<MediaLocationDiscoverySummary>?> MediaLocationsProperty =
-        AvaloniaProperty.Register<WorkflowMediaLocationTable, IEnumerable<MediaLocationDiscoverySummary>?>(
+    public static readonly StyledProperty<IEnumerable<MediaLocationDiscoveryInfo>?> MediaLocationsProperty =
+        AvaloniaProperty.Register<WorkflowMediaLocationTable, IEnumerable<MediaLocationDiscoveryInfo>?>(
             nameof(MediaLocations));
 
-    public IEnumerable<MediaLocationDiscoverySummary>? MediaLocations
+    public IEnumerable<MediaLocationDiscoveryInfo>? MediaLocations
     {
         get => GetValue(MediaLocationsProperty);
         set => SetValue(MediaLocationsProperty, value);

@@ -84,10 +84,18 @@
                     Height="8"
                     Fill="{Binding StatusBrush, ElementName=Root}" />
 
-                <!-- Ready to Discover -->
+                <!-- Status text -->
+
+                <TextBlock
+                    FontSize="12"
+                    VerticalAlignment="Center"
+                    Text="{Binding Status, ElementName=Root}" />
+
+                <!-- Discover -->
 
                 <Button
                     Padding="0"
+                    Margin="8,0,0,0"
                     Background="Transparent"
                     BorderThickness="0"
                     Cursor="Hand"
@@ -97,23 +105,16 @@
 
                     <TextBlock
                         FontSize="12"
-                        Text="{Binding Status, ElementName=Root}"
+                        Text="Discover →"
                         TextDecorations="Underline"/>
 
                 </Button>
-
-                <!-- Discovery Complete -->
-
-                <TextBlock
-                    FontSize="12"
-                    VerticalAlignment="Center"
-                    Text="{Binding Status, ElementName=Root}"
-                    IsVisible="{Binding CanView, ElementName=Root}" />
 
                 <!-- View -->
 
                 <Button
                     Padding="0"
+                    Margin="8,0,0,0"
                     Background="Transparent"
                     BorderThickness="0"
                     Cursor="Hand"

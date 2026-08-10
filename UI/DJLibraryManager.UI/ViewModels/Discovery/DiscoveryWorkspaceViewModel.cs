@@ -1,13 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 
 using DJLibraryManager.Core.Models;
-using DJLibraryManager.Core.Models.Discovery;
 
 using DJLibraryManager.UI.Models;
+using DJLibraryManager.UI.Models.Discovery;
 using DJLibraryManager.UI.Services.Discovery;
 using DJLibraryManager.UI.ViewModels.Workspace;
 
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace DJLibraryManager.UI.ViewModels;
@@ -16,6 +17,7 @@ public partial class DiscoveryWorkspaceViewModel : WorkspaceViewModel
 {
     private readonly DashboardViewModel _dashboard;
     private readonly MediaDiscoveryService _mediaDiscoveryService = new();
+    private readonly DiscoveryValidationService _validationService = new();
 
     public override string Title => "Discovery";
 
@@ -23,6 +25,8 @@ public partial class DiscoveryWorkspaceViewModel : WorkspaceViewModel
         DashboardViewModel dashboard)
     {
         _dashboard = dashboard;
+
+        LoadMediaLocations();
     }
 
     /// <summary>
@@ -32,15 +36,60 @@ public partial class DiscoveryWorkspaceViewModel : WorkspaceViewModel
         _dashboard.InstalledProviders
                   .Where(provider => provider.Installed);
 
+    // ============================================================
+    // Media Discovery
+    // ============================================================
+
+    public ObservableCollection<MediaLocationDiscoveryInfo> MediaLocations { get; }
+        = new();
+
+    private void LoadMediaLocations()
+    {
+        MediaLocations.Clear();
+
+        foreach (var summary in App.Services
+                     .DiscoveryRepository
+                     .GetSummaries(_dashboard.MediaLocations))
+        {
+            var info = new MediaLocationDiscoveryInfo
+            {
+                Summary = summary
+            };
+
+            var session =
+                App.Services.DiscoveryRepository.Get(
+                    summary.MediaLocation.Path);
+
+            if (session is not null)
+            {
+                var validation =
+                    App.Services
+                        .DiscoveryValidationRepository
+                        .Get(session.MediaLocation.Path);
+
+                info.HasChanges =
+                    validation?.HasChanges ?? false;
+            }
+
+            MediaLocations.Add(info);
+        }
+
+        OnPropertyChanged(nameof(TotalDrives));
+        OnPropertyChanged(nameof(TotalFolders));
+        OnPropertyChanged(nameof(TotalAudioFiles));
+        OnPropertyChanged(nameof(TotalVideoFiles));
+    }
+
     /// <summary>
-    /// Discovery summaries for each media location.
+    /// Reloads the Discovery workspace from the cached repositories.
     /// </summary>
-    public IEnumerable<MediaLocationDiscoverySummary> MediaLocations =>
-        App.Services.DiscoveryRepository
-            .GetSummaries(_dashboard.MediaLocations);
+    public void Refresh()
+    {
+        LoadMediaLocations();
+    }
 
     public int TotalDrives =>
-        MediaLocations.Count();
+        MediaLocations.Count;
 
     public int TotalFolders =>
         MediaLocations.Sum(x => x.FolderCount);
@@ -51,17 +100,18 @@ public partial class DiscoveryWorkspaceViewModel : WorkspaceViewModel
     public int TotalVideoFiles =>
         MediaLocations.Sum(x => x.VideoFileCount);
 
-   
     /// <summary>
     /// Opens the selected media location.
     /// </summary>
     [RelayCommand]
-    private void ViewMediaLocation(MediaLocationDiscoverySummary summary)
+    private void ViewMediaLocation(
+        MediaLocationDiscoveryInfo mediaLocation)
     {
-        if (summary is null)
+        if (mediaLocation is null)
             return;
 
-        _dashboard.SelectMediaLocationCommand.Execute(summary.MediaLocation);
+        _dashboard.SelectMediaLocationCommand.Execute(
+            mediaLocation.Summary.MediaLocation);
     }
 
     /// <summary>
@@ -75,20 +125,37 @@ public partial class DiscoveryWorkspaceViewModel : WorkspaceViewModel
     }
 
     /// <summary>
+    /// Validates every discovered media location and updates
+    /// the cached Discovery validation results.
+    /// </summary>
+    [RelayCommand]
+    private void ValidateDiscovery()
+    {
+        App.Services
+            .DiscoveryValidationWorkflowService
+            .Validate(
+                App.Services
+                    .DiscoveryRepository
+                    .DiscoverySessions);
+
+        Refresh();
+    }
+
+    /// <summary>
     /// Discovers media beneath the selected media location.
     /// </summary>
     [RelayCommand]
-    private void DiscoverMedia(MediaLocationDiscoverySummary summary)
+    private void DiscoverMedia(
+        MediaLocationDiscoveryInfo mediaLocation)
     {
-        if (summary is null)
+        if (mediaLocation is null)
             return;
 
-        _mediaDiscoveryService.Discover(summary.MediaLocation);
+        _mediaDiscoveryService.Discover(
+            mediaLocation.Summary.MediaLocation);
 
-        OnPropertyChanged(nameof(MediaLocations));
-        OnPropertyChanged(nameof(TotalDrives));
-        OnPropertyChanged(nameof(TotalFolders));
-        OnPropertyChanged(nameof(TotalAudioFiles));
-        OnPropertyChanged(nameof(TotalVideoFiles));
+        // Refresh the collection so the updated summaries
+        // and change detection are reflected immediately.
+        LoadMediaLocations();
     }
 }

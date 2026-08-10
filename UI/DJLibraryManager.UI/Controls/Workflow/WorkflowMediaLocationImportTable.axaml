@@ -29,7 +29,7 @@
 
             <Grid
                 Grid.Row="2"
-                ColumnDefinitions="220,170,100,100,180,*">
+                ColumnDefinitions="170,150,90,90,90,90,180,*">
 
                 <TextBlock
                     Grid.Column="0"
@@ -48,24 +48,38 @@
                     HorizontalAlignment="Right"
                     FontSize="12"
                     FontWeight="SemiBold"
-                    Text="Tracks"/>
+                    Text="Discovered"/>
 
                 <TextBlock
                     Grid.Column="3"
                     HorizontalAlignment="Right"
                     FontSize="12"
                     FontWeight="SemiBold"
-                    Text="Folders"/>
+                    Text="Existing"/>
 
                 <TextBlock
                     Grid.Column="4"
+                    HorizontalAlignment="Right"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Text="Imported"/>
+
+                <TextBlock
+                    Grid.Column="5"
+                    HorizontalAlignment="Right"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Text="Failed"/>
+
+                <TextBlock
+                    Grid.Column="6"
                     Margin="12,0,0,0"
                     FontSize="12"
                     FontWeight="SemiBold"
                     Text="Last Imported"/>
 
                 <TextBlock
-                    Grid.Column="5"
+                    Grid.Column="7"
                     HorizontalAlignment="Center"
                     FontSize="12"
                     FontWeight="SemiBold"
@@ -117,7 +131,7 @@
 
             <Grid
                 Grid.Row="6"
-                ColumnDefinitions="220,170,100,100,180,*">
+                ColumnDefinitions="170,150,90,90,90,90,180,*">
 
                 <TextBlock
                     Grid.Column="0"
@@ -141,7 +155,25 @@
                     HorizontalAlignment="Right"
                     FontWeight="SemiBold"
                     FontSize="12"
-                    Text="{Binding TotalFolders,
+                    Text="{Binding TotalExisting,
+                                   ElementName=Root,
+                                   StringFormat={}{0:N0}}" />
+
+                <TextBlock
+                    Grid.Column="4"
+                    HorizontalAlignment="Right"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding TotalImported,
+                                   ElementName=Root,
+                                   StringFormat={}{0:N0}}" />
+
+                <TextBlock
+                    Grid.Column="5"
+                    HorizontalAlignment="Right"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="{Binding TotalFailed,
                                    ElementName=Root,
                                    StringFormat={}{0:N0}}" />
 
