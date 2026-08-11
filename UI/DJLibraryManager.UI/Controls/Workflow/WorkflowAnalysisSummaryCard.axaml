@@ -9,7 +9,21 @@
         Padding="12">
 
         <Grid
-            RowDefinitions="Auto,12,Auto,Auto,Auto,Auto">
+            RowDefinitions="
+                Auto,
+                12,
+                Auto,
+                Auto,
+                Auto,
+                Auto,
+                16,
+                Auto,
+                12,
+                Auto,
+                12,
+                Auto,
+                16,
+                Auto">
 
             <!-- ===================================================== -->
             <!-- Heading -->
@@ -21,28 +35,37 @@
                 Text="Analysis Summary"/>
 
             <!-- ===================================================== -->
-            <!-- Summary -->
+            <!-- Tracks Scanned -->
             <!-- ===================================================== -->
 
             <Grid
                 Grid.Row="2"
                 ColumnDefinitions="*,Auto"
-                Margin="0,4">
+                Margin="0,2">
 
                 <TextBlock
                     Text="Tracks Scanned"/>
 
                 <TextBlock
                     Grid.Column="1"
-                    FontWeight="SemiBold"
-                    Text="{Binding TracksScanned, ElementName=Root}"/>
+                    FontWeight="SemiBold">
+
+                    <Run Text="{Binding TracksScanned, ElementName=Root, StringFormat={}{0:N0}}"/>
+                    <Run Text=" / "/>
+                    <Run Text="{Binding TotalTracks, ElementName=Root, StringFormat={}{0:N0}}"/>
+
+                </TextBlock>
 
             </Grid>
+
+            <!-- ===================================================== -->
+            <!-- Issues -->
+            <!-- ===================================================== -->
 
             <Grid
                 Grid.Row="3"
                 ColumnDefinitions="*,Auto"
-                Margin="0,4">
+                Margin="0,2">
 
                 <TextBlock
                     Text="Issues Found"/>
@@ -50,14 +73,18 @@
                 <TextBlock
                     Grid.Column="1"
                     FontWeight="SemiBold"
-                    Text="{Binding IssuesFound, ElementName=Root}"/>
+                    Text="{Binding IssuesFound, ElementName=Root, StringFormat={}{0:N0}}"/>
 
             </Grid>
+
+            <!-- ===================================================== -->
+            <!-- Health -->
+            <!-- ===================================================== -->
 
             <Grid
                 Grid.Row="4"
                 ColumnDefinitions="*,Auto"
-                Margin="0,4">
+                Margin="0,2">
 
                 <TextBlock
                     Text="Overall Health"/>
@@ -71,10 +98,14 @@
 
             </Grid>
 
+            <!-- ===================================================== -->
+            <!-- Last Analysed -->
+            <!-- ===================================================== -->
+
             <Grid
                 Grid.Row="5"
                 ColumnDefinitions="*,Auto"
-                Margin="0,4">
+                Margin="0,2">
 
                 <TextBlock
                     Text="Last Analysed"/>
@@ -83,9 +114,80 @@
                     Grid.Column="1"
                     FontWeight="SemiBold"
                     Text="{Binding LastAnalysed,
-                                   ElementName=Root}"/>
+                                   ElementName=Root,
+                                   TargetNullValue=Never,
+                                   StringFormat={}{0:dd/MM/yyyy HH:mm:ss}}"/>
 
             </Grid>
+
+            <!-- ===================================================== -->
+            <!-- Progress -->
+            <!-- ===================================================== -->
+
+            <StackPanel
+                Grid.Row="7"
+                Spacing="6">
+
+                <TextBlock
+                    FontWeight="SemiBold"
+                    Text="Progress"/>
+
+                <ProgressBar
+                    Minimum="0"
+                    Maximum="100"
+                    Value="{Binding Progress,
+                                    ElementName=Root}"/>
+
+            </StackPanel>
+
+            <!-- ===================================================== -->
+            <!-- Current Stage -->
+            <!-- ===================================================== -->
+
+            <StackPanel
+                Grid.Row="9"
+                Spacing="2">
+
+                <TextBlock
+                    FontWeight="SemiBold"
+                    Text="Current Stage"/>
+
+                <TextBlock
+                    Text="{Binding CurrentStage,
+                                   ElementName=Root}"/>
+
+            </StackPanel>
+
+            <!-- ===================================================== -->
+            <!-- Current Track -->
+            <!-- ===================================================== -->
+
+            <StackPanel
+                Grid.Row="11"
+                Spacing="2">
+
+                <TextBlock
+                    FontWeight="SemiBold"
+                    Text="Current Track"/>
+
+                <TextBlock
+                    Text="{Binding CurrentTrack,
+                                   ElementName=Root}"
+                    TextTrimming="CharacterEllipsis"/>
+
+            </StackPanel>
+
+            <!-- ===================================================== -->
+            <!-- Action -->
+            <!-- ===================================================== -->
+
+            <Button
+                Grid.Row="13"
+                HorizontalAlignment="Right"
+                Theme="{StaticResource DJLM.PrimaryButton}"
+                Content="Analyse Library"
+                Command="{Binding AnalyseCommand,
+                                  ElementName=Root}"/>
 
         </Grid>
 

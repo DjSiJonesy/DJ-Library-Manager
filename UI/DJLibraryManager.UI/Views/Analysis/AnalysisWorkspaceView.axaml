@@ -33,17 +33,29 @@
 
             <workflow:WorkflowAnalysisSummaryCard
                 Grid.Row="0"
+
                 TracksScanned="{Binding TracksScanned}"
+                TotalTracks="{Binding TotalTracks}"
+
                 IssuesFound="{Binding IssuesFound}"
                 HealthScore="{Binding HealthScore}"
-                LastAnalysed="{Binding LastAnalysed}" />
+
+                LastAnalysed="{Binding LastAnalysed}"
+
+                Progress="{Binding Progress}"
+
+                CurrentStage="{Binding CurrentStage}"
+                CurrentTrack="{Binding CurrentTrack}"
+
+                AnalyseCommand="{Binding AnalyseLibraryCommand}" />
 
             <!-- ===================================================== -->
             <!-- Analysis Results -->
             <!-- ===================================================== -->
 
             <workflow:WorkflowAnalysisTable
-                Grid.Row="2" />
+                Grid.Row="2"
+                Categories="{Binding Categories}" />
 
         </Grid>
 

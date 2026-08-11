@@ -1,27 +1,50 @@
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:DJLibraryManager.UI.Models.Analysis"
+    xmlns:analysis="using:DJLibraryManager.UI.ViewModels.Analysis"
     x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowAnalysisTable"
+    x:DataType="analysis:AnalysisWorkspaceViewModel"
     x:Name="Root">
+
+    <UserControl.Resources>
+
+        <DataTemplate
+            x:Key="CategoryTemplate"
+            x:DataType="models:AnalysisCategoryInfo">
+
+            <Grid
+                ColumnDefinitions="*,100,100"
+                Margin="0,4">
+
+                <TextBlock
+                    Grid.Column="0"
+                    Text="{Binding Name}" />
+
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Text="{Binding IssueCount,
+                                   StringFormat={}{0:N0}}" />
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Text="{Binding HealthScore,
+                                   StringFormat={}{0:F1}%}" />
+
+            </Grid>
+
+        </DataTemplate>
+
+    </UserControl.Resources>
 
     <Border
         Classes="card-secondary"
         Padding="12">
 
         <Grid
-            ColumnDefinitions="*,100,100"
-            RowDefinitions="
-                Auto,
-                12,
-                Auto,
-                6,
-                Auto,
-                Auto,
-                Auto,
-                Auto,
-                Auto,
-                6,
-                Auto">
+            RowDefinitions="Auto,12,Auto,6,Auto,*">
 
             <!-- ===================================================== -->
             <!-- Heading -->
@@ -29,128 +52,54 @@
 
             <TextBlock
                 Grid.Row="0"
-                Grid.ColumnSpan="3"
                 Classes="subheading"
-                Text="Issue Breakdown"/>
+                Text="Issue Breakdown" />
 
             <!-- ===================================================== -->
             <!-- Column Headings -->
             <!-- ===================================================== -->
 
-            <TextBlock
+            <Grid
                 Grid.Row="2"
-                Grid.Column="0"
-                FontSize="12"
-                FontWeight="SemiBold"
-                Text="Category"/>
+                ColumnDefinitions="*,100,100">
 
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="1"
-                HorizontalAlignment="Right"
-                FontSize="12"
-                FontWeight="SemiBold"
-                Text="Issues"/>
+                <TextBlock
+                    Grid.Column="0"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Category" />
 
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="2"
-                HorizontalAlignment="Right"
-                FontSize="12"
-                FontWeight="SemiBold"
-                Text="Health"/>
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Issues" />
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Health" />
+
+            </Grid>
 
             <!-- Divider -->
 
             <Border
                 Grid.Row="4"
-                Grid.ColumnSpan="3"
                 Height="1"
-                Background="#303030"/>
+                Background="#303030" />
 
             <!-- ===================================================== -->
-            <!-- Placeholder Rows -->
+            <!-- Analysis Categories -->
             <!-- ===================================================== -->
 
-            <Grid Grid.Row="5" ColumnDefinitions="*,100,100">
-
-                <TextBlock Text="Metadata"/>
-
-                <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-                <TextBlock
-                    Grid.Column="2"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-            </Grid>
-
-            <Grid Grid.Row="6" ColumnDefinitions="*,100,100">
-
-                <TextBlock Text="File Integrity"/>
-
-                <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-                <TextBlock
-                    Grid.Column="2"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-            </Grid>
-
-            <Grid Grid.Row="7" ColumnDefinitions="*,100,100">
-
-                <TextBlock Text="Duplicates"/>
-
-                <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-                <TextBlock
-                    Grid.Column="2"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-            </Grid>
-
-            <Grid Grid.Row="8" ColumnDefinitions="*,100,100">
-
-                <TextBlock Text="Music"/>
-
-                <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-                <TextBlock
-                    Grid.Column="2"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-            </Grid>
-
-            <Grid Grid.Row="9" ColumnDefinitions="*,100,100">
-
-                <TextBlock Text="Providers"/>
-
-                <TextBlock
-                    Grid.Column="1"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-                <TextBlock
-                    Grid.Column="2"
-                    HorizontalAlignment="Right"
-                    Text="--"/>
-
-            </Grid>
+            <ItemsControl
+                Grid.Row="5"
+                ItemsSource="{Binding Categories, ElementName=Root}"
+                ItemTemplate="{StaticResource CategoryTemplate}" />
 
         </Grid>
 

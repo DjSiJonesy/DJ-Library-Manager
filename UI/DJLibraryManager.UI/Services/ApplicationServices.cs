@@ -61,6 +61,11 @@ public sealed class ApplicationServices
     public LibraryImportService LibraryImportService { get; }
 
     /// <summary>
+    /// Stores the latest Library Analysis.
+    /// </summary>
+    public AnalysisRepository AnalysisRepository { get; }
+
+    /// <summary>
     /// Analyses Media from the Library.
     /// </summary>
     public AnalysisService Analysis { get; }
@@ -83,12 +88,14 @@ public sealed class ApplicationServices
 
         MediaImportRepository = new MediaImportRepository();
 
+        AnalysisRepository = new AnalysisRepository();
+
         LibraryStatisticsService = new LibraryStatisticsService(LibraryRepository, MediaImportRepository);
 
         LibraryImportService = new LibraryImportService(ProgressReporter, LibraryRepository);
 
         LibraryImportService.Register(new VirtualDJImporter(ProgressReporter));
 
-        Analysis = new AnalysisService();
+        Analysis = new AnalysisService(LibraryRepository);
     }
 }

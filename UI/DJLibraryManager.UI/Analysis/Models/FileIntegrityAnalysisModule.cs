@@ -3,19 +3,20 @@ using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Models.Media;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DJLibraryManager.UI.Analysis.Modules;
 
 /// <summary>
-/// Analyses metadata completeness.
+/// Analyses the integrity of media files.
 /// </summary>
-public sealed class MetadataAnalysisModule : IAnalysisModule
+public sealed class FileIntegrityAnalysisModule : IAnalysisModule
 {
     private readonly List<AnalysisIssue> _issues = new();
 
     private int _trackCount;
 
-    public string Name => "Metadata";
+    public string Name => "File Integrity";
 
     public void Begin()
     {
@@ -27,41 +28,35 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
     {
         _trackCount++;
 
-        if (string.IsNullOrWhiteSpace(media.Artist))
+        if (string.IsNullOrWhiteSpace(media.FilePath))
+        {
             _issues.Add(CreateIssue(
-                "MissingArtist",
-                "Missing Artist",
+                "MissingPath",
+                "Missing File Path",
                 media));
 
-        if (string.IsNullOrWhiteSpace(media.Title))
+            return;
+        }
+
+        if (!File.Exists(media.FilePath))
+        {
             _issues.Add(CreateIssue(
-                "MissingTitle",
-                "Missing Title",
+                "MissingFile",
+                "File Not Found",
                 media));
 
-        if (string.IsNullOrWhiteSpace(media.Album))
-            _issues.Add(CreateIssue(
-                "MissingAlbum",
-                "Missing Album",
-                media));
+            return;
+        }
 
-        if (string.IsNullOrWhiteSpace(media.Genre))
-            _issues.Add(CreateIssue(
-                "MissingGenre",
-                "Missing Genre",
-                media));
+        var file = new FileInfo(media.FilePath);
 
-        if (media.BPM is null || media.BPM <= 0)
+        if (file.Length == 0)
+        {
             _issues.Add(CreateIssue(
-                "MissingBPM",
-                "Missing BPM",
+                "ZeroByte",
+                "Zero Byte File",
                 media));
-
-        if (string.IsNullOrWhiteSpace(media.Key))
-            _issues.Add(CreateIssue(
-                "MissingKey",
-                "Missing Musical Key",
-                media));
+        }
     }
 
     public AnalysisCategoryResult Complete()
@@ -81,12 +76,12 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
     {
         return new AnalysisIssue
         {
-            Category = "Metadata",
+            Category = "File Integrity",
             Type = type,
             Title = title,
             Description = $"{title}: {media.Artist} - {media.Title}",
             FilePath = media.FilePath,
-            CanAutoFix = true
+            CanAutoFix = false
         };
     }
 
@@ -97,9 +92,7 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
         if (trackCount == 0)
             return 100;
 
-        var possibleIssues = trackCount * 6.0;
-
-        var score = 100 - ((issueCount / possibleIssues) * 100);
+        var score = 100 - ((double)issueCount / trackCount * 100);
 
         return Math.Round(Math.Clamp(score, 0, 100), 1);
     }

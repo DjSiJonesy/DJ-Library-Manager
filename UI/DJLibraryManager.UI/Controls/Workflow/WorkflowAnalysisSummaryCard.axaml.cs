@@ -1,14 +1,23 @@
-﻿using Avalonia;
+﻿using System;
+using System.Windows.Input;
+using Avalonia;
 using Avalonia.Controls;
 
 namespace DJLibraryManager.UI.Controls.Workflow;
 
+/// <summary>
+/// Displays the Analysis workflow summary.
+/// </summary>
 public partial class WorkflowAnalysisSummaryCard : UserControl
 {
     public WorkflowAnalysisSummaryCard()
     {
         InitializeComponent();
     }
+
+    // ============================================================
+    // Summary
+    // ============================================================
 
     public static readonly StyledProperty<int> TracksScannedProperty =
         AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, int>(
@@ -18,6 +27,16 @@ public partial class WorkflowAnalysisSummaryCard : UserControl
     {
         get => GetValue(TracksScannedProperty);
         set => SetValue(TracksScannedProperty, value);
+    }
+
+    public static readonly StyledProperty<int> TotalTracksProperty =
+        AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, int>(
+            nameof(TotalTracks));
+
+    public int TotalTracks
+    {
+        get => GetValue(TotalTracksProperty);
+        set => SetValue(TotalTracksProperty, value);
     }
 
     public static readonly StyledProperty<int> IssuesFoundProperty =
@@ -40,14 +59,67 @@ public partial class WorkflowAnalysisSummaryCard : UserControl
         set => SetValue(HealthScoreProperty, value);
     }
 
-    public static readonly StyledProperty<string> LastAnalysedProperty =
-        AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, string>(
-            nameof(LastAnalysed),
-            "Never");
+    // ============================================================
+    // Analysis
+    // ============================================================
 
-    public string LastAnalysed
+    public static readonly StyledProperty<double> ProgressProperty =
+        AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, double>(
+            nameof(Progress));
+
+    public double Progress
+    {
+        get => GetValue(ProgressProperty);
+        set => SetValue(ProgressProperty, value);
+    }
+
+    public static readonly StyledProperty<string> CurrentStageProperty =
+        AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, string>(
+            nameof(CurrentStage),
+            "Ready");
+
+    public string CurrentStage
+    {
+        get => GetValue(CurrentStageProperty);
+        set => SetValue(CurrentStageProperty, value);
+    }
+
+    public static readonly StyledProperty<string> CurrentTrackProperty =
+        AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, string>(
+            nameof(CurrentTrack),
+            "—");
+
+    public string CurrentTrack
+    {
+        get => GetValue(CurrentTrackProperty);
+        set => SetValue(CurrentTrackProperty, value);
+    }
+
+    // ============================================================
+    // Dates
+    // ============================================================
+
+    public static readonly StyledProperty<DateTime?> LastAnalysedProperty =
+        AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, DateTime?>(
+            nameof(LastAnalysed));
+
+    public DateTime? LastAnalysed
     {
         get => GetValue(LastAnalysedProperty);
         set => SetValue(LastAnalysedProperty, value);
+    }
+
+    // ============================================================
+    // Commands
+    // ============================================================
+
+    public static readonly StyledProperty<ICommand?> AnalyseCommandProperty =
+        AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, ICommand?>(
+            nameof(AnalyseCommand));
+
+    public ICommand? AnalyseCommand
+    {
+        get => GetValue(AnalyseCommandProperty);
+        set => SetValue(AnalyseCommandProperty, value);
     }
 }

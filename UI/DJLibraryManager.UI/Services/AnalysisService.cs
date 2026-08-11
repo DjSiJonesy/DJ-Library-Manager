@@ -1,4 +1,5 @@
-﻿using DJLibraryManager.UI.Analysis.Engines;
+﻿using DJLibraryManager.Core.Services.Library;
+using DJLibraryManager.UI.Analysis.Engines;
 using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Analysis.Modules;
 using System.Threading;
@@ -13,13 +14,14 @@ public sealed class AnalysisService
 {
     private readonly LibraryRepository _libraryRepository;
 
-    public AnalysisService()
+    public AnalysisService(
+        LibraryRepository libraryRepository)
     {
-        _libraryRepository = new LibraryRepository();
+        _libraryRepository = libraryRepository;
     }
 
     /// <summary>
-    /// Analyses the current media library.
+    /// Analyses the current DIASISS library.
     /// </summary>
     public async Task<LibraryAnalysisResult> AnalyseLibraryAsync(
         CancellationToken cancellationToken = default)
@@ -28,7 +30,11 @@ public sealed class AnalysisService
 
         var engine = new AnalysisEngine(
         [
-            new MetadataAnalysisModule()
+            new MetadataAnalysisModule(),
+            new FileIntegrityAnalysisModule(),
+            new DuplicateAnalysisModule(),
+            new MusicAnalysisModule(),
+            new ProviderAnalysisModule()
         ]);
 
         return await engine.AnalyseAsync(

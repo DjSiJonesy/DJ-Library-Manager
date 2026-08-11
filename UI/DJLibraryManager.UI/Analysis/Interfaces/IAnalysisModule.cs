@@ -1,13 +1,11 @@
 ﻿using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Models.Media;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DJLibraryManager.UI.Analysis.Interfaces;
 
 /// <summary>
 /// Defines a single analysis module.
+/// Each module analyses one track at a time.
 /// </summary>
 public interface IAnalysisModule
 {
@@ -17,9 +15,17 @@ public interface IAnalysisModule
     string Name { get; }
 
     /// <summary>
-    /// Analyses the supplied media library.
+    /// Called before analysis starts.
     /// </summary>
-    Task<AnalysisCategoryResult> AnalyseAsync(
-        IReadOnlyList<DJLMMediaItem> mediaItems,
-        CancellationToken cancellationToken = default);
+    void Begin();
+
+    /// <summary>
+    /// Analyses a single media item.
+    /// </summary>
+    void Analyse(DJLMMediaItem mediaItem);
+
+    /// <summary>
+    /// Called after all tracks have been analysed and returns the result.
+    /// </summary>
+    AnalysisCategoryResult Complete();
 }

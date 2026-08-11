@@ -15,12 +15,17 @@ public sealed class LibraryAnalysisResult
     public DateTime AnalysisDate { get; init; } = DateTime.Now;
 
     /// <summary>
-    /// Total number of tracks analysed.
+    /// Number of tracks analysed.
     /// </summary>
     public int TracksScanned { get; init; }
 
     /// <summary>
-    /// Overall library health score (0-100).
+    /// Total number of tracks in the library.
+    /// </summary>
+    public int TotalTracks { get; init; }
+
+    /// <summary>
+    /// Overall library health score (0–100).
     /// </summary>
     public double HealthScore { get; init; }
 

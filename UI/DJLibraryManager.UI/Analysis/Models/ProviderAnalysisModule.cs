@@ -7,15 +7,15 @@ using System.Collections.Generic;
 namespace DJLibraryManager.UI.Analysis.Modules;
 
 /// <summary>
-/// Analyses metadata completeness.
+/// Analyses provider-specific information.
 /// </summary>
-public sealed class MetadataAnalysisModule : IAnalysisModule
+public sealed class ProviderAnalysisModule : IAnalysisModule
 {
     private readonly List<AnalysisIssue> _issues = new();
 
     private int _trackCount;
 
-    public string Name => "Metadata";
+    public string Name => "Providers";
 
     public void Begin()
     {
@@ -27,41 +27,13 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
     {
         _trackCount++;
 
-        if (string.IsNullOrWhiteSpace(media.Artist))
+        if (string.IsNullOrWhiteSpace(media.Provider))
+        {
             _issues.Add(CreateIssue(
-                "MissingArtist",
-                "Missing Artist",
+                "MissingProvider",
+                "Missing Provider",
                 media));
-
-        if (string.IsNullOrWhiteSpace(media.Title))
-            _issues.Add(CreateIssue(
-                "MissingTitle",
-                "Missing Title",
-                media));
-
-        if (string.IsNullOrWhiteSpace(media.Album))
-            _issues.Add(CreateIssue(
-                "MissingAlbum",
-                "Missing Album",
-                media));
-
-        if (string.IsNullOrWhiteSpace(media.Genre))
-            _issues.Add(CreateIssue(
-                "MissingGenre",
-                "Missing Genre",
-                media));
-
-        if (media.BPM is null || media.BPM <= 0)
-            _issues.Add(CreateIssue(
-                "MissingBPM",
-                "Missing BPM",
-                media));
-
-        if (string.IsNullOrWhiteSpace(media.Key))
-            _issues.Add(CreateIssue(
-                "MissingKey",
-                "Missing Musical Key",
-                media));
+        }
     }
 
     public AnalysisCategoryResult Complete()
@@ -81,12 +53,12 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
     {
         return new AnalysisIssue
         {
-            Category = "Metadata",
+            Category = "Providers",
             Type = type,
             Title = title,
             Description = $"{title}: {media.Artist} - {media.Title}",
             FilePath = media.FilePath,
-            CanAutoFix = true
+            CanAutoFix = false
         };
     }
 
@@ -97,9 +69,7 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
         if (trackCount == 0)
             return 100;
 
-        var possibleIssues = trackCount * 6.0;
-
-        var score = 100 - ((issueCount / possibleIssues) * 100);
+        var score = 100 - ((double)issueCount / trackCount * 100);
 
         return Math.Round(Math.Clamp(score, 0, 100), 1);
     }

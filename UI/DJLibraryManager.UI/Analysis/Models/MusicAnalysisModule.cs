@@ -7,15 +7,15 @@ using System.Collections.Generic;
 namespace DJLibraryManager.UI.Analysis.Modules;
 
 /// <summary>
-/// Analyses metadata completeness.
+/// Analyses music-related metadata quality.
 /// </summary>
-public sealed class MetadataAnalysisModule : IAnalysisModule
+public sealed class MusicAnalysisModule : IAnalysisModule
 {
     private readonly List<AnalysisIssue> _issues = new();
 
     private int _trackCount;
 
-    public string Name => "Metadata";
+    public string Name => "Music";
 
     public void Begin()
     {
@@ -27,41 +27,32 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
     {
         _trackCount++;
 
-        if (string.IsNullOrWhiteSpace(media.Artist))
+        if (media.BPM is <= 0 or > 300)
+        {
             _issues.Add(CreateIssue(
-                "MissingArtist",
-                "Missing Artist",
+                "InvalidBPM",
+                "Invalid BPM",
                 media));
+        }
 
-        if (string.IsNullOrWhiteSpace(media.Title))
-            _issues.Add(CreateIssue(
-                "MissingTitle",
-                "Missing Title",
-                media));
+        if (!string.IsNullOrWhiteSpace(media.Key))
+        {
+            if (!IsValidKey(media.Key))
+            {
+                _issues.Add(CreateIssue(
+                    "InvalidKey",
+                    "Invalid Musical Key",
+                    media));
+            }
+        }
 
-        if (string.IsNullOrWhiteSpace(media.Album))
+        if (media.Duration <= TimeSpan.Zero)
+        {
             _issues.Add(CreateIssue(
-                "MissingAlbum",
-                "Missing Album",
+                "InvalidDuration",
+                "Invalid Duration",
                 media));
-
-        if (string.IsNullOrWhiteSpace(media.Genre))
-            _issues.Add(CreateIssue(
-                "MissingGenre",
-                "Missing Genre",
-                media));
-
-        if (media.BPM is null || media.BPM <= 0)
-            _issues.Add(CreateIssue(
-                "MissingBPM",
-                "Missing BPM",
-                media));
-
-        if (string.IsNullOrWhiteSpace(media.Key))
-            _issues.Add(CreateIssue(
-                "MissingKey",
-                "Missing Musical Key",
-                media));
+        }
     }
 
     public AnalysisCategoryResult Complete()
@@ -74,6 +65,16 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
         };
     }
 
+    private static bool IsValidKey(string key)
+    {
+        key = key.Trim().ToUpperInvariant();
+
+        return key.EndsWith("A") ||
+               key.EndsWith("B") ||
+               key.Contains("MAJ") ||
+               key.Contains("MIN");
+    }
+
     private static AnalysisIssue CreateIssue(
         string type,
         string title,
@@ -81,12 +82,12 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
     {
         return new AnalysisIssue
         {
-            Category = "Metadata",
+            Category = "Music",
             Type = type,
             Title = title,
             Description = $"{title}: {media.Artist} - {media.Title}",
             FilePath = media.FilePath,
-            CanAutoFix = true
+            CanAutoFix = false
         };
     }
 
@@ -97,9 +98,7 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
         if (trackCount == 0)
             return 100;
 
-        var possibleIssues = trackCount * 6.0;
-
-        var score = 100 - ((issueCount / possibleIssues) * 100);
+        var score = 100 - ((double)issueCount / trackCount * 100);
 
         return Math.Round(Math.Clamp(score, 0, 100), 1);
     }

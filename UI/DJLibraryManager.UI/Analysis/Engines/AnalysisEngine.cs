@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-
 namespace DJLibraryManager.UI.Analysis.Engines;
 
 /// <summary>
@@ -23,30 +22,39 @@ public sealed class AnalysisEngine
     }
 
     /// <summary>
-    /// Runs all analysis modules and returns the combined results.
+    /// Runs all analysis modules over the library.
     /// </summary>
-    public async Task<LibraryAnalysisResult> AnalyseAsync(
-    IReadOnlyList<DJLMMediaItem> mediaItems,
-    CancellationToken cancellationToken = default)
+    public Task<LibraryAnalysisResult> AnalyseAsync(
+        IReadOnlyList<DJLMMediaItem> mediaItems,
+        CancellationToken cancellationToken = default)
     {
-        var categories = new List<AnalysisCategoryResult>();
-
         foreach (var module in _modules)
+        {
+            module.Begin();
+        }
+
+        foreach (var mediaItem in mediaItems)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var result = await module.AnalyseAsync(mediaItems, cancellationToken);
-
-            categories.Add(result);
+            foreach (var module in _modules)
+            {
+                module.Analyse(mediaItem);
+            }
         }
 
-        return new LibraryAnalysisResult
-        {
-            AnalysisDate = DateTime.Now,
-            Categories = categories,
-            TracksScanned = mediaItems.Count,
-            HealthScore = CalculateHealth(categories)
-        };
+        var categories = _modules
+            .Select(m => m.Complete())
+            .ToList();
+
+        return Task.FromResult(
+            new LibraryAnalysisResult
+            {
+                AnalysisDate = DateTime.Now,
+                TracksScanned = mediaItems.Count,
+                HealthScore = CalculateHealth(categories),
+                Categories = categories
+            });
     }
 
     private static double CalculateHealth(

@@ -16,57 +16,63 @@ public static class ApplicationPaths
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "DIASISS DJ");
 
-    /// <summary>
-    /// Discovery repository.
-    /// </summary>
+    // ============================================================
+    // Data Folders
+    // ============================================================
+
+    public static string Data =>
+        Path.Combine(Root, "Data");
+
+    public static string Analysis =>
+        Path.Combine(Data, "Analysis");
+
+    public static string Discovery =>
+        Path.Combine(Data, "Discovery");
+
+    public static string Import =>
+        Path.Combine(Data, "Import");
+
+    public static string Library =>
+        Path.Combine(Data, "Library");
+
+    public static string Search =>
+        Path.Combine(Data, "Search");
+
+    // ============================================================
+    // Data Files
+    // ============================================================
+
     public static string DiscoverySessions =>
-        Path.Combine(Root, "DiscoverySessions.json");
+        Path.Combine(Discovery, "DiscoverySessions.json");
 
-    /// <summary>
-    /// Imported media library.
-    /// </summary>
-    public static string MediaLibrary =>
-        Path.Combine(Root, "MediaLibrary.json");
-
-    /// <summary> 
-    /// Imported Media.
-    /// </summary> 
-    public static string MediaImports =>
-        Path.Combine(Root,"MediaImports.json");
-
-    /// <summary>
-    /// Discovery validation history.
-    /// </summary>
     public static string DiscoveryValidation =>
-        Path.Combine(Root, "DiscoveryValidation.json");
+        Path.Combine(Discovery, "DiscoveryValidation.json");
 
-    /// <summary>
-    /// Provider import metadata.
-    /// </summary>
+    public static string MediaImports =>
+        Path.Combine(Import, "MediaImports.json");
+
     public static string LibraryMetadata =>
-        Path.Combine(Root, "LibraryMetadata.json");
+        Path.Combine(Import, "LibraryMetadata.json");
 
-    /// <summary>
-    /// Application log folder.
-    /// </summary>
+    public static string MediaLibrary =>
+        Path.Combine(Library, "MediaLibrary.json");
+
+    public static string LatestAnalysis =>
+        Path.Combine(Analysis, "LatestAnalysis.json");
+
+    // ============================================================
+    // Other Folders
+    // ============================================================
+
     public static string Logs =>
         Path.Combine(Root, "Logs");
 
-    /// <summary>
-    /// Backup folder.
-    /// </summary>
     public static string Backups =>
         Path.Combine(Root, "Backups");
 
-    /// <summary>
-    /// Temporary working folder.
-    /// </summary>
     public static string Temp =>
         Path.Combine(Root, "Temp");
 
-    /// <summary>
-    /// Cached external metadata.
-    /// </summary>
     public static string Cache =>
         Path.Combine(Root, "Cache");
 
@@ -77,6 +83,14 @@ public static class ApplicationPaths
     public static void EnsureCreated()
     {
         Directory.CreateDirectory(Root);
+
+        Directory.CreateDirectory(Data);
+        Directory.CreateDirectory(Analysis);
+        Directory.CreateDirectory(Discovery);
+        Directory.CreateDirectory(Import);
+        Directory.CreateDirectory(Library);
+        Directory.CreateDirectory(Search);
+
         Directory.CreateDirectory(Logs);
         Directory.CreateDirectory(Backups);
         Directory.CreateDirectory(Temp);
