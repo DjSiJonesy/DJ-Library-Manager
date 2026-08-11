@@ -192,6 +192,16 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Opens the Analysis workflow.
+    /// </summary>
+    [RelayCommand]
+    private void OpenAnalysis()
+    {
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Analysis);
+    }
+
+    /// <summary>
     /// Returns to the Dashboard workspace.
     /// </summary>
     [RelayCommand]

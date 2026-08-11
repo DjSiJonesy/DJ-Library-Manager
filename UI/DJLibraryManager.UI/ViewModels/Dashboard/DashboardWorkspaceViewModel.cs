@@ -212,6 +212,7 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
         {
             Definition = WorkflowDefinitions.Analysis,
             HoverAction = stage => Guidance.Show(stage),
+            ActionCommand = _dashboard.OpenAnalysisCommand,
 
             Status = "Ready",
             StatusBrush = Brushes.DeepSkyBlue,

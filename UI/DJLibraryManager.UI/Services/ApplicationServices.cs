@@ -60,6 +60,11 @@ public sealed class ApplicationServices
     /// </summary>
     public LibraryImportService LibraryImportService { get; }
 
+    /// <summary>
+    /// Analyses Media from the Library.
+    /// </summary>
+    public AnalysisService Analysis { get; }
+
     public ApplicationServices()
     {
         ProgressReporter = new ProgressReporter();
@@ -83,5 +88,7 @@ public sealed class ApplicationServices
         LibraryImportService = new LibraryImportService(ProgressReporter, LibraryRepository);
 
         LibraryImportService.Register(new VirtualDJImporter(ProgressReporter));
+
+        Analysis = new AnalysisService();
     }
 }

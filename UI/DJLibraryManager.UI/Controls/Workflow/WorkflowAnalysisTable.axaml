@@ -1,0 +1,159 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowAnalysisTable"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="12">
+
+        <Grid
+            ColumnDefinitions="*,100,100"
+            RowDefinitions="
+                Auto,
+                12,
+                Auto,
+                6,
+                Auto,
+                Auto,
+                Auto,
+                Auto,
+                Auto,
+                6,
+                Auto">
+
+            <!-- ===================================================== -->
+            <!-- Heading -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="0"
+                Grid.ColumnSpan="3"
+                Classes="subheading"
+                Text="Issue Breakdown"/>
+
+            <!-- ===================================================== -->
+            <!-- Column Headings -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="0"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Category"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="1"
+                HorizontalAlignment="Right"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Issues"/>
+
+            <TextBlock
+                Grid.Row="2"
+                Grid.Column="2"
+                HorizontalAlignment="Right"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="Health"/>
+
+            <!-- Divider -->
+
+            <Border
+                Grid.Row="4"
+                Grid.ColumnSpan="3"
+                Height="1"
+                Background="#303030"/>
+
+            <!-- ===================================================== -->
+            <!-- Placeholder Rows -->
+            <!-- ===================================================== -->
+
+            <Grid Grid.Row="5" ColumnDefinitions="*,100,100">
+
+                <TextBlock Text="Metadata"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+            </Grid>
+
+            <Grid Grid.Row="6" ColumnDefinitions="*,100,100">
+
+                <TextBlock Text="File Integrity"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+            </Grid>
+
+            <Grid Grid.Row="7" ColumnDefinitions="*,100,100">
+
+                <TextBlock Text="Duplicates"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+            </Grid>
+
+            <Grid Grid.Row="8" ColumnDefinitions="*,100,100">
+
+                <TextBlock Text="Music"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+            </Grid>
+
+            <Grid Grid.Row="9" ColumnDefinitions="*,100,100">
+
+                <TextBlock Text="Providers"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+                <TextBlock
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    Text="--"/>
+
+            </Grid>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

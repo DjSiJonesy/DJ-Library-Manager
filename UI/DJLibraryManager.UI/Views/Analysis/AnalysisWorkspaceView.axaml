@@ -1,0 +1,52 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels.Analysis"
+    xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
+    x:Class="DJLibraryManager.UI.Views.Analysis.AnalysisWorkspaceView"
+    x:DataType="vm:AnalysisWorkspaceViewModel">
+
+    <Grid RowDefinitions="Auto,20,*">
+
+        <!-- ===================================================== -->
+        <!-- Header -->
+        <!-- ===================================================== -->
+
+        <workflow:WorkflowHeader
+            Grid.Row="0"
+            Title="Analysis"
+            Description="Analyse the DIASISS media library and identify issues before searching for improvements."
+            PreviousText="← Import"
+            NextText="Search →"/>
+
+        <!-- ===================================================== -->
+        <!-- Content -->
+        <!-- ===================================================== -->
+
+        <Grid
+            Grid.Row="2"
+            RowDefinitions="Auto,20,*">
+
+            <!-- ===================================================== -->
+            <!-- Analysis Summary -->
+            <!-- ===================================================== -->
+
+            <workflow:WorkflowAnalysisSummaryCard
+                Grid.Row="0"
+                TracksScanned="{Binding TracksScanned}"
+                IssuesFound="{Binding IssuesFound}"
+                HealthScore="{Binding HealthScore}"
+                LastAnalysed="{Binding LastAnalysed}" />
+
+            <!-- ===================================================== -->
+            <!-- Analysis Results -->
+            <!-- ===================================================== -->
+
+            <workflow:WorkflowAnalysisTable
+                Grid.Row="2" />
+
+        </Grid>
+
+    </Grid>
+
+</UserControl>

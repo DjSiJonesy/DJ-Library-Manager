@@ -1,0 +1,94 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowAnalysisSummaryCard"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="12">
+
+        <Grid
+            RowDefinitions="Auto,12,Auto,Auto,Auto,Auto">
+
+            <!-- ===================================================== -->
+            <!-- Heading -->
+            <!-- ===================================================== -->
+
+            <TextBlock
+                Grid.Row="0"
+                Classes="subheading"
+                Text="Analysis Summary"/>
+
+            <!-- ===================================================== -->
+            <!-- Summary -->
+            <!-- ===================================================== -->
+
+            <Grid
+                Grid.Row="2"
+                ColumnDefinitions="*,Auto"
+                Margin="0,4">
+
+                <TextBlock
+                    Text="Tracks Scanned"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    FontWeight="SemiBold"
+                    Text="{Binding TracksScanned, ElementName=Root}"/>
+
+            </Grid>
+
+            <Grid
+                Grid.Row="3"
+                ColumnDefinitions="*,Auto"
+                Margin="0,4">
+
+                <TextBlock
+                    Text="Issues Found"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    FontWeight="SemiBold"
+                    Text="{Binding IssuesFound, ElementName=Root}"/>
+
+            </Grid>
+
+            <Grid
+                Grid.Row="4"
+                ColumnDefinitions="*,Auto"
+                Margin="0,4">
+
+                <TextBlock
+                    Text="Overall Health"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    FontWeight="SemiBold"
+                    Text="{Binding HealthScore,
+                                   ElementName=Root,
+                                   StringFormat={}{0:F1}%}"/>
+
+            </Grid>
+
+            <Grid
+                Grid.Row="5"
+                ColumnDefinitions="*,Auto"
+                Margin="0,4">
+
+                <TextBlock
+                    Text="Last Analysed"/>
+
+                <TextBlock
+                    Grid.Column="1"
+                    FontWeight="SemiBold"
+                    Text="{Binding LastAnalysed,
+                                   ElementName=Root}"/>
+
+            </Grid>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>

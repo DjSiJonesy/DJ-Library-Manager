@@ -41,13 +41,11 @@
 	  <Folder Include="Providers\Traktor\Models\" />
 	  <Folder Include="Providers\Traktor\Translators\" />
 	  <Folder Include="Providers\Traktor\Services\" />
-	  <Folder Include="ViewModels\Analysis\" />
 	  <Folder Include="ViewModels\Controls\" />
 	  <Folder Include="ViewModels\Improve\" />
 	  <Folder Include="ViewModels\Synchronise\" />
 	  <Folder Include="ViewModels\Structure\" />
 	  <Folder Include="ViewModels\Search\" />
-	  <Folder Include="Views\Analysis\" />
 	  <Folder Include="Views\Improve\" />
 	  <Folder Include="Views\Synchronise\" />
 	  <Folder Include="Views\Structure\" />
@@ -66,6 +64,9 @@
 	  </Compile>
 	  <Compile Update="Controls\Workflow\DiscoveryProviderRow.axaml.cs">
 	    <DependentUpon>DiscoveryProviderRow.axaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\Analysis\AnalysisWorkspaceView.axaml.cs">
+	    <DependentUpon>AnalysisWorkspaceView.axaml</DependentUpon>
 	  </Compile>
 	  <Compile Update="Views\Provider\ProviderWorkspaceView.axaml.cs">
 	    <DependentUpon>ProviderWorkspaceView.axaml</DependentUpon>

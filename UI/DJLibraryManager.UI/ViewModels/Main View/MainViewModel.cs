@@ -3,6 +3,7 @@ using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.ViewModels.Dashboard;
 using DJLibraryManager.UI.ViewModels.Workspace;
 using DJLibraryManager.UI.ViewModels.Library;
+using DJLibraryManager.UI.ViewModels.Analysis;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.ViewModels.Import;
 using System;
@@ -154,6 +155,17 @@ public partial class MainViewModel : ViewModelBase
                     Dashboard.CurrentWorkspace = importWorkspace;
 
                     StatusText = "Viewing Import";
+                    break;
+                }
+
+            case WorkspaceType.Analysis:
+                {
+                    var analysisWorkspace = new AnalysisWorkspaceViewModel();
+
+                    CurrentWorkspace = analysisWorkspace;
+                    Dashboard.CurrentWorkspace = analysisWorkspace;
+
+                    StatusText = "Viewing Analysis";
                     break;
                 }
         }
