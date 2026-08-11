@@ -4,49 +4,41 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:DJLibraryManager.UI.ViewModels"
-    xmlns:rows="using:DJLibraryManager.UI.Controls.Rows"
     xmlns:common="using:DJLibraryManager.UI.Controls.Common"
+    xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
     x:Class="DJLibraryManager.UI.Views.MediaLocationWorkspaceView"
     x:DataType="vm:MediaLocationWorkspaceViewModel"
     mc:Ignorable="d">
 
     <Grid
-        RowDefinitions="Auto,20,Auto,20,*">
-
-        <!-- ===================================================== -->
-        <!-- Header -->
-        <!-- ===================================================== -->
+        RowDefinitions="Auto,16,Auto,16,*">
 
         <!-- ===================================================== -->
         <!-- Workspace Header -->
         <!-- ===================================================== -->
 
-<Grid
-    Grid.Row="0"
-    ColumnDefinitions="*,Auto"
-    RowDefinitions="Auto,Auto"
-    ColumnSpacing="20">
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="*,Auto"
+            RowDefinitions="Auto,Auto"
+            ColumnSpacing="8">
 
-    <!-- Title -->
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="0"
+                Classes="heading"
+                VerticalAlignment="Center"
+                Text="Media Location"/>
 
-    <TextBlock
-        Grid.Row="0"
-        Grid.Column="0"
-        Classes="heading"
-        VerticalAlignment="Center"
-        Text="Media Location"/>
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="0"
+                Grid.ColumnSpan="2"
+                Margin="0,2,0,0"
+                Classes="caption"
+                Text="Discover and analyse media stored in this location."/>
 
-    <!-- Description -->
-
-    <TextBlock
-        Grid.Row="1"
-        Grid.Column="0"
-        Grid.ColumnSpan="2"
-        Margin="0,2,0,0"
-        Classes="caption"
-        Text="Discover and analyse media stored in this location."/>
-
-</Grid>
+        </Grid>
 
         <!-- ===================================================== -->
         <!-- Location Information -->
@@ -55,11 +47,11 @@
         <Border
             Grid.Row="2"
             Classes="card-secondary"
-            Padding="16">
+            Padding="12">
 
             <Grid
                 ColumnDefinitions="*,320"
-                RowDefinitions="Auto,20,Auto">
+                RowDefinitions="Auto,12,Auto">
 
                 <!-- ================================================= -->
                 <!-- Card Header -->
@@ -72,13 +64,14 @@
 
                     <TextBlock
                         Classes="section"
-                        VerticalAlignment="Center"
+                        VerticalAlignment="Top"
                         Text="Media Location"/>
 
                     <Button
                         Grid.Column="1"
                         Width="180"
-                        Height="44"
+                        MinHeight="32"
+                        Padding="12,4"
                         HorizontalAlignment="Right"
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
@@ -88,69 +81,69 @@
 
                 </Grid>
 
-                    <!-- ================================================= -->
-                    <!-- Left Information -->
-                    <!-- ================================================= -->
+                <!-- ================================================= -->
+                <!-- Left Information -->
+                <!-- ================================================= -->
 
-                    <StackPanel
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        Spacing="8">
+                <StackPanel
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Spacing="4">
 
-                        <common:PropertyRow
-                            Icon="🏷️"
-                            Label="Name"
-                            Value="{Binding Name}" />
+                    <common:PropertyRow
+                        Icon="🏷️"
+                        Label="Name"
+                        Value="{Binding Name}" />
 
-                        <common:PropertyRow
-                            Icon="📁"
-                            Label="Path"
-                            Value="{Binding Path}" />
+                    <common:PropertyRow
+                        Icon="📁"
+                        Label="Path"
+                        Value="{Binding Path}" />
 
-                        <common:PropertyRow
-                            Icon="💽"
-                            Label="Drive"
-                            Value="{Binding Drive}" />
+                    <common:PropertyRow
+                        Icon="💽"
+                        Label="Drive"
+                        Value="{Binding Drive}" />
 
-                        <common:PropertyRow
-                            ShowIndicator="True"
-                            IndicatorBrush="{Binding StatusBrush}"
-                            Label="Status"
-                            Value="{Binding Status}" />
+                    <common:PropertyRow
+                        ShowIndicator="True"
+                        IndicatorBrush="{Binding StatusBrush}"
+                        Label="Status"
+                        Value="{Binding Status}" />
 
-                    </StackPanel>
+                </StackPanel>
 
-                        <!-- ================================================= -->
-                        <!-- Discovery Summary -->
-                        <!-- ================================================= -->
+                <!-- ================================================= -->
+                <!-- Discovery Summary -->
+                <!-- ================================================= -->
 
-                        <StackPanel
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Margin="16,0,0,0"
-                            Spacing="8">
+                <StackPanel
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="16,0,0,0"
+                    Spacing="4">
 
-                            <common:PropertyRow
-                                Icon="📁"
-                                Label="Folders"
-                                Value="{Binding FolderCountDisplay}" />
+                    <common:PropertyRow
+                        Icon="📁"
+                        Label="Folders"
+                        Value="{Binding FolderCountDisplay}" />
 
-                            <common:PropertyRow
-                                Icon="🎵"
-                                Label="Audio Files"
-                                Value="{Binding AudioFileCountDisplay}" />
+                    <common:PropertyRow
+                        Icon="🎵"
+                        Label="Audio Files"
+                        Value="{Binding AudioFileCountDisplay}" />
 
-                            <common:PropertyRow
-                                Icon="🎬"
-                                Label="Video Files"
-                                Value="{Binding VideoFileCountDisplay}" />
+                    <common:PropertyRow
+                        Icon="🎬"
+                        Label="Video Files"
+                        Value="{Binding VideoFileCountDisplay}" />
 
-                            <common:PropertyRow
-                                Icon="💾"
-                                Label="Total Size"
-                                Value="{Binding TotalSize}" />
+                    <common:PropertyRow
+                        Icon="💾"
+                        Label="Total Size"
+                        Value="{Binding TotalSize}" />
 
-                        </StackPanel>
+                </StackPanel>
 
             </Grid>
 
@@ -160,97 +153,9 @@
         <!-- Discovered Media Folders -->
         <!-- ===================================================== -->
 
-        <Border
+        <workflow:WorkflowMediaFolderTable
             Grid.Row="4"
-            Classes="card"
-            Padding="20">
-
-            <Grid
-                RowDefinitions="Auto,Auto,Auto,*"
-                RowSpacing="12">
-
-                <!-- ================================================= -->
-                <!-- Heading -->
-                <!-- ================================================= -->
-
-                <TextBlock
-                    Grid.Row="0"
-                    Classes="section"
-                    Text="Discovered Media Folders"/>
-
-                <!-- ================================================= -->
-                <!-- Column Headings -->
-                <!-- ================================================= -->
-
-                <Grid
-                    Grid.Row="1"
-                    Margin="8,0,24,0"
-                    ColumnDefinitions="*,90,90,90"
-                    ColumnSpacing="20">
-
-                    <TextBlock
-                        Grid.Column="0"
-                        FontWeight="Bold"
-                        Text="Folder"/>
-
-                    <TextBlock
-                        Grid.Column="1"
-                        FontWeight="Bold"
-                        HorizontalAlignment="Center"
-                        Text="Audio"/>
-
-                    <TextBlock
-                        Grid.Column="2"
-                        FontWeight="Bold"
-                        HorizontalAlignment="Center"
-                        Text="Video"/>
-
-                    <TextBlock
-                        Grid.Column="3"
-                        FontWeight="Bold"
-                        HorizontalAlignment="Center"
-                        Text="Total"/>
-
-                </Grid>
-
-                <Border
-                    Grid.Row="2"
-                    Height="1"
-                    Background="#555"/>
-
-                <!-- ================================================= -->
-                <!-- Folder List -->
-                <!-- ================================================= -->
-
-                <ScrollViewer
-                    Grid.Row="3"
-                    VerticalScrollBarVisibility="Auto"
-                    HorizontalScrollBarVisibility="Disabled">
-
-                    <ItemsControl
-                        ItemsSource="{Binding Libraries}">
-
-                        <ItemsControl.ItemTemplate>
-
-                            <DataTemplate>
-
-                                <rows:MediaFolderRow
-                                    Folder="{Binding Path}"
-                                    AudioCount="{Binding AudioFileCount}"
-                                    VideoCount="{Binding VideoFileCount}"
-                                    TotalCount="{Binding TotalMediaFiles}" />
-
-                            </DataTemplate>
-
-                        </ItemsControl.ItemTemplate>
-
-                    </ItemsControl>
-
-                </ScrollViewer>
-
-            </Grid>
-
-        </Border>
+            Libraries="{Binding Libraries}" />
 
     </Grid>
 

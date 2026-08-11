@@ -1,17 +1,16 @@
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    x:Class="DJLibraryManager.UI.Controls.Rows.MediaFolderRow"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowMediaFolderRow"
     x:Name="Root">
 
     <Border
-        Height="30"
         Padding="0"
-        CornerRadius="6">
+        Margin="0,2">
 
         <Grid
-            ColumnDefinitions="*,80,80,80"
-            ColumnSpacing="12"
+            Height="30"
+            ColumnDefinitions="*,90,90,90"
             VerticalAlignment="Center">
 
             <!-- ===================================================== -->
@@ -31,7 +30,8 @@
 
                 <StackPanel
                     Orientation="Horizontal"
-                    Spacing="8">
+                    Spacing="6"
+                    VerticalAlignment="Center">
 
                     <TextBlock
                         FontSize="12"
@@ -54,10 +54,12 @@
 
             <TextBlock
                 Grid.Column="1"
-                HorizontalAlignment="Right"
                 FontSize="12"
+                HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                Text="{Binding AudioCount, ElementName=Root, StringFormat={}{0:N0}}"/>
+                Text="{Binding AudioCount,
+                               ElementName=Root,
+                               StringFormat={}{0:N0}}"/>
 
             <!-- ===================================================== -->
             <!-- Video -->
@@ -65,10 +67,12 @@
 
             <TextBlock
                 Grid.Column="2"
-                HorizontalAlignment="Right"
                 FontSize="12"
+                HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                Text="{Binding VideoCount, ElementName=Root, StringFormat={}{0:N0}}"/>
+                Text="{Binding VideoCount,
+                               ElementName=Root,
+                               StringFormat={}{0:N0}}"/>
 
             <!-- ===================================================== -->
             <!-- Total -->
@@ -76,10 +80,12 @@
 
             <TextBlock
                 Grid.Column="3"
-                HorizontalAlignment="Right"
                 FontSize="12"
+                HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                Text="{Binding TotalCount, ElementName=Root, StringFormat={}{0:N0}}"/>
+                Text="{Binding TotalCount,
+                               ElementName=Root,
+                               StringFormat={}{0:N0}}"/>
 
         </Grid>
 

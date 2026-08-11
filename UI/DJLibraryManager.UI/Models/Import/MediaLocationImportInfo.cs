@@ -132,10 +132,10 @@ public partial class MediaLocationImportInfo : ObservableObject
         ImportState switch
         {
             MediaImportState.Imported when HasChanges
-                => "Import Changes",
+                => "Re-Import",
 
             MediaImportState.Imported
-                => "Re-import",
+                => "Re-Import",
 
             _ => "Import"
         };

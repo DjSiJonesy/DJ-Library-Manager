@@ -68,7 +68,8 @@
                     ClipToBounds="True"
                     BorderBrush="{DynamicResource Brush.Border}"
                     BorderThickness="1"
-                    HorizontalAlignment="Center">
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top">                    
 
                     <Image
                         Stretch="Uniform"

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace DJLibraryManager.UI.Services.Discovery;
 
 /// <summary>
-/// Coordinates validation of every discovered media location.
+/// Coordinates validation of one or more discovered media locations.
 /// </summary>
 public sealed class DiscoveryValidationWorkflowService
 {
@@ -24,7 +24,8 @@ public sealed class DiscoveryValidationWorkflowService
     }
 
     /// <summary>
-    /// Validates every Discovery Session and updates the cache.
+    /// Validates every Discovery Session and replaces the cached
+    /// validation results.
     /// </summary>
     public void Validate(
         IEnumerable<DiscoverySession> sessions)
@@ -44,5 +45,23 @@ public sealed class DiscoveryValidationWorkflowService
         }
 
         _repository.SaveAll(records);
+    }
+
+    /// <summary>
+    /// Validates a single Discovery Session and updates only its
+    /// cached validation record.
+    /// </summary>
+    public void Validate(
+        DiscoverySession session)
+    {
+        ArgumentNullException.ThrowIfNull(session);
+
+        _repository.Save(
+            new DiscoveryValidationRecord
+            {
+                LocationPath = session.MediaLocation.Path,
+                LastValidated = DateTime.Now,
+                HasChanges = _validationService.HasChanges(session)
+            });
     }
 }

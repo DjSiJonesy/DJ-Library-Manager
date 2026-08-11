@@ -151,11 +151,37 @@ public partial class DiscoveryWorkspaceViewModel : WorkspaceViewModel
         if (mediaLocation is null)
             return;
 
+        //
+        // Perform Discovery.
+        //
+
         _mediaDiscoveryService.Discover(
             mediaLocation.Summary.MediaLocation);
 
-        // Refresh the collection so the updated summaries
-        // and change detection are reflected immediately.
-        LoadMediaLocations();
+        //
+        // Retrieve the newly updated Discovery Session.
+        //
+
+        var session =
+            App.Services
+                .DiscoveryRepository
+                .Get(mediaLocation.Summary.MediaLocation.Path);
+
+        //
+        // Refresh the cached validation for this location.
+        //
+
+        if (session is not null)
+        {
+            App.Services
+                .DiscoveryValidationWorkflowService
+                .Validate(session);
+        }
+
+        //
+        // Refresh the Discovery workspace.
+        //
+
+        Refresh();
     }
 }

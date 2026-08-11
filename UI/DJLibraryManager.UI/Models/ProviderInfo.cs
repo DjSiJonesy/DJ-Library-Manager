@@ -112,7 +112,7 @@ public partial class ProviderInfo : ObservableObject
     /// </summary>
     public string ImportActionText =>
         ImportState == ImportState.Imported
-            ? "Re-import"
+            ? "Re-Import"
             : "Import";
 
     /// <summary>

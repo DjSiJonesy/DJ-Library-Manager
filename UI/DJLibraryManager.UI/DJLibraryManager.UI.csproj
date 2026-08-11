@@ -28,6 +28,7 @@
 	<ItemGroup>
 	  <Folder Include="Assets\Icons\" />
 	  <Folder Include="Docs\Architecture\" />
+	  <Folder Include="Docs\UI\" />
 	  <Folder Include="Providers\EngineDJ\Models\" />
 	  <Folder Include="Providers\EngineDJ\Translators\" />
 	  <Folder Include="Providers\EngineDJ\Services\" />
