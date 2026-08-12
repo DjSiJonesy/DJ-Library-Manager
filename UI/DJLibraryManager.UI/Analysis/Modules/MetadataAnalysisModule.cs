@@ -3,6 +3,7 @@ using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Models.Media;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DJLibraryManager.UI.Analysis.Modules;
 
@@ -11,6 +12,10 @@ namespace DJLibraryManager.UI.Analysis.Modules;
 ///
 /// One AnalysisIssue is created per affected track, even when
 /// multiple metadata fields are missing.
+///
+/// VirtualDJ sampler files are excluded because they are managed
+/// by VirtualDJ rather than being part of the user's main
+/// music library.
 /// </summary>
 public sealed class MetadataAnalysisModule : IAnalysisModule
 {
@@ -19,6 +24,19 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
     private int _trackCount;
 
     public string Name => "Metadata";
+
+    // ============================================================
+    // VirtualDJ Sampler Location
+    // ============================================================
+
+    private static string VirtualDJSamplerAudioPath =>
+        Path.GetFullPath(
+            Path.Combine(
+                Environment.GetFolderPath(
+                    Environment.SpecialFolder.LocalApplicationData),
+                "VirtualDJ",
+                "Sampler",
+                "Audio"));
 
     // ============================================================
     // Begin
@@ -38,6 +56,14 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
     public void Analyse(
         DJLMMediaItem media)
     {
+        // --------------------------------------------------------
+        // VirtualDJ sampler files are not part of the main
+        // music library and should not be analysed.
+        // --------------------------------------------------------
+
+        if (IsVirtualDJSamplerFile(media.FilePath))
+            return;
+
         _trackCount++;
 
         var missingFields =
@@ -181,6 +207,12 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
             Description =
                 $"{trackName} — Missing: {missing}",
 
+            Artist =
+                media.Artist ?? string.Empty,
+
+            TrackTitle =
+                media.Title ?? string.Empty,
+
             FilePath =
                 media.FilePath,
 
@@ -189,6 +221,43 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
 
             CanAutoFix = true
         };
+    }
+
+    // ============================================================
+    // VirtualDJ Sampler Detection
+    // ============================================================
+
+    private static bool IsVirtualDJSamplerFile(
+        string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return false;
+
+        try
+        {
+            var fullPath =
+                Path.GetFullPath(filePath);
+
+            var samplerPath =
+                VirtualDJSamplerAudioPath;
+
+            if (!samplerPath.EndsWith(
+                    Path.DirectorySeparatorChar))
+            {
+                samplerPath +=
+                    Path.DirectorySeparatorChar;
+            }
+
+            return fullPath.StartsWith(
+                samplerPath,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            // If the path cannot be resolved, allow the normal
+            // metadata analysis to handle it.
+            return false;
+        }
     }
 
     // ============================================================

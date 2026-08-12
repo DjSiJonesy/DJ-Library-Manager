@@ -409,6 +409,10 @@ public partial class AnalysisWorkspaceViewModel : WorkspaceViewModel
                 .AnalysisRepository
                 .Save(result);
 
+            App.Services
+                .SearchRepository
+                .Clear();
+
             TracksScanned =
                 result.TracksScanned;
 

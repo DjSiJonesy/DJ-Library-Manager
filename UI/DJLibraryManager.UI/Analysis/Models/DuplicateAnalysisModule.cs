@@ -153,6 +153,12 @@ public sealed class DuplicateAnalysisModule : IAnalysisModule
                     $"{primary.Artist} - {primary.Title} " +
                     $"({duplicateGroup.Count:N0} copies found)",
 
+                Artist =
+                    primary.Artist ?? string.Empty,
+
+                TrackTitle =
+                    primary.Title ?? string.Empty,
+
                 FilePath =
                     primary.FilePath,
 

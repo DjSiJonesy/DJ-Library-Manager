@@ -60,6 +60,9 @@ public static class ApplicationPaths
     public static string LatestAnalysis =>
         Path.Combine(Analysis, "LatestAnalysis.json");
 
+    public static string LatestSearch =>
+        Path.Combine(Search, "LatestSearch.json");
+
     // ============================================================
     // Other Folders
     // ============================================================

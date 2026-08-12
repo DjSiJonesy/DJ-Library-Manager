@@ -14,6 +14,14 @@ public partial class SearchCategoryInfo : ObservableObject
     private string name = string.Empty;
 
     /// <summary>
+    /// Display icon used by the Search category selector.
+    ///
+    /// This is presentation-only and has no effect on Search logic.
+    /// </summary>
+    [ObservableProperty]
+    private string icon = string.Empty;
+
+    /// <summary>
     /// Explains what this Search category investigates.
     /// </summary>
     [ObservableProperty]

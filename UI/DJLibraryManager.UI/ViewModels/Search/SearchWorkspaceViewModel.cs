@@ -6,6 +6,7 @@ using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Search;
 using DJLibraryManager.UI.ViewModels.Workspace;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -91,6 +92,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             new SearchCategoryInfo
             {
                 Name = "Duplicates",
+                Icon = "📑",
                 Description =
                     "Find duplicate tracks and compare the available copies."
             });
@@ -99,6 +101,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             new SearchCategoryInfo
             {
                 Name = "Missing Files",
+                Icon = "⚠️",
                 Description =
                     "Investigate files that are no longer available at their recorded location."
             });
@@ -107,24 +110,9 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             new SearchCategoryInfo
             {
                 Name = "Metadata",
+                Icon = "📋",
                 Description =
                     "Find missing or incomplete track metadata."
-            });
-
-        Categories.Add(
-            new SearchCategoryInfo
-            {
-                Name = "Music",
-                Description =
-                    "Investigate BPM, Key and Duration information."
-            });
-
-        Categories.Add(
-            new SearchCategoryInfo
-            {
-                Name = "Providers",
-                Description =
-                    "Investigate provider associations for library tracks."
             });
 
         SelectedCategory =
@@ -176,17 +164,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             MetadataIssueCount =
                 GetIssueCount(
                     analysis,
-                    "Metadata"),
-
-            MusicIssueCount =
-                GetIssueCount(
-                    analysis,
-                    "Music"),
-
-            ProviderIssueCount =
-                GetIssueCount(
-                    analysis,
-                    "Providers")
+                    "Metadata")
         };
 
         UpdateCategoryCounts();
@@ -212,14 +190,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         SetCategoryCount(
             "Metadata",
             Summary.MetadataIssueCount);
-
-        SetCategoryCount(
-            "Music",
-            Summary.MusicIssueCount);
-
-        SetCategoryCount(
-            "Providers",
-            Summary.ProviderIssueCount);
     }
 
     private void SetCategoryCount(
@@ -247,6 +217,34 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     {
         SelectIssuesForCategory();
     }
+
+    // ============================================================
+    // Category Selection Command
+    // ============================================================
+
+    [RelayCommand]
+    private void SelectCategory(
+        SearchCategoryInfo? category)
+    {
+        if (category is null)
+            return;
+
+        // If the user clicks the already-selected category,
+        // refresh the issue list anyway.
+        if (ReferenceEquals(
+                SelectedCategory,
+                category))
+        {
+            SelectIssuesForCategory();
+            return;
+        }
+
+        SelectedCategory = category;
+    }
+
+    // ============================================================
+    // Select Issues For Category
+    // ============================================================
 
     private void SelectIssuesForCategory()
     {
@@ -279,60 +277,51 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         if (category is null)
             return;
 
+        // ============================================================
+        // Build a dictionary of saved Search issues once.
+        //
+        // This avoids repeatedly scanning the entire saved Search
+        // collection for every Analysis issue.
+        // ============================================================
+
+        var savedSearch =
+            GetCurrentSearchState(
+                analysis);
+
+        var savedIssues =
+            savedSearch?
+                .Issues
+                .ToDictionary(
+                    x => x.Id,
+                    StringComparer.OrdinalIgnoreCase)
+            ?? new Dictionary<string, SearchIssue>(
+                StringComparer.OrdinalIgnoreCase);
+
+        // ============================================================
+        // Build the current category
+        // ============================================================
+
         foreach (var issue in category.Issues)
         {
             var searchIssue =
-                new SearchIssue
-                {
-                    Id =
-                        issue.Id.ToString(),
+                CreateSearchIssue(issue);
 
-                    Category =
-                        issue.Category,
-
-                    Type =
-                        issue.Type,
-
-                    Title =
-                        issue.Title,
-
-                    Description =
-                        issue.Description,
-
-                    FilePath =
-                        issue.FilePath,
-
-                    IsSearched =
-                        false,
-
-                    HasResults =
-                        false
-                };
-
-            foreach (var relatedPath in
-                     issue.RelatedFilePaths)
+            if (savedIssues.TryGetValue(
+                    searchIssue.Id,
+                    out var savedIssue))
             {
-                if (string.IsNullOrWhiteSpace(
-                        relatedPath))
-                {
-                    continue;
-                }
-
-                if (string.Equals(
-                        relatedPath,
-                        issue.FilePath,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                searchIssue.RelatedFilePaths.Add(
-                    relatedPath);
+                RestoreSearchState(
+                    searchIssue,
+                    savedIssue);
             }
 
             Issues.Add(
                 searchIssue);
         }
+
+        // ============================================================
+        // Select first issue
+        // ============================================================
 
         SelectedIssue =
             Issues.FirstOrDefault();
@@ -340,8 +329,212 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         SearchStatus =
             Issues.Count == 0
                 ? "No issues found"
-                : $"{Issues.Count:N0} issues available";
+                : GetCategorySearchStatus();
     }
+
+    // ============================================================
+    // Create Search Issue
+    // ============================================================
+
+    private static SearchIssue CreateSearchIssue(
+        AnalysisIssue issue)
+    {
+        var searchIssue =
+            new SearchIssue
+            {
+                Id =
+                    issue.Id.ToString(),
+
+                Category =
+                    issue.Category,
+
+                Type =
+                    issue.Type,
+
+                Title =
+                    issue.Title,
+
+                Description =
+                    issue.Description,
+
+                Artist =
+                    issue.Artist,
+
+                TrackTitle =
+                    issue.TrackTitle,
+
+                FilePath =
+                    issue.FilePath,
+
+                IsSearched =
+                    false,
+
+                HasResults =
+                    false
+            };
+
+        foreach (var relatedPath in
+                 issue.RelatedFilePaths)
+        {
+            if (string.IsNullOrWhiteSpace(
+                    relatedPath))
+            {
+                continue;
+            }
+
+            if (string.Equals(
+                    relatedPath,
+                    issue.FilePath,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            searchIssue.RelatedFilePaths.Add(
+                relatedPath);
+        }
+
+        return searchIssue;
+    }
+
+    // ============================================================
+    // Restore Search State
+    // ============================================================
+
+    private static void RestoreSearchState(
+        SearchIssue target,
+        SearchIssue saved)
+    {
+        target.IsSearched =
+            saved.IsSearched;
+
+        target.HasResults =
+            saved.HasResults;
+
+        target.RelatedFilePaths.Clear();
+
+        foreach (var path in
+                 saved.RelatedFilePaths)
+        {
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                target.RelatedFilePaths.Add(path);
+            }
+        }
+
+        target.Results.Clear();
+
+        foreach (var result in
+                 saved.Results)
+        {
+            target.Results.Add(result);
+        }
+    }
+
+    // ============================================================
+    // Current Search State
+    // ============================================================
+
+    private static SearchState? GetCurrentSearchState(
+        LibraryAnalysisResult analysis)
+    {
+        var savedSearch =
+            App.Services
+                .SearchRepository
+                .CurrentSearch;
+
+        if (savedSearch is null)
+            return null;
+
+        if (savedSearch.AnalysisDate !=
+            analysis.AnalysisDate)
+        {
+            return null;
+        }
+
+        return savedSearch;
+    }
+
+    // ============================================================
+    // Save Search State
+    // ============================================================
+
+    private void SaveSearchState()
+    {
+        var analysis =
+            App.Services
+                .AnalysisRepository
+                .CurrentAnalysis;
+
+        if (analysis is null)
+            return;
+
+        var existing =
+            GetCurrentSearchState(
+                analysis);
+
+        var persistedIssues =
+            existing?.Issues
+                .ToDictionary(
+                    x => x.Id,
+                    StringComparer.OrdinalIgnoreCase)
+            ?? new Dictionary<
+                string,
+                SearchIssue>(
+                StringComparer.OrdinalIgnoreCase);
+
+        foreach (var issue in Issues)
+        {
+            persistedIssues[issue.Id] =
+                issue;
+        }
+
+        var state =
+            new SearchState
+            {
+                AnalysisDate =
+                    analysis.AnalysisDate,
+
+                SavedAt =
+                    DateTime.Now,
+
+                Issues =
+                    persistedIssues.Values.ToList()
+            };
+
+        App.Services
+            .SearchRepository
+            .Save(state);
+    }
+
+    // ============================================================
+    // Search Status
+    // ============================================================
+
+    private string GetCategorySearchStatus()
+    {
+        var searched =
+            Issues.Count(
+                x => x.IsSearched);
+
+        var withResults =
+            Issues.Count(
+                x => x.HasResults);
+
+        if (searched == 0)
+        {
+            return
+                $"{Issues.Count:N0} issues available";
+        }
+
+        return
+            $"{searched:N0} of {Issues.Count:N0} searched • " +
+            $"{withResults:N0} with results";
+    }
+
+    // ============================================================
+    // Category Mapping
+    // ============================================================
 
     private static string? GetAnalysisCategoryName(
         string searchCategory)
@@ -356,12 +549,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
             "Metadata" =>
                 "Metadata",
-
-            "Music" =>
-                "Music",
-
-            "Providers" =>
-                "Providers",
 
             _ =>
                 null
@@ -407,6 +594,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             issue.HasResults =
                 issue.Results.Count > 0;
 
+            SaveSearchState();
+
             SearchStatus =
                 issue.HasResults
                     ? $"{issue.Results.Count:N0} result(s) found"
@@ -417,6 +606,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             issue.IsSearched = true;
 
             issue.HasResults = false;
+
+            SaveSearchState();
 
             SearchStatus =
                 "Search failed";
@@ -430,27 +621,31 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     }
 
     // ============================================================
-    // Search All Duplicates
+    // Search All
     // ============================================================
 
     [RelayCommand]
-    private async Task SearchAllDuplicates()
+    private async Task SearchAll(
+        SearchCategoryInfo? category)
     {
         if (IsSearching)
             return;
 
-        var duplicateIssues =
+        if (category is null)
+            return;
+
+        var categoryIssues =
             Issues
                 .Where(x =>
                     x.Category.Equals(
-                        "Duplicates",
+                        GetAnalysisCategoryName(category.Name),
                         StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-        if (duplicateIssues.Count == 0)
+        if (categoryIssues.Count == 0)
         {
             SearchStatus =
-                "No duplicate issues found";
+                $"No {category.Name.ToLowerInvariant()} issues found";
 
             return;
         }
@@ -461,11 +656,12 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         var resultsFound = 0;
 
         SearchStatus =
-            $"Searching 0 of {duplicateIssues.Count:N0} duplicates...";
+            $"Searching 0 of {categoryIssues.Count:N0} " +
+            $"{category.Name.ToLowerInvariant()}...";
 
         try
         {
-            foreach (var issue in duplicateIssues)
+            foreach (var issue in categoryIssues)
             {
                 CancellationToken.None
                     .ThrowIfCancellationRequested();
@@ -479,8 +675,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
                 foreach (var result in results)
                 {
-                    issue.Results.Add(
-                        result);
+                    issue.Results.Add(result);
                 }
 
                 issue.IsSearched = true;
@@ -498,18 +693,27 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
                 SearchStatus =
                     $"Searching {searched:N0} of " +
-                    $"{duplicateIssues.Count:N0} duplicates...";
+                    $"{categoryIssues.Count:N0} " +
+                    $"{category.Name.ToLowerInvariant()}...";
             }
 
+            // Save after the entire category has completed.
+            SaveSearchState();
+
             SearchStatus =
-                $"{searched:N0} duplicates searched • " +
+                $"{searched:N0} {category.Name.ToLowerInvariant()} searched • " +
                 $"{resultsFound:N0} candidates found";
         }
         catch
         {
+            // Preserve any searches that completed before
+            // the failure occurred.
+            SaveSearchState();
+
             SearchStatus =
                 $"Search stopped after {searched:N0} of " +
-                $"{duplicateIssues.Count:N0} duplicates";
+                $"{categoryIssues.Count:N0} " +
+                $"{category.Name.ToLowerInvariant()}";
 
             throw;
         }

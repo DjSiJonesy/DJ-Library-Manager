@@ -74,6 +74,11 @@ public sealed class ApplicationServices
     public AnalysisService Analysis { get; }
 
     /// <summary>
+    /// Stores the latest Search state.
+    /// </summary>
+    public SearchRepository SearchRepository { get; }
+
+    /// <summary>
     /// Coordinates Search operations.
     /// </summary>
     public SearchService Search { get; }
@@ -150,6 +155,9 @@ public sealed class ApplicationServices
         // ========================================================
         // Search
         // ========================================================
+
+        SearchRepository =
+            new SearchRepository();
 
         var duplicateSearchService =
             new DuplicateSearchService(

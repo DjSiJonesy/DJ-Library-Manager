@@ -65,6 +65,15 @@ public partial class SearchIssue : ObservableObject
     public ObservableCollection<string> RelatedFilePaths { get; }
         = new();
 
+    /// <summary>
+    /// Total number of files in the duplicate group.
+    ///
+    /// RelatedFilePaths contains the other copies, while the
+    /// current issue represents the first copy.
+    /// </summary>
+    public int CopyCount =>
+        RelatedFilePaths.Count + 1;
+
     // ============================================================
     // Search State
     // ============================================================

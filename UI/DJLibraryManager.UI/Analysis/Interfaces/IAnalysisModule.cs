@@ -1,4 +1,5 @@
 ﻿using DJLibraryManager.UI.Analysis.Models;
+using DJLibraryManager.UI.Analysis.Modules;
 using DJLibraryManager.UI.Models.Media;
 
 namespace DJLibraryManager.UI.Analysis.Interfaces;

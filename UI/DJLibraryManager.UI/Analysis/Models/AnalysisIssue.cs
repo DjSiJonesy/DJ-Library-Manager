@@ -35,10 +35,28 @@ public sealed class AnalysisIssue
     /// </summary>
     public string Description { get; init; } = string.Empty;
 
+    // ============================================================
+    // Media
+    // ============================================================
+
+    /// <summary>
+    /// Artist associated with the affected track.
+    /// </summary>
+    public string Artist { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Title of the affected track.
+    /// </summary>
+    public string TrackTitle { get; init; } = string.Empty;
+
     /// <summary>
     /// The file this issue relates to.
     /// </summary>
     public string FilePath { get; init; } = string.Empty;
+
+    // ============================================================
+    // Related Files
+    // ============================================================
 
     /// <summary>
     /// Other files belonging to the same issue.
@@ -48,6 +66,10 @@ public sealed class AnalysisIssue
     /// </summary>
     public IReadOnlyList<string> RelatedFilePaths { get; init; }
         = [];
+
+    // ============================================================
+    // Metadata
+    // ============================================================
 
     /// <summary>
     /// Metadata fields that are missing from the affected track.
