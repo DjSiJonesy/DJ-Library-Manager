@@ -1,7 +1,6 @@
 <UserControl
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:DJLibraryManager.UI.Controls.Common"
     x:Class="DJLibraryManager.UI.Controls.Common.HealthBar"
     x:Name="Root">
 
@@ -12,12 +11,15 @@
             Minimum="0"
             Maximum="100"
             Height="10"
-            Value="{Binding Value, ElementName=Root}"/>
+            Value="{Binding Value, ElementName=Root}"
+            Foreground="{Binding HealthBrush, ElementName=Root}"/>
 
         <TextBlock
             HorizontalAlignment="Center"
             Classes="caption"
-            Text="{Binding Value, ElementName=Root, StringFormat='{}{0}%'}"/>
+            Text="{Binding Value,
+                           ElementName=Root,
+                           StringFormat='{}{0}%'}"/>
 
     </StackPanel>
 

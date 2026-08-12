@@ -2,6 +2,7 @@
 using DJLibraryManager.UI.Analysis.Engines;
 using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Analysis.Modules;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +14,11 @@ namespace DJLibraryManager.UI.Services;
 public sealed class AnalysisService
 {
     private readonly LibraryRepository _libraryRepository;
+
+    /// <summary>
+    /// Raised as each track is analysed.
+    /// </summary>
+    public event EventHandler<AnalysisProgressEventArgs>? ProgressChanged;
 
     public AnalysisService(
         LibraryRepository libraryRepository)
@@ -37,8 +43,26 @@ public sealed class AnalysisService
             new ProviderAnalysisModule()
         ]);
 
-        return await engine.AnalyseAsync(
-            mediaItems,
-            cancellationToken);
+        engine.ProgressChanged += Engine_ProgressChanged;
+
+        try
+        {
+            return await Task.Run(
+                () => engine.AnalyseAsync(
+                    mediaItems,
+                    cancellationToken),
+                cancellationToken);
+        }
+        finally
+        {
+            engine.ProgressChanged -= Engine_ProgressChanged;
+        }
+    }
+
+    private void Engine_ProgressChanged(
+        object? sender,
+        AnalysisProgressEventArgs e)
+    {
+        ProgressChanged?.Invoke(this, e);
     }
 }

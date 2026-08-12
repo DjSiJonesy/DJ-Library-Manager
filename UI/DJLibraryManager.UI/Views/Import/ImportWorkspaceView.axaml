@@ -12,13 +12,16 @@
         <!-- Header -->
         <!-- ===================================================== -->
 
-        <workflow:WorkflowHeader
+       <workflow:WorkflowHeader
             Grid.Row="0"
             Title="Import"
             Description="1st: Import DJ provider libraries. 2nd: Import the discovered media into the DIASISS master library."
             PreviousText="← Discovery"
             PreviousCommand="{Binding GoDiscoveryCommand}"
-            NextText="Analysis →"/>
+            NextText="Analysis →"
+            NextCommand="{Binding GoAnalysisCommand}"
+            ShowPrevious="True"
+            ShowNext="True"/>
 
         <!-- ===================================================== -->
         <!-- Content -->

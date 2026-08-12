@@ -13,11 +13,15 @@
         <!-- ===================================================== -->
 
         <workflow:WorkflowHeader
-            Grid.Row="0"
-            Title="Analysis"
-            Description="Analyse the DIASISS media library and identify issues before searching for improvements."
-            PreviousText="← Import"
-            NextText="Search →"/>
+                Grid.Row="0"
+                Title="Analysis"
+                Description="Analyse the DIASISS library and identify issues before searching for improvements."
+                PreviousText="← Import"
+                PreviousCommand="{Binding PreviousCommand}"
+                NextText="Search →"
+                NextCommand="{Binding NextCommand}"
+                ShowPrevious="True"
+                ShowNext="True"/>
 
         <!-- ===================================================== -->
         <!-- Content -->
@@ -44,7 +48,8 @@
 
                 Progress="{Binding Progress}"
 
-                CurrentStage="{Binding CurrentStage}"
+                Status="{Binding Status}"
+                StatusBrush="{Binding StatusBrush}"
                 CurrentTrack="{Binding CurrentTrack}"
 
                 AnalyseCommand="{Binding AnalyseLibraryCommand}" />

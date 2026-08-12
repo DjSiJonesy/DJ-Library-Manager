@@ -30,12 +30,11 @@ public partial class DashboardViewModel : ViewModelBase
         ["Serato"] = "Serato4.png",
         ["Traktor"] = "Traktor.jpeg",
         ["EngineDJ"] = "EngineDJ.png"
-
     };
 
     public event EventHandler<ProviderSelectedEventArgs>? ProviderSelected;
     public event EventHandler<MediaLocationSelectedEventArgs>? MediaLocationSelected;
-    public event EventHandler? LibraryExplorerSelected;    
+    public event EventHandler? LibraryExplorerSelected;
 
     public ObservableCollection<ProviderInfo> InstalledProviders { get; } = new();
 
@@ -43,10 +42,6 @@ public partial class DashboardViewModel : ViewModelBase
 
     public LibraryOverviewViewModel LibraryOverview { get; } = new();
 
-    /// <summary>
-    /// The Dashboard workspace currently being displayed.
-    /// Used to update workflow cards as discovery progresses.
-    /// </summary>
     public DashboardWorkspaceViewModel? DashboardWorkspace { get; set; }
 
     [ObservableProperty]
@@ -73,6 +68,7 @@ public partial class DashboardViewModel : ViewModelBase
 
         DashboardWorkspace?.UpdateDiscoveryStatus();
         DashboardWorkspace?.UpdateImportStatus();
+        DashboardWorkspace?.UpdateAnalysisStatus();
     }
 
     private void OnDiscoveryChanged(object? sender, EventArgs e)
@@ -92,7 +88,7 @@ public partial class DashboardViewModel : ViewModelBase
             var provider = CreateProvider(discoveredProvider);
 
             var metadata =
-        await repository.GetProviderImportAsync(provider.Name);
+                await repository.GetProviderImportAsync(provider.Name);
 
             if (provider.Installed && metadata is not null)
             {
@@ -112,11 +108,9 @@ public partial class DashboardViewModel : ViewModelBase
         var discoveryService = new MediaLocationDiscoveryService();
         var repository = App.Services.MediaLocationRepository;
 
-        // Refresh the repository.
         repository.Clear();
         repository.Save(discoveryService.DiscoverLocations());
 
-        // Populate the Dashboard from the repository.
         MediaLocations.Clear();
 
         foreach (var location in repository.MediaLocations.OrderBy(x => x.Name))
@@ -132,7 +126,9 @@ public partial class DashboardViewModel : ViewModelBase
             return;
 
         var provider = InstalledProviders.FirstOrDefault(
-            p => p.Name.Equals(providerName, StringComparison.OrdinalIgnoreCase));
+            p => p.Name.Equals(
+                providerName,
+                StringComparison.OrdinalIgnoreCase));
 
         if (provider is null || !provider.Installed)
             return;
@@ -168,8 +164,14 @@ public partial class DashboardViewModel : ViewModelBase
     [RelayCommand]
     private void OpenLibraryExplorer()
     {
-        LibraryExplorerSelected?.Invoke(this, EventArgs.Empty);
+        LibraryExplorerSelected?.Invoke(
+            this,
+            EventArgs.Empty);
     }
+
+    // ============================================================
+    // Workflow Navigation
+    // ============================================================
 
     /// <summary>
     /// Opens the Discovery workflow.
@@ -202,6 +204,46 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Opens the Search workflow.
+    /// </summary>
+    //[RelayCommand]
+    //private void OpenSearch()
+    //{
+    //    App.Services.ApplicationState.NavigateTo(
+    //        WorkspaceType.Search);
+    //}
+
+    /// <summary>
+    /// Opens the Improve workflow.
+    /// </summary>
+    //[RelayCommand]
+    //private void OpenImprove()
+    //{
+    //    App.Services.ApplicationState.NavigateTo(
+    //        WorkspaceType.Improve);
+    //}
+
+    /// <summary>
+    /// Opens the Structure workflow.
+    /// </summary>
+    //[RelayCommand]
+    //private void OpenStructure()
+    //{
+    //    App.Services.ApplicationState.NavigateTo(
+    //        WorkspaceType.Structure);
+    //}
+
+    /// <summary>
+    /// Opens the Synchronise workflow.
+    /// </summary>
+    //[RelayCommand]
+    //private void OpenSynchronise()
+    //{
+    //    App.Services.ApplicationState.NavigateTo(
+    //        WorkspaceType.Synchronise);
+    //}
+
+    /// <summary>
     /// Returns to the Dashboard workspace.
     /// </summary>
     [RelayCommand]
@@ -210,6 +252,10 @@ public partial class DashboardViewModel : ViewModelBase
         App.Services.ApplicationState.NavigateTo(
             WorkspaceType.Dashboard);
     }
+
+    // ============================================================
+    // Provider Import
+    // ============================================================
 
     /// <summary>
     /// Imports the selected provider's library.
@@ -238,9 +284,12 @@ public partial class DashboardViewModel : ViewModelBase
         DashboardWorkspace?.UpdateImportStatus();
     }
 
-    private ProviderInfo CreateProvider(ProviderDiscoveryResult provider)
+    private ProviderInfo CreateProvider(
+        ProviderDiscoveryResult provider)
     {
-        ProviderLogos.TryGetValue(provider.Name, out var logoFile);
+        ProviderLogos.TryGetValue(
+            provider.Name,
+            out var logoFile);
 
         Bitmap? logo = null;
 
@@ -248,7 +297,8 @@ public partial class DashboardViewModel : ViewModelBase
         {
             logo = new Bitmap(
                 AssetLoader.Open(
-                    new Uri($"avares://DJLibraryManager.UI/Assets/Providers/{logoFile}")));
+                    new Uri(
+                        $"avares://DJLibraryManager.UI/Assets/Providers/{logoFile}")));
         }
 
         return new ProviderInfo
@@ -273,11 +323,13 @@ public sealed class ProviderSelectedEventArgs : EventArgs
 {
     public ProviderInfo Provider { get; }
 
-    public ProviderSelectedEventArgs(ProviderInfo provider)
+    public ProviderSelectedEventArgs(
+        ProviderInfo provider)
     {
         Provider = provider;
     }
 }
+
 /// <summary>
 /// Event arguments raised when a media location is selected.
 /// </summary>
@@ -285,7 +337,8 @@ public sealed class MediaLocationSelectedEventArgs : EventArgs
 {
     public MediaLocation MediaLocation { get; }
 
-    public MediaLocationSelectedEventArgs(MediaLocation mediaLocation)
+    public MediaLocationSelectedEventArgs(
+        MediaLocation mediaLocation)
     {
         MediaLocation = mediaLocation;
     }

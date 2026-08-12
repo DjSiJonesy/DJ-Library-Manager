@@ -5,6 +5,7 @@ using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.Models.Operations;
 using DJLibraryManager.UI.Services.Import;
+using DJLibraryManager.UI.ViewModels.Dashboard;
 using DJLibraryManager.UI.ViewModels.Workspace;
 using System;
 using System.Collections.Generic;
@@ -92,17 +93,14 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
 
             if (record is not null)
             {
-                // Populate all comparison values FIRST
                 mediaLocation.LastImported = record.LastImported;
                 mediaLocation.LastDiscoveryDate = record.DiscoveryDate;
                 mediaLocation.ImportedTotalFiles = record.TotalFiles;
 
-                // Import statistics
                 mediaLocation.ImportedFiles = record.ImportedFiles;
                 mediaLocation.SkippedFiles = record.SkippedFiles;
                 mediaLocation.FailedFiles = record.FailedFiles;
 
-                // Set ImportState LAST so HasChanges evaluates correctly
                 mediaLocation.ImportState = record.ImportState;
             }
 
@@ -113,12 +111,10 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
 
         OnPropertyChanged(nameof(TotalDrives));
         OnPropertyChanged(nameof(TotalFolders));
-
         OnPropertyChanged(nameof(TotalDiscovered));
         OnPropertyChanged(nameof(TotalExisting));
         OnPropertyChanged(nameof(TotalImported));
         OnPropertyChanged(nameof(TotalFailed));
-
         OnPropertyChanged(nameof(TotalAudioFiles));
         OnPropertyChanged(nameof(TotalVideoFiles));
     }
@@ -127,7 +123,7 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
         MediaLocations.Count;
 
     public int TotalFolders =>
-    MediaLocations.Sum(x => x.FolderCount);
+        MediaLocations.Sum(x => x.FolderCount);
 
     /// <summary>
     /// Total media files currently discovered.
@@ -162,6 +158,10 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
     public int TotalVideoFiles =>
         MediaLocations.Sum(x => x.Summary.VideoFileCount);
 
+    // ============================================================
+    // Workflow Navigation
+    // ============================================================
+
     /// <summary>
     /// Return to Discovery.
     /// </summary>
@@ -171,6 +171,20 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
         App.Services.ApplicationState.NavigateTo(
             WorkspaceType.Discovery);
     }
+
+    /// <summary>
+    /// Continue to Analysis.
+    /// </summary>
+    [RelayCommand]
+    private void GoAnalysis()
+    {
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Analysis);
+    }
+
+    // ============================================================
+    // Media Location
+    // ============================================================
 
     /// <summary>
     /// Opens the selected media location.
@@ -185,6 +199,10 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
         _dashboard.SelectMediaLocationCommand.Execute(
             mediaLocation.Summary.MediaLocation);
     }
+
+    // ============================================================
+    // Provider Import
+    // ============================================================
 
     /// <summary>
     /// Imports a provider library.
@@ -233,6 +251,10 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
         }
     }
 
+    // ============================================================
+    // Media Import
+    // ============================================================
+
     /// <summary>
     /// Imports all media beneath the selected media location.
     /// </summary>
@@ -255,8 +277,12 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
 
             mediaLocation.LastImported = DateTime.Now;
 
-            mediaLocation.LastDiscoveryDate = mediaLocation.Summary.DiscoveryDate;
-            mediaLocation.ImportedTotalFiles = mediaLocation.Summary.TotalMediaFiles;
+            mediaLocation.LastDiscoveryDate =
+                mediaLocation.Summary.DiscoveryDate;
+
+            mediaLocation.ImportedTotalFiles =
+                mediaLocation.Summary.TotalMediaFiles;
+
             mediaLocation.ImportedFiles = result.Imported;
             mediaLocation.SkippedFiles = result.Skipped;
             mediaLocation.FailedFiles = result.Failed;
@@ -267,18 +293,20 @@ public partial class ImportWorkspaceViewModel : WorkspaceViewModel
                 new MediaImportRecord
                 {
                     LocationPath = mediaLocation.Path,
-
                     ImportState = mediaLocation.ImportState,
-
                     LastImported = mediaLocation.LastImported,
 
-                    // Informational only
-                    DiscoveryDate = mediaLocation.Summary.DiscoveryDate,
+                    DiscoveryDate =
+                        mediaLocation.Summary.DiscoveryDate,
 
-                    // Discovery snapshot
-                    FolderCount = mediaLocation.Summary.FolderCount,
-                    AudioFileCount = mediaLocation.Summary.AudioFileCount,
-                    VideoFileCount = mediaLocation.Summary.VideoFileCount,
+                    FolderCount =
+                        mediaLocation.Summary.FolderCount,
+
+                    AudioFileCount =
+                        mediaLocation.Summary.AudioFileCount,
+
+                    VideoFileCount =
+                        mediaLocation.Summary.VideoFileCount,
 
                     ImportedFiles = result.Imported,
                     SkippedFiles = result.Skipped,

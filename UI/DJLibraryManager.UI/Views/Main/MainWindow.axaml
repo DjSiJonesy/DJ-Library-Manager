@@ -33,76 +33,116 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-<!-- Header -->
+        <!-- ===================================================== -->
+        <!-- Header -->
+        <!-- ===================================================== -->
 
-<Grid
-    Grid.Row="0"
-    ColumnDefinitions="Auto,*,Auto"
-    ColumnSpacing="20">
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="Auto,*,Auto"
+            ColumnSpacing="20">
 
-    <!-- ========================================================= -->
-    <!-- Application Logo                                           -->
-    <!-- ========================================================= -->
+            <!-- ================================================= -->
+            <!-- Application Logo -->
+            <!-- ================================================= -->
 
-    <Border
-        Grid.Column="0"
-        Height="90"
-        VerticalAlignment="Center"
-        HorizontalAlignment="Left">
+            <Border
+                Grid.Column="0"
+                Height="90"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Left">
 
-        <Image
-            Source="avares://DJLibraryManager.UI/Assets/Logos/DIASISS_Logo.png"
-            Stretch="Uniform"/>
+                <Image
+                    Source="avares://DJLibraryManager.UI/Assets/Logos/DIASISS_Logo.png"
+                    Stretch="Uniform"/>
 
-    </Border>
+            </Border>
 
-    <!-- ========================================================= -->
-    <!-- User / Licence Information                                 -->
-    <!-- ========================================================= -->
+            <!-- ================================================= -->
+            <!-- User / Licence Information -->
+            <!-- ================================================= -->
 
-    <Border
-        Grid.Column="2"
-        Padding="18,12"
-        VerticalAlignment="Center"
-        CornerRadius="10"
-        BorderBrush="{DynamicResource Brush.Border}"
-        BorderThickness="1">
+            <Border
+                Grid.Column="2"
+                Padding="18,12"
+                VerticalAlignment="Center"
+                CornerRadius="10"
+                BorderBrush="{DynamicResource Brush.Border}"
+                BorderThickness="1">
 
-        <StackPanel
-            HorizontalAlignment="Center">
+                <StackPanel
+                    HorizontalAlignment="Center">
 
-            <TextBlock
-                HorizontalAlignment="Center"
-                FontSize="15"
-                FontWeight="SemiBold"
-                Text="Guest User"/>
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        Text="Guest User"/>
 
-            <TextBlock
-                Margin="0,4,0,0"
-                Classes="caption"
-                HorizontalAlignment="Center"
-                Text="Community Edition"/>
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Classes="caption"
+                        HorizontalAlignment="Center"
+                        Text="Community Edition"/>
 
-        </StackPanel>
+                </StackPanel>
 
-    </Border>
+            </Border>
 
-</Grid>
+        </Grid>
 
+        <!-- ===================================================== -->
         <!-- Main Content -->
+        <!-- ===================================================== -->
 
         <ContentControl
             Grid.Row="2"
             Content="{Binding Dashboard}" />
 
+        <!-- ===================================================== -->
         <!-- Footer -->
+        <!-- ===================================================== -->
 
-        <TextBlock
+        <Grid
             Grid.Row="4"
             Margin="0,2,0,0"
-            Classes="caption"
-            HorizontalAlignment="Right"
-            Text="{Binding StatusText}" />
+            ColumnDefinitions="*,Auto">
+
+            <!-- ================================================= -->
+            <!-- SMSounds Branding -->
+            <!-- ================================================= -->
+
+            <StackPanel
+                Grid.Column="0"
+                Orientation="Horizontal"
+                Spacing="6"
+                VerticalAlignment="Center">
+
+                <TextBlock
+                    Classes="caption"
+                    VerticalAlignment="Center"
+                    Text="©"/>
+
+                <Image
+                    Source="avares://DJLibraryManager.UI/Assets/Logos/SMSounds_Wordmark.png"
+                    Height="8"
+                    VerticalAlignment="Center"
+                    Stretch="Uniform"/>
+
+            </StackPanel>
+
+            <!-- ================================================= -->
+            <!-- Application Status -->
+            <!-- ================================================= -->
+
+            <TextBlock
+                Grid.Column="1"
+                Classes="caption"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Right"
+                Text="{Binding StatusText}" />
+
+        </Grid>
 
     </Grid>
 

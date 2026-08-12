@@ -1,5 +1,4 @@
 ﻿using Avalonia.Media;
-using DJLibraryManager.Core.Services;
 using DJLibraryManager.Core.Workflow;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Services.Discovery;
@@ -23,7 +22,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
     public DashboardGuidanceViewModel Guidance { get; } = new();
 
     private readonly DashboardViewModel _dashboard;
-    private readonly DiscoveryValidationService _validationService = new();
     private readonly ImportValidationService _importValidationService = new();
 
     public void UpdateDiscoveryStatus()
@@ -40,17 +38,13 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             _dashboard.MediaLocations.Count;
 
         discoverCard.PrimaryStatisticTitle = "Providers Found";
-        discoverCard.PrimaryStatisticValue = providerCount.ToString();
+        discoverCard.PrimaryStatisticValue = providerCount.ToString("N0");
 
         discoverCard.SecondaryStatisticTitle = "Media Locations";
-        discoverCard.SecondaryStatisticValue = mediaLocationCount.ToString();
+        discoverCard.SecondaryStatisticValue = mediaLocationCount.ToString("N0");
 
         var discoverySessions =
             App.Services.DiscoveryRepository.DiscoverySessions;
-
-        //
-        // Not all media locations have been discovered.
-        //
 
         if (discoverySessions.Count < mediaLocationCount)
         {
@@ -58,19 +52,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             discoverCard.StatusBrush = Brushes.DeepSkyBlue;
             return;
         }
-
-        //
-        // One or more discovered locations have changed.
-        //
-
-        //
-        // Validation will be performed explicitly by the
-        // Discovery workspace (Recheck Drives).
-        //
-
-        //
-        // Everything is up to date.
-        //
 
         discoverCard.Status = "Discovery Complete";
         discoverCard.StatusBrush = Brushes.LimeGreen;
@@ -83,9 +64,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
 
         var importCard = WorkflowCards[1];
 
-        var installedProviders =
-            _dashboard.InstalledProviders.Count(x => x.Installed);
-
         var importedProviders =
             _dashboard.InstalledProviders.Count(x =>
                 x.Installed &&
@@ -96,17 +74,13 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                 .LibraryStatisticsService
                 .GetStatisticsAsync();
 
-                importCard.PrimaryStatisticTitle = "Tracks Imported";
-                importCard.PrimaryStatisticValue =
-                    statistics.LibraryTrackCount.ToString("N0");
+        importCard.PrimaryStatisticTitle = "Tracks Imported";
+        importCard.PrimaryStatisticValue =
+            statistics.LibraryTrackCount.ToString("N0");
 
-                importCard.SecondaryStatisticTitle = "Playlists";
-                importCard.SecondaryStatisticValue =
-                    statistics.LibraryPlaylistCount.ToString("N0");
-
-        //
-        // Not all providers imported.
-        //
+        importCard.SecondaryStatisticTitle = "Playlists";
+        importCard.SecondaryStatisticValue =
+            statistics.LibraryPlaylistCount.ToString("N0");
 
         if (importedProviders == 0)
         {
@@ -115,16 +89,8 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             return;
         }
 
-        //
-        // Not all discovered media locations imported.
-        //
-
         var discoverySessions =
             App.Services.DiscoveryRepository.DiscoverySessions;
-
-        //
-        // Import cannot be complete until Discovery is complete.
-        //
 
         if (discoverySessions.Count < _dashboard.MediaLocations.Count)
         {
@@ -158,26 +124,54 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             }
         }
 
-        //
-        // Everything is fully imported and current.
-        //
-
         importCard.Status = "Import Complete";
         importCard.StatusBrush = Brushes.LimeGreen;
+    }
+
+    /// <summary>
+    /// Updates the Analysis workflow card from the
+    /// latest persisted analysis result.
+    /// </summary>
+    public void UpdateAnalysisStatus()
+    {
+        if (WorkflowCards.Count < 3)
+            return;
+
+        var analysisCard = WorkflowCards[2];
+
+        var analysis =
+            App.Services.AnalysisRepository.CurrentAnalysis;
+
+        if (analysis is null)
+        {
+            analysisCard.Status = "Ready";
+            analysisCard.StatusBrush = Brushes.DeepSkyBlue;
+
+            analysisCard.PrimaryStatisticTitle = "Health Score";
+            analysisCard.PrimaryStatisticValue = "—";
+
+            analysisCard.SecondaryStatisticTitle = "Issues Found";
+            analysisCard.SecondaryStatisticValue = "—";
+
+            return;
+        }
+
+        analysisCard.Status = "Analysis Complete";
+        analysisCard.StatusBrush = Brushes.LimeGreen;
+
+        analysisCard.PrimaryStatisticTitle = "Health Score";
+        analysisCard.PrimaryStatisticValue =
+            $"{analysis.HealthScore:F1}%";
+
+        analysisCard.SecondaryStatisticTitle = "Issues Found";
+        analysisCard.SecondaryStatisticValue =
+            analysis.TotalIssues.ToString("N0");
     }
 
     public DashboardWorkspaceViewModel(
         DashboardViewModel dashboard)
     {
         _dashboard = dashboard;
-
-        var discovery = WorkflowDefinitions.Discovery;
-        var import = WorkflowDefinitions.Import;
-        var analysis = WorkflowDefinitions.Analysis;
-        var search = WorkflowDefinitions.Search;
-        var improve = WorkflowDefinitions.Improve;
-        var structure = WorkflowDefinitions.Structure;
-        var synchronise = WorkflowDefinitions.Synchronise;
 
         WorkflowCards.Add(new WorkflowCardViewModel
         {
@@ -218,10 +212,10 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             StatusBrush = Brushes.DeepSkyBlue,
 
             PrimaryStatisticTitle = "Health Score",
-            PrimaryStatisticValue = "84%",
+            PrimaryStatisticValue = "—",
 
             SecondaryStatisticTitle = "Issues Found",
-            SecondaryStatisticValue = "126"
+            SecondaryStatisticValue = "—"
         });
 
         WorkflowCards.Add(new WorkflowCardViewModel
@@ -286,7 +280,8 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
 
         UpdateDiscoveryStatus();
         _ = UpdateImportStatus();
+        UpdateAnalysisStatus();
 
         Guidance.Reset();
-    } 
+    }
 }

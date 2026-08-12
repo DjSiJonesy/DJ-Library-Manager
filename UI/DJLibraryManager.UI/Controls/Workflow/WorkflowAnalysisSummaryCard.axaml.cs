@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media;
 
 namespace DJLibraryManager.UI.Controls.Workflow;
 
@@ -73,15 +74,26 @@ public partial class WorkflowAnalysisSummaryCard : UserControl
         set => SetValue(ProgressProperty, value);
     }
 
-    public static readonly StyledProperty<string> CurrentStageProperty =
+    public static readonly StyledProperty<string> StatusProperty =
         AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, string>(
-            nameof(CurrentStage),
+            nameof(Status),
             "Ready");
 
-    public string CurrentStage
+    public string Status
     {
-        get => GetValue(CurrentStageProperty);
-        set => SetValue(CurrentStageProperty, value);
+        get => GetValue(StatusProperty);
+        set => SetValue(StatusProperty, value);
+    }
+
+    public static readonly StyledProperty<IBrush> StatusBrushProperty =
+        AvaloniaProperty.Register<WorkflowAnalysisSummaryCard, IBrush>(
+            nameof(StatusBrush),
+            Brushes.Gray);
+
+    public IBrush StatusBrush
+    {
+        get => GetValue(StatusBrushProperty);
+        set => SetValue(StatusBrushProperty, value);
     }
 
     public static readonly StyledProperty<string> CurrentTrackProperty =
