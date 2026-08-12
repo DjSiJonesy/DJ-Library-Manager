@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DJLibraryManager.UI.Analysis.Models;
 
@@ -20,7 +21,7 @@ public sealed class AnalysisIssue
 
     /// <summary>
     /// Type of issue.
-    /// Example: MissingGenre, DuplicateTrack.
+    /// Example: MetadataIncomplete, DuplicateTrack.
     /// </summary>
     public string Type { get; init; } = string.Empty;
 
@@ -38,6 +39,24 @@ public sealed class AnalysisIssue
     /// The file this issue relates to.
     /// </summary>
     public string FilePath { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Other files belonging to the same issue.
+    ///
+    /// Used by duplicate analysis to represent the complete
+    /// duplicate group.
+    /// </summary>
+    public IReadOnlyList<string> RelatedFilePaths { get; init; }
+        = [];
+
+    /// <summary>
+    /// Metadata fields that are missing from the affected track.
+    ///
+    /// Used by Metadata analysis. Empty for issue types where
+    /// missing metadata fields are not relevant.
+    /// </summary>
+    public IReadOnlyList<string> MissingFields { get; init; }
+        = [];
 
     /// <summary>
     /// Indicates whether this issue can be automatically corrected.

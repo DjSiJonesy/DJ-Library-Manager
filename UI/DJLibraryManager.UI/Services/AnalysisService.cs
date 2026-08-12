@@ -10,6 +10,10 @@ namespace DJLibraryManager.UI.Services;
 
 /// <summary>
 /// Executes a complete library analysis.
+///
+/// Analysis determines the current health of the DIASISS library.
+/// It does not search external sources and does not modify the
+/// library.
 /// </summary>
 public sealed class AnalysisService
 {
@@ -23,7 +27,10 @@ public sealed class AnalysisService
     public AnalysisService(
         LibraryRepository libraryRepository)
     {
-        _libraryRepository = libraryRepository;
+        _libraryRepository =
+            libraryRepository
+            ?? throw new ArgumentNullException(
+                nameof(libraryRepository));
     }
 
     /// <summary>
@@ -32,30 +39,56 @@ public sealed class AnalysisService
     public async Task<LibraryAnalysisResult> AnalyseLibraryAsync(
         CancellationToken cancellationToken = default)
     {
-        var mediaItems = await _libraryRepository.LoadAsync();
+        var mediaItems =
+            await _libraryRepository.LoadAsync();
 
-        var engine = new AnalysisEngine(
-        [
-            new MetadataAnalysisModule(),
-            new FileIntegrityAnalysisModule(),
-            new DuplicateAnalysisModule(),
-            new MusicAnalysisModule(),
-            new ProviderAnalysisModule()
-        ]);
+        var engine =
+            new AnalysisEngine(
+            [
+                // =================================================
+                // Metadata
+                // =================================================
+                //
+                // Checks completeness of all required track
+                // metadata including Artist, Title, Album, Genre,
+                // Year, BPM, Key and Duration.
+                //
+                new MetadataAnalysisModule(),
 
-        engine.ProgressChanged += Engine_ProgressChanged;
+                // =================================================
+                // File Integrity
+                // =================================================
+                //
+                // Checks whether files recorded in the library
+                // are actually available.
+                //
+                new FileIntegrityAnalysisModule(),
+
+                // =================================================
+                // Duplicates
+                // =================================================
+                //
+                // Identifies duplicate groups within the library.
+                //
+                new DuplicateAnalysisModule()
+            ]);
+
+        engine.ProgressChanged +=
+            Engine_ProgressChanged;
 
         try
         {
             return await Task.Run(
-                () => engine.AnalyseAsync(
-                    mediaItems,
-                    cancellationToken),
+                () =>
+                    engine.AnalyseAsync(
+                        mediaItems,
+                        cancellationToken),
                 cancellationToken);
         }
         finally
         {
-            engine.ProgressChanged -= Engine_ProgressChanged;
+            engine.ProgressChanged -=
+                Engine_ProgressChanged;
         }
     }
 
@@ -63,6 +96,8 @@ public sealed class AnalysisService
         object? sender,
         AnalysisProgressEventArgs e)
     {
-        ProgressChanged?.Invoke(this, e);
+        ProgressChanged?.Invoke(
+            this,
+            e);
     }
 }

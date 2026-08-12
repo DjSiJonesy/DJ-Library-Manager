@@ -1,11 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using DJLibraryManager.UI.Models.Import;
-using DJLibraryManager.UI.ViewModels.Dashboard;
-using DJLibraryManager.UI.ViewModels.Workspace;
-using DJLibraryManager.UI.ViewModels.Library;
-using DJLibraryManager.UI.ViewModels.Analysis;
 using DJLibraryManager.UI.Models;
+using DJLibraryManager.UI.Models.Import;
+using DJLibraryManager.UI.ViewModels.Analysis;
+using DJLibraryManager.UI.ViewModels.Dashboard;
 using DJLibraryManager.UI.ViewModels.Import;
+using DJLibraryManager.UI.ViewModels.Library;
+using DJLibraryManager.UI.ViewModels.Search;
+using DJLibraryManager.UI.ViewModels.Workspace;
 using System;
 
 namespace DJLibraryManager.UI.ViewModels;
@@ -23,8 +24,7 @@ public partial class MainViewModel : ViewModelBase
     public ImportResult? CurrentLibrary { get; private set; }
 
     /// <summary>
-    /// The currently displayed provider workspace.
-    /// Null when no provider has been selected.
+    /// The currently displayed workspace.
     /// </summary>
     [ObservableProperty]
     private WorkspaceViewModel? currentWorkspace;
@@ -39,17 +39,30 @@ public partial class MainViewModel : ViewModelBase
     {
         Dashboard = new DashboardViewModel();
 
-        var workspace = new DashboardWorkspaceViewModel(Dashboard);
+        var workspace =
+            new DashboardWorkspaceViewModel(Dashboard);
 
         CurrentWorkspace = workspace;
+
         Dashboard.CurrentWorkspace = workspace;
         Dashboard.DashboardWorkspace = workspace;
 
-        Dashboard.ProviderSelected += Dashboard_ProviderSelected;
-        Dashboard.MediaLocationSelected += Dashboard_MediaLocationSelected;
-        Dashboard.LibraryExplorerSelected += Dashboard_LibraryExplorerSelected;
-        App.Services.ApplicationState.NavigateRequested += ApplicationState_NavigateRequested;
+        Dashboard.ProviderSelected +=
+            Dashboard_ProviderSelected;
+
+        Dashboard.MediaLocationSelected +=
+            Dashboard_MediaLocationSelected;
+
+        Dashboard.LibraryExplorerSelected +=
+            Dashboard_LibraryExplorerSelected;
+
+        App.Services.ApplicationState.NavigateRequested +=
+            ApplicationState_NavigateRequested;
     }
+
+    // ============================================================
+    // Provider Workspace
+    // ============================================================
 
     /// <summary>
     /// Opens the selected provider workspace.
@@ -63,13 +76,19 @@ public partial class MainViewModel : ViewModelBase
             Dashboard,
             LibraryImported);
 
-        workspace.GoBackRequested += Workspace_GoBackRequested;
+        workspace.GoBackRequested +=
+            Workspace_GoBackRequested;
 
         CurrentWorkspace = workspace;
         Dashboard.CurrentWorkspace = workspace;
 
-        StatusText = $"Viewing {e.Provider.Name}";
+        StatusText =
+            $"Viewing {e.Provider.Name}";
     }
+
+    // ============================================================
+    // Media Location Workspace
+    // ============================================================
 
     /// <summary>
     /// Opens the selected media location workspace.
@@ -78,16 +97,23 @@ public partial class MainViewModel : ViewModelBase
         object? sender,
         MediaLocationSelectedEventArgs e)
     {
-        var workspace = new MediaLocationWorkspaceViewModel(
-            e.MediaLocation);
+        var workspace =
+            new MediaLocationWorkspaceViewModel(
+                e.MediaLocation);
 
-        workspace.GoBackRequested += Workspace_GoBackRequested;
+        workspace.GoBackRequested +=
+            Workspace_GoBackRequested;
 
         CurrentWorkspace = workspace;
         Dashboard.CurrentWorkspace = workspace;
 
-        StatusText = $"Viewing {e.MediaLocation.Path}";
+        StatusText =
+            $"Viewing {e.MediaLocation.Path}";
     }
+
+    // ============================================================
+    // Library Explorer
+    // ============================================================
 
     /// <summary>
     /// Opens the Library Explorer workspace.
@@ -96,23 +122,19 @@ public partial class MainViewModel : ViewModelBase
         object? sender,
         EventArgs e)
     {
-        var workspace = new LibraryExplorerViewModel();
+        var workspace =
+            new LibraryExplorerViewModel();
 
         CurrentWorkspace = workspace;
         Dashboard.CurrentWorkspace = workspace;
 
-        StatusText = "Viewing Library Explorer";
+        StatusText =
+            "Viewing Library Explorer";
     }
 
-
-    /// <summary>
-    /// Opens the Discovery workspace.
-    /// </summary>
-    private void OpenDiscovery()
-    {
-        App.Services.ApplicationState.NavigateTo(
-            WorkspaceType.Discovery);
-    }
+    // ============================================================
+    // Application Navigation
+    // ============================================================
 
     /// <summary>
     /// Handles application-wide workspace navigation requests.
@@ -123,58 +145,123 @@ public partial class MainViewModel : ViewModelBase
     {
         switch (workspace)
         {
+            // ====================================================
+            // Dashboard
+            // ====================================================
+
             case WorkspaceType.Dashboard:
                 {
-                    var dashboardWorkspace = new DashboardWorkspaceViewModel(Dashboard);
+                    var dashboardWorkspace =
+                        new DashboardWorkspaceViewModel(Dashboard);
 
                     CurrentWorkspace = dashboardWorkspace;
 
-                    Dashboard.CurrentWorkspace = dashboardWorkspace;
-                    Dashboard.DashboardWorkspace = dashboardWorkspace;
+                    Dashboard.CurrentWorkspace =
+                        dashboardWorkspace;
+
+                    Dashboard.DashboardWorkspace =
+                        dashboardWorkspace;
 
                     StatusText = "Ready";
+
                     break;
                 }
+
+            // ====================================================
+            // Discovery
+            // ====================================================
 
             case WorkspaceType.Discovery:
                 {
-                    var discoveryWorkspace = new DiscoveryWorkspaceViewModel(Dashboard);
+                    var discoveryWorkspace =
+                        new DiscoveryWorkspaceViewModel(Dashboard);
 
-                    CurrentWorkspace = discoveryWorkspace;
-                    Dashboard.CurrentWorkspace = discoveryWorkspace;
+                    CurrentWorkspace =
+                        discoveryWorkspace;
 
-                    StatusText = "Viewing Discovery";
+                    Dashboard.CurrentWorkspace =
+                        discoveryWorkspace;
+
+                    StatusText =
+                        "Viewing Discovery";
+
                     break;
                 }
+
+            // ====================================================
+            // Import
+            // ====================================================
 
             case WorkspaceType.Import:
                 {
-                    var importWorkspace = new ImportWorkspaceViewModel(Dashboard);
+                    var importWorkspace =
+                        new ImportWorkspaceViewModel(Dashboard);
 
-                    CurrentWorkspace = importWorkspace;
-                    Dashboard.CurrentWorkspace = importWorkspace;
+                    CurrentWorkspace =
+                        importWorkspace;
 
-                    StatusText = "Viewing Import";
+                    Dashboard.CurrentWorkspace =
+                        importWorkspace;
+
+                    StatusText =
+                        "Viewing Import";
+
                     break;
                 }
 
+            // ====================================================
+            // Analysis
+            // ====================================================
+
             case WorkspaceType.Analysis:
                 {
-                    var analysisWorkspace = new AnalysisWorkspaceViewModel();
+                    var analysisWorkspace =
+                        new AnalysisWorkspaceViewModel();
 
-                    CurrentWorkspace = analysisWorkspace;
-                    Dashboard.CurrentWorkspace = analysisWorkspace;
+                    CurrentWorkspace =
+                        analysisWorkspace;
 
-                    StatusText = "Viewing Analysis";
+                    Dashboard.CurrentWorkspace =
+                        analysisWorkspace;
+
+                    StatusText =
+                        "Viewing Analysis";
+
+                    break;
+                }
+
+            // ====================================================
+            // Search
+            // ====================================================
+
+            case WorkspaceType.Search:
+                {
+                    var searchWorkspace =
+                        new SearchWorkspaceViewModel();
+
+                    CurrentWorkspace =
+                        searchWorkspace;
+
+                    Dashboard.CurrentWorkspace =
+                        searchWorkspace;
+
+                    StatusText =
+                        "Viewing Search";
+
                     break;
                 }
         }
     }
 
+    // ============================================================
+    // Import
+    // ============================================================
+
     /// <summary>
     /// Called when a provider finishes importing its library.
     /// </summary>
-    private void LibraryImported(ImportResult result)
+    private void LibraryImported(
+        ImportResult result)
     {
         CurrentLibrary = result;
 
@@ -182,20 +269,29 @@ public partial class MainViewModel : ViewModelBase
             $"Imported {result.TrackCount:N0} tracks from {result.ProviderName}";
     }
 
+    // ============================================================
+    // Dashboard Return
+    // ============================================================
+
     /// <summary>
     /// Returns to the dashboard.
     /// </summary>
     private void Workspace_GoBackRequested(
         object? sender,
         EventArgs e)
-        {
-            var workspace = new DashboardWorkspaceViewModel(Dashboard);
+    {
+        var workspace =
+            new DashboardWorkspaceViewModel(Dashboard);
 
-            CurrentWorkspace = workspace;
+        CurrentWorkspace = workspace;
 
-            Dashboard.CurrentWorkspace = workspace;
-            Dashboard.DashboardWorkspace = workspace;
+        Dashboard.CurrentWorkspace =
+            workspace;
 
-            StatusText = "Ready";
-        }
+        Dashboard.DashboardWorkspace =
+            workspace;
+
+        StatusText =
+            "Ready";
+    }
 }

@@ -45,11 +45,9 @@
 	  <Folder Include="ViewModels\Improve\" />
 	  <Folder Include="ViewModels\Synchronise\" />
 	  <Folder Include="ViewModels\Structure\" />
-	  <Folder Include="ViewModels\Search\" />
 	  <Folder Include="Views\Improve\" />
 	  <Folder Include="Views\Synchronise\" />
 	  <Folder Include="Views\Structure\" />
-	  <Folder Include="Views\Search\" />
 	</ItemGroup>
 
 	<ItemGroup>

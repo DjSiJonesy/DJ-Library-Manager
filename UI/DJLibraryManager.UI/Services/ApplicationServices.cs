@@ -1,9 +1,10 @@
 ﻿using DJLibraryManager.Core.Services;
+using DJLibraryManager.Core.Services.Library;
 
 using DJLibraryManager.UI.Providers.VirtualDJ.Services;
-using DJLibraryManager.UI.Services.Import;
-using DJLibraryManager.Core.Services.Library;
+using DJLibraryManager.UI.Search.Services;
 using DJLibraryManager.UI.Services.Discovery;
+using DJLibraryManager.UI.Services.Import;
 
 namespace DJLibraryManager.UI.Services;
 
@@ -48,7 +49,9 @@ public sealed class ApplicationServices
     /// <summary>
     /// Coordinates Discovery validation operations.
     /// </summary>
-    public DiscoveryValidationWorkflowService DiscoveryValidationWorkflowService { get; }
+    public DiscoveryValidationWorkflowService
+        DiscoveryValidationWorkflowService
+    { get; }
 
     /// <summary>
     /// Stores Media Location import history.
@@ -70,32 +73,108 @@ public sealed class ApplicationServices
     /// </summary>
     public AnalysisService Analysis { get; }
 
+    /// <summary>
+    /// Coordinates Search operations.
+    /// </summary>
+    public SearchService Search { get; }
+
     public ApplicationServices()
     {
-        ProgressReporter = new ProgressReporter();
+        // ========================================================
+        // Core Services
+        // ========================================================
 
-        ApplicationState = new ApplicationState();
+        ProgressReporter =
+            new ProgressReporter();
 
-        LibraryRepository = new LibraryRepository();
+        ApplicationState =
+            new ApplicationState();
 
-        MediaLocationRepository = new MediaLocationRepository();
+        // ========================================================
+        // Library
+        // ========================================================
 
-        DiscoveryRepository = new DiscoveryRepository(ApplicationState);
+        LibraryRepository =
+            new LibraryRepository();
 
-        DiscoveryValidationRepository = new DiscoveryValidationRepository();
+        MediaLocationRepository =
+            new MediaLocationRepository();
 
-        DiscoveryValidationWorkflowService = new DiscoveryValidationWorkflowService(DiscoveryValidationRepository);
+        // ========================================================
+        // Discovery
+        // ========================================================
 
-        MediaImportRepository = new MediaImportRepository();
+        DiscoveryRepository =
+            new DiscoveryRepository(
+                ApplicationState);
 
-        AnalysisRepository = new AnalysisRepository();
+        DiscoveryValidationRepository =
+            new DiscoveryValidationRepository();
 
-        LibraryStatisticsService = new LibraryStatisticsService(LibraryRepository, MediaImportRepository);
+        DiscoveryValidationWorkflowService =
+            new DiscoveryValidationWorkflowService(
+                DiscoveryValidationRepository);
 
-        LibraryImportService = new LibraryImportService(ProgressReporter, LibraryRepository);
+        // ========================================================
+        // Import
+        // ========================================================
 
-        LibraryImportService.Register(new VirtualDJImporter(ProgressReporter));
+        MediaImportRepository =
+            new MediaImportRepository();
 
-        Analysis = new AnalysisService(LibraryRepository);
+        LibraryImportService =
+            new LibraryImportService(
+                ProgressReporter,
+                LibraryRepository);
+
+        LibraryImportService.Register(
+            new VirtualDJImporter(
+                ProgressReporter));
+
+        // ========================================================
+        // Analysis
+        // ========================================================
+
+        AnalysisRepository =
+            new AnalysisRepository();
+
+        LibraryStatisticsService =
+            new LibraryStatisticsService(
+                LibraryRepository,
+                MediaImportRepository);
+
+        Analysis =
+            new AnalysisService(
+                LibraryRepository);
+
+        // ========================================================
+        // Search
+        // ========================================================
+
+        var duplicateSearchService =
+            new DuplicateSearchService(
+                LibraryRepository);
+
+        var missingFileSearchService =
+            new MissingFileSearchService();
+
+        var metadataSearchService =
+            new MetadataSearchService();
+
+        var musicSearchService =
+            new MusicSearchService(
+                LibraryRepository);
+
+        var providerSearchService =
+            new ProviderSearchService(
+                LibraryRepository);
+
+        Search =
+            new SearchService(
+                duplicateSearchService,
+                missingFileSearchService,
+                metadataSearchService,
+                musicSearchService,
+                providerSearchService);
     }
 }

@@ -21,9 +21,11 @@ public sealed class AnalysisEngine
     /// </summary>
     public event EventHandler<AnalysisProgressEventArgs>? ProgressChanged;
 
-    public AnalysisEngine(IEnumerable<IAnalysisModule> modules)
+    public AnalysisEngine(
+        IEnumerable<IAnalysisModule> modules)
     {
-        _modules = modules.ToList();
+        _modules =
+            modules.ToList();
     }
 
     /// <summary>
@@ -38,7 +40,9 @@ public sealed class AnalysisEngine
             module.Begin();
         }
 
-        var totalTracks = mediaItems.Count;
+        var totalTracks =
+            mediaItems.Count;
+
         var tracksScanned = 0;
 
         foreach (var mediaItem in mediaItems)
@@ -52,9 +56,12 @@ public sealed class AnalysisEngine
 
             tracksScanned++;
 
-            var progress = totalTracks == 0
-                ? 100
-                : (double)tracksScanned / totalTracks * 100.0;
+            var progress =
+                totalTracks == 0
+                    ? 100
+                    : (double)tracksScanned /
+                      totalTracks *
+                      100.0;
 
             ProgressChanged?.Invoke(
                 this,
@@ -62,28 +69,44 @@ public sealed class AnalysisEngine
                     tracksScanned,
                     totalTracks,
                     progress,
-                    GetTrackDescription(mediaItem)));
+                    GetTrackDescription(
+                        mediaItem)));
         }
 
-        var categories = _modules
-            .Select(m => m.Complete())
-            .ToList();
+        var categories =
+            _modules
+                .Select(m => m.Complete())
+                .ToList();
 
         return Task.FromResult(
             new LibraryAnalysisResult
             {
-                AnalysisDate = DateTime.Now,
-                TracksScanned = tracksScanned,
-                HealthScore = CalculateHealth(categories),
-                Categories = categories
+                AnalysisDate =
+                    DateTime.Now,
+
+                TracksScanned =
+                    tracksScanned,
+
+                TotalTracks =
+                    totalTracks,
+
+                HealthScore =
+                    CalculateHealth(
+                        categories),
+
+                Categories =
+                    categories
             });
     }
 
     private static string GetTrackDescription(
         DJLMMediaItem mediaItem)
     {
-        var artist = mediaItem.Artist?.Trim();
-        var title = mediaItem.Title?.Trim();
+        var artist =
+            mediaItem.Artist?.Trim();
+
+        var title =
+            mediaItem.Title?.Trim();
 
         if (!string.IsNullOrWhiteSpace(artist) &&
             !string.IsNullOrWhiteSpace(title))
@@ -97,7 +120,8 @@ public sealed class AnalysisEngine
         if (!string.IsNullOrWhiteSpace(artist))
             return artist;
 
-        return mediaItem.FilePath ?? "Unknown track";
+        return mediaItem.FilePath ??
+               "Unknown track";
     }
 
     private static double CalculateHealth(
@@ -106,7 +130,10 @@ public sealed class AnalysisEngine
         if (categories.Count == 0)
             return 100;
 
-        return categories.Average(c => c.HealthScore);
+        return Math.Round(
+            categories.Average(
+                c => c.HealthScore),
+            1);
     }
 }
 
@@ -129,9 +156,16 @@ public sealed class AnalysisProgressEventArgs : EventArgs
         double progress,
         string currentTrack)
     {
-        TracksScanned = tracksScanned;
-        TotalTracks = totalTracks;
-        Progress = progress;
-        CurrentTrack = currentTrack;
+        TracksScanned =
+            tracksScanned;
+
+        TotalTracks =
+            totalTracks;
+
+        Progress =
+            progress;
+
+        CurrentTrack =
+            currentTrack;
     }
 }

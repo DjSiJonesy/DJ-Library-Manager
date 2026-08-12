@@ -13,15 +13,15 @@
         <!-- ===================================================== -->
 
         <workflow:WorkflowHeader
-                Grid.Row="0"
-                Title="Analysis"
-                Description="Analyse the DIASISS library and identify issues before searching for improvements."
-                PreviousText="← Import"
-                PreviousCommand="{Binding PreviousCommand}"
-                NextText="Search →"
-                NextCommand="{Binding NextCommand}"
-                ShowPrevious="True"
-                ShowNext="True"/>
+            Grid.Row="0"
+            Title="Analysis"
+            Description="Analyse the DIASISS library and identify issues before searching for improvements."
+            PreviousText="← Import"
+            PreviousCommand="{Binding PreviousCommand}"
+            NextText="Search →"
+            NextCommand="{Binding NextCommand}"
+            ShowPrevious="True"
+            ShowNext="True"/>
 
         <!-- ===================================================== -->
         <!-- Content -->
@@ -29,11 +29,11 @@
 
         <Grid
             Grid.Row="2"
-            RowDefinitions="Auto,20,*">
+            RowDefinitions="Auto,20,Auto,20,*">
 
-            <!-- ===================================================== -->
+            <!-- ================================================= -->
             <!-- Analysis Summary -->
-            <!-- ===================================================== -->
+            <!-- ================================================= -->
 
             <workflow:WorkflowAnalysisSummaryCard
                 Grid.Row="0"
@@ -54,13 +54,20 @@
 
                 AnalyseCommand="{Binding AnalyseLibraryCommand}" />
 
-            <!-- ===================================================== -->
-            <!-- Analysis Results -->
-            <!-- ===================================================== -->
+            <!-- ================================================= -->
+            <!-- Issue Breakdown -->
+            <!-- ================================================= -->
 
             <workflow:WorkflowAnalysisTable
                 Grid.Row="2"
                 Categories="{Binding Categories}" />
+
+            <!-- ================================================= -->
+            <!-- Selected Category Details -->
+            <!-- ================================================= -->
+
+            <workflow:WorkflowAnalysisDetailCard
+                Grid.Row="4" />
 
         </Grid>
 

@@ -9,21 +9,7 @@
         Padding="12">
 
         <Grid
-            RowDefinitions="
-                Auto,
-                12,
-                Auto,
-                Auto,
-                Auto,
-                Auto,
-                16,
-                Auto,
-                12,
-                Auto,
-                12,
-                Auto,
-                16,
-                Auto">
+            RowDefinitions="Auto,10,Auto,10,Auto,10,Auto">
 
             <!-- ===================================================== -->
             <!-- Heading -->
@@ -35,92 +21,109 @@
                 Text="Analysis Summary"/>
 
             <!-- ===================================================== -->
-            <!-- Tracks Scanned -->
+            <!-- Summary Information -->
             <!-- ===================================================== -->
 
             <Grid
                 Grid.Row="2"
-                ColumnDefinitions="*,Auto"
-                Margin="0,2">
+                RowDefinitions="Auto,Auto,Auto,Auto"
+                RowSpacing="4">
 
-                <TextBlock
-                    FontSize="12"                    
-                    Text="Tracks Scanned"/>
+                <!-- ================================================= -->
+                <!-- Tracks Scanned -->
+                <!-- ================================================= -->
 
-                <TextBlock
-                    Grid.Column="1"
-                    FontSize="12">
+                <Grid
+                    Grid.Row="0"
+                    ColumnDefinitions="*,Auto">
 
-                    <Run Text="{Binding TracksScanned, ElementName=Root, StringFormat={}{0:N0}}"/>
-                    <Run Text=" / "/>
-                    <Run Text="{Binding TotalTracks, ElementName=Root, StringFormat={}{0:N0}}"/>
+                    <TextBlock
+                        FontSize="12"
+                        Text="Tracks Scanned"/>
 
-                </TextBlock>
+                    <TextBlock
+                        Grid.Column="1"
+                        FontSize="12">
 
-            </Grid>
+                        <Run
+                            Text="{Binding TracksScanned,
+                                           ElementName=Root,
+                                           StringFormat={}{0:N0}}"/>
 
-            <!-- ===================================================== -->
-            <!-- Issues -->
-            <!-- ===================================================== -->
+                        <Run Text=" / "/>
 
-            <Grid
-                Grid.Row="3"
-                ColumnDefinitions="*,Auto"
-                Margin="0,2">
+                        <Run
+                            Text="{Binding TotalTracks,
+                                           ElementName=Root,
+                                           StringFormat={}{0:N0}}"/>
 
-                <TextBlock
-                    FontSize="12"
-                    Text="Issues Found"/>
+                    </TextBlock>
 
-                <TextBlock
-                    Grid.Column="1"
-                    FontSize="12"
-                    Text="{Binding IssuesFound, ElementName=Root, StringFormat={}{0:N0}}"/>
+                </Grid>
 
-            </Grid>
+                <!-- ================================================= -->
+                <!-- Issues -->
+                <!-- ================================================= -->
 
-            <!-- ===================================================== -->
-            <!-- Health -->
-            <!-- ===================================================== -->
+                <Grid
+                    Grid.Row="1"
+                    ColumnDefinitions="*,Auto">
 
-            <Grid
-                Grid.Row="4"
-                ColumnDefinitions="*,Auto"
-                Margin="0,2">
+                    <TextBlock
+                        FontSize="12"
+                        Text="Issues Found"/>
 
-                <TextBlock
-                    FontSize="12"
-                    Text="Overall Health"/>
+                    <TextBlock
+                        Grid.Column="1"
+                        FontSize="12"
+                        Text="{Binding IssuesFound,
+                                       ElementName=Root,
+                                       StringFormat={}{0:N0}}"/>
 
-                <TextBlock
-                    Grid.Column="1"
-                    FontSize="12"
-                    Text="{Binding HealthScore,
-                                   ElementName=Root,
-                                   StringFormat={}{0:F1}%}"/>
+                </Grid>
 
-            </Grid>
+                <!-- ================================================= -->
+                <!-- Health -->
+                <!-- ================================================= -->
 
-            <!-- ===================================================== -->
-            <!-- Last Analysed -->
-            <!-- ===================================================== -->
+                <Grid
+                    Grid.Row="2"
+                    ColumnDefinitions="*,Auto">
 
-            <Grid
-                Grid.Row="5"
-                ColumnDefinitions="*,Auto"
-                Margin="0,2">
+                    <TextBlock
+                        FontSize="12"
+                        Text="Overall Health"/>
 
-                <TextBlock
-                    FontSize="12"
-                    Text="Last Analysed"/>
+                    <TextBlock
+                        Grid.Column="1"
+                        FontSize="12"
+                        Text="{Binding HealthScore,
+                                       ElementName=Root,
+                                       StringFormat={}{0:F1}%}"/>
 
-                <TextBlock
-                    Grid.Column="1"
-                    FontSize="12"
-                    Text="{Binding LastAnalysed,
-                                   ElementName=Root,
-                                   TargetNullValue=Never,
-                                   StringFormat={}{0:dd/MM/yyyy HH:mm:ss}}"/>
+                </Grid>
+
+                <!-- ================================================= -->
+                <!-- Last Analysed -->
+                <!-- ================================================= -->
+
+                <Grid
+                    Grid.Row="3"
+                    ColumnDefinitions="*,Auto">
+
+                    <TextBlock
+                        FontSize="12"
+                        Text="Last Analysed"/>
+
+                    <TextBlock
+                        Grid.Column="1"
+                        FontSize="12"
+                        Text="{Binding LastAnalysed,
+                                       ElementName=Root,
+                                       TargetNullValue=Never,
+                                       StringFormat={}{0:dd/MM/yyyy HH:mm:ss}}"/>
+
+                </Grid>
 
             </Grid>
 
@@ -129,8 +132,8 @@
             <!-- ===================================================== -->
 
             <StackPanel
-                Grid.Row="7"
-                Spacing="6">
+                Grid.Row="4"
+                Spacing="5">
 
                 <TextBlock
                     FontSize="12"
@@ -146,71 +149,90 @@
             </StackPanel>
 
             <!-- ===================================================== -->
-            <!-- Status -->
+            <!-- Status / Current Track / Action -->
             <!-- ===================================================== -->
 
-            <StackPanel
-                Grid.Row="9"
-                Spacing="4">
+            <Grid
+                Grid.Row="6"
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="20">
 
-                <TextBlock
-                    FontSize="12"
-                    FontWeight="SemiBold"
-                    Text="Status"/>
+                <!-- ================================================= -->
+                <!-- Status Information -->
+                <!-- ================================================= -->
 
-                <StackPanel
-                    Orientation="Horizontal"
-                    Spacing="8">
+                <Grid
+                    Grid.Column="0"
+                    RowDefinitions="Auto,Auto"
+                    RowSpacing="5">
 
-                    <Ellipse
-                        Width="10"
-                        Height="10"
-                        VerticalAlignment="Center"
-                        Fill="{Binding StatusBrush,
-                                       ElementName=Root}"/>
+                    <!-- Status -->
 
-                    <TextBlock
-                        FontSize="12"
-                        VerticalAlignment="Center"
-                        Text="{Binding Status,
-                                       ElementName=Root}"/>
+                    <StackPanel
+                        Grid.Row="0"
+                        Spacing="4">
 
-                </StackPanel>
+                        <TextBlock
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Text="Status"/>
 
-            </StackPanel>
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Spacing="8">
 
-            <!-- ===================================================== -->
-            <!-- Current Track -->
-            <!-- ===================================================== -->
+                            <Ellipse
+                                Width="10"
+                                Height="10"
+                                VerticalAlignment="Center"
+                                Fill="{Binding StatusBrush,
+                                               ElementName=Root}"/>
 
-            <StackPanel
-                Grid.Row="11"
-                Spacing="2">
+                            <TextBlock
+                                FontSize="12"
+                                VerticalAlignment="Center"
+                                Text="{Binding Status,
+                                               ElementName=Root}"/>
 
-                <TextBlock
-                    FontSize="12"
-                    FontWeight="SemiBold"
-                    Text="Current Track"/>
+                        </StackPanel>
 
-                <TextBlock
-                    FontSize="12"
-                    Text="{Binding CurrentTrack,
-                                   ElementName=Root}"
-                    TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
 
-            </StackPanel>
+                    <!-- Current Track -->
 
-            <!-- ===================================================== -->
-            <!-- Action -->
-            <!-- ===================================================== -->
+                    <StackPanel
+                        Grid.Row="1"
+                        Spacing="2">
 
-            <Button
-                Grid.Row="13"
-                HorizontalAlignment="Right"
-                Theme="{StaticResource DJLM.PrimaryButton}"
-                Content="Analyse Library"
-                Command="{Binding AnalyseCommand,
-                                  ElementName=Root}"/>
+                        <TextBlock
+                            FontSize="12"
+                            FontWeight="SemiBold"
+                            Text="Current Track"/>
+
+                        <TextBlock
+                            FontSize="12"
+                            Text="{Binding CurrentTrack,
+                                           ElementName=Root}"
+                            TextTrimming="CharacterEllipsis"/>
+
+                    </StackPanel>
+
+                </Grid>
+
+                <!-- ================================================= -->
+                <!-- Analyse Button -->
+                <!-- ================================================= -->
+
+                <Button
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Right"
+                    Theme="{StaticResource DJLM.PrimaryButton}"
+                    Content="Analyse Library"
+                    Command="{Binding AnalyseCommand,
+                                      ElementName=Root}"/>
+
+            </Grid>
 
         </Grid>
 

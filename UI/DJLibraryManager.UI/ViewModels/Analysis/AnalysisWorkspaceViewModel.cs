@@ -63,6 +63,108 @@ public partial class AnalysisWorkspaceViewModel : WorkspaceViewModel
         = new();
 
     // ============================================================
+    // Selected Category
+    // ============================================================
+
+    [ObservableProperty]
+    private AnalysisCategoryInfo? selectedCategory;
+
+    // ============================================================
+    // Selected Category Visibility
+    // ============================================================
+
+    /// <summary>
+    /// Indicates whether Metadata is currently selected.
+    /// </summary>
+    public bool IsMetadataSelected =>
+        string.Equals(
+            SelectedCategory?.Name,
+            "Metadata",
+            StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Indicates whether File Integrity is currently selected.
+    /// </summary>
+    public bool IsFileIntegritySelected =>
+        string.Equals(
+            SelectedCategory?.Name,
+            "File Integrity",
+            StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Indicates whether Duplicates is currently selected.
+    /// </summary>
+    public bool IsDuplicatesSelected =>
+        string.Equals(
+            SelectedCategory?.Name,
+            "Duplicates",
+            StringComparison.OrdinalIgnoreCase);
+
+    // ============================================================
+    // Selected Category Detail
+    // ============================================================
+
+    /// <summary>
+    /// Number of selected-category issues where Artist is missing.
+    /// </summary>
+    public int MissingArtistCount =>
+        CountMissingField("Artist");
+
+    /// <summary>
+    /// Number of selected-category issues where Title is missing.
+    /// </summary>
+    public int MissingTitleCount =>
+        CountMissingField("Title");
+
+    /// <summary>
+    /// Number of selected-category issues where Album is missing.
+    /// </summary>
+    public int MissingAlbumCount =>
+        CountMissingField("Album");
+
+    /// <summary>
+    /// Number of selected-category issues where Genre is missing.
+    /// </summary>
+    public int MissingGenreCount =>
+        CountMissingField("Genre");
+
+    /// <summary>
+    /// Number of selected-category issues where Year is missing.
+    /// </summary>
+    public int MissingYearCount =>
+        CountMissingField("Year");
+
+    /// <summary>
+    /// Number of selected-category issues where BPM is missing.
+    /// </summary>
+    public int MissingBPMCount =>
+        CountMissingField("BPM");
+
+    /// <summary>
+    /// Number of selected-category issues where Musical Key is missing.
+    /// </summary>
+    public int MissingKeyCount =>
+        CountMissingField("Key");
+
+    /// <summary>
+    /// Number of selected-category issues where Duration is missing.
+    /// </summary>
+    public int MissingDurationCount =>
+        CountMissingField("Duration");
+
+    /// <summary>
+    /// Number of issues in the currently selected category.
+    /// </summary>
+    public int SelectedCategoryIssueCount =>
+        SelectedCategory?.IssueCount ?? 0;
+
+    /// <summary>
+    /// Health score of the currently selected category.
+    /// </summary>
+    public double SelectedCategoryHealthScore =>
+        SelectedCategory?.HealthScore ?? 100;
+
+    // ============================================================
     // Constructor
     // ============================================================
 
@@ -77,47 +179,89 @@ public partial class AnalysisWorkspaceViewModel : WorkspaceViewModel
     }
 
     // ============================================================
+    // Selected Category Changed
+    // ============================================================
+
+    partial void OnSelectedCategoryChanged(
+    AnalysisCategoryInfo? value)
+    {
+        OnPropertyChanged(nameof(MissingArtistCount));
+        OnPropertyChanged(nameof(MissingTitleCount));
+        OnPropertyChanged(nameof(MissingAlbumCount));
+        OnPropertyChanged(nameof(MissingGenreCount));
+        OnPropertyChanged(nameof(MissingYearCount));
+        OnPropertyChanged(nameof(MissingBPMCount));
+        OnPropertyChanged(nameof(MissingKeyCount));
+        OnPropertyChanged(nameof(MissingDurationCount));
+
+        OnPropertyChanged(nameof(SelectedCategoryIssueCount));
+        OnPropertyChanged(nameof(SelectedCategoryHealthScore));
+
+        OnPropertyChanged(nameof(IsMetadataSelected));
+        OnPropertyChanged(nameof(IsFileIntegritySelected));
+        OnPropertyChanged(nameof(IsDuplicatesSelected));
+    }
+
+    // ============================================================
     // Initialisation
     // ============================================================
 
     private async Task InitializeAsync()
     {
-        var statistics = await App.Services
-            .LibraryStatisticsService
-            .GetStatisticsAsync();
+        var statistics =
+            await App.Services
+                .LibraryStatisticsService
+                .GetStatisticsAsync();
 
-        TotalTracks = statistics.LibraryTrackCount;
+        TotalTracks =
+            statistics.LibraryTrackCount;
 
         var previousAnalysis =
-            App.Services.AnalysisRepository.CurrentAnalysis;
+            App.Services
+                .AnalysisRepository
+                .CurrentAnalysis;
 
         if (previousAnalysis is null)
             return;
 
-        TracksScanned = previousAnalysis.TracksScanned;
-        IssuesFound = previousAnalysis.TotalIssues;
-        HealthScore = previousAnalysis.HealthScore;
-        LastAnalysed = previousAnalysis.AnalysisDate;
+        TracksScanned =
+            previousAnalysis.TracksScanned;
+
+        IssuesFound =
+            previousAnalysis.TotalIssues;
+
+        HealthScore =
+            previousAnalysis.HealthScore;
+
+        LastAnalysed =
+            previousAnalysis.AnalysisDate;
 
         Progress = 100;
 
         Status = "Complete";
         StatusBrush = Brushes.LimeGreen;
 
-        CurrentTrack = $"{TracksScanned:N0} tracks analysed";
+        CurrentTrack =
+            $"{TracksScanned:N0} tracks analysed";
 
         Categories.Clear();
 
-        foreach (var category in previousAnalysis.Categories.OrderBy(x => x.Name))
+        foreach (var category in
+         previousAnalysis.Categories
+             .OrderBy(x => x.Name))
         {
             Categories.Add(new AnalysisCategoryInfo
             {
                 Name = category.Name,
                 Description = GetCategoryDescription(category.Name),
                 IssueCount = category.IssueCount,
-                HealthScore = category.HealthScore
+                HealthScore = category.HealthScore,
+                Issues = category.Issues
             });
         }
+
+        SelectedCategory =
+            Categories.FirstOrDefault();
     }
 
     // ============================================================
@@ -143,68 +287,98 @@ public partial class AnalysisWorkspaceViewModel : WorkspaceViewModel
 
         Categories.Clear();
 
-        Categories.Add(new AnalysisCategoryInfo
-        {
-            Name = "Metadata",
-            Description = GetCategoryDescription("Metadata"),
-            HealthScore = 100
-        });
+        SelectedCategory = null;
 
-        Categories.Add(new AnalysisCategoryInfo
-        {
-            Name = "File Integrity",
-            Description = GetCategoryDescription("File Integrity"),
-            HealthScore = 100
-        });
+        // --------------------------------------------------------
+        // Metadata
+        // --------------------------------------------------------
 
-        Categories.Add(new AnalysisCategoryInfo
-        {
-            Name = "Duplicates",
-            Description = GetCategoryDescription("Duplicates"),
-            HealthScore = 100
-        });
+        Categories.Add(
+            new AnalysisCategoryInfo
+            {
+                Name = "Metadata",
 
-        Categories.Add(new AnalysisCategoryInfo
-        {
-            Name = "Music",
-            Description = GetCategoryDescription("Music"),
-            HealthScore = 100
-        });
+                Description =
+                    GetCategoryDescription(
+                        "Metadata"),
 
-        Categories.Add(new AnalysisCategoryInfo
-        {
-            Name = "Providers",
-            Description = GetCategoryDescription("Providers"),
-            HealthScore = 100
-        });
+                HealthScore = 100
+            });
+
+        // --------------------------------------------------------
+        // File Integrity
+        // --------------------------------------------------------
+
+        Categories.Add(
+            new AnalysisCategoryInfo
+            {
+                Name = "File Integrity",
+
+                Description =
+                    GetCategoryDescription(
+                        "File Integrity"),
+
+                HealthScore = 100
+            });
+
+        // --------------------------------------------------------
+        // Duplicates
+        // --------------------------------------------------------
+
+        Categories.Add(
+            new AnalysisCategoryInfo
+            {
+                Name = "Duplicates",
+
+                Description =
+                    GetCategoryDescription(
+                        "Duplicates"),
+
+                HealthScore = 100
+            });
     }
 
     // ============================================================
     // Category Descriptions
     // ============================================================
 
-    private static string GetCategoryDescription(string categoryName)
+    private static string GetCategoryDescription(
+        string categoryName)
     {
         return categoryName switch
         {
             "Metadata" =>
-                "Checks the descriptive information associated with each track.",
+                "Checks the required information associated with each track, including Artist, Title, Album, Genre, Year, BPM, Key and Duration.",
 
             "File Integrity" =>
                 "Checks whether library files exist and can be accessed.",
 
             "Duplicates" =>
-                "Identifies tracks that appear to be duplicates.",
-
-            "Music" =>
-                "Checks BPM, musical key and track duration for valid values.",
-
-            "Providers" =>
-                "Checks information associated with DJ software provider libraries.",
+                "Identifies groups of tracks that appear to be duplicates.",
 
             _ =>
                 string.Empty
         };
+    }
+
+    // ============================================================
+    // Metadata Detail Counts
+    // ============================================================
+
+    private int CountMissingField(
+        string fieldName)
+    {
+        if (SelectedCategory?.Issues is null)
+            return 0;
+
+        return SelectedCategory.Issues.Count(
+            issue =>
+                issue.MissingFields.Any(
+                    field =>
+                        string.Equals(
+                            field,
+                            fieldName,
+                            StringComparison.OrdinalIgnoreCase)));
     }
 
     // ============================================================
@@ -217,50 +391,76 @@ public partial class AnalysisWorkspaceViewModel : WorkspaceViewModel
         Status = "Running";
         StatusBrush = Brushes.Goldenrod;
 
-        CurrentTrack = "Loading Library...";
+        CurrentTrack =
+            "Loading Library...";
+
         Progress = 0;
+
         TracksScanned = 0;
 
         try
         {
             var result =
-                await App.Services.Analysis.AnalyseLibraryAsync();
+                await App.Services
+                    .Analysis
+                    .AnalyseLibraryAsync();
 
-            App.Services.AnalysisRepository.Save(result);
+            App.Services
+                .AnalysisRepository
+                .Save(result);
 
-            TracksScanned = result.TracksScanned;
-            IssuesFound = result.TotalIssues;
-            HealthScore = result.HealthScore;
-            LastAnalysed = result.AnalysisDate;
+            TracksScanned =
+                result.TracksScanned;
+
+            IssuesFound =
+                result.TotalIssues;
+
+            HealthScore =
+                result.HealthScore;
+
+            LastAnalysed =
+                result.AnalysisDate;
 
             Progress = 100;
 
             Status = "Complete";
             StatusBrush = Brushes.LimeGreen;
 
-            CurrentTrack = $"{TracksScanned:N0} tracks analysed";
+            CurrentTrack =
+                $"{TracksScanned:N0} tracks analysed";
 
             Categories.Clear();
 
-            foreach (var category in result.Categories.OrderBy(c => c.Name))
+            foreach (var category in
+         result.Categories
+             .OrderBy(c => c.Name))
             {
                 Categories.Add(new AnalysisCategoryInfo
                 {
                     Name = category.Name,
                     Description = GetCategoryDescription(category.Name),
                     IssueCount = category.IssueCount,
-                    HealthScore = category.HealthScore
+                    HealthScore = category.HealthScore,
+                    Issues = category.Issues
                 });
             }
 
-            App.Services.ApplicationState.NotifyAnalysisCompleted();
+            SelectedCategory =
+                Categories.FirstOrDefault();
+
+            App.Services
+                .ApplicationState
+                .NotifyAnalysisCompleted();
         }
         catch
         {
             Status = "Error";
-            StatusBrush = Brushes.Red;
 
-            CurrentTrack = "Analysis failed";
+            StatusBrush =
+                Brushes.Red;
+
+            CurrentTrack =
+                "Analysis failed";
 
             throw;
         }
@@ -274,10 +474,31 @@ public partial class AnalysisWorkspaceViewModel : WorkspaceViewModel
         object? sender,
         AnalysisProgressEventArgs e)
     {
-        TracksScanned = e.TracksScanned;
-        TotalTracks = e.TotalTracks;
-        Progress = e.Progress;
-        CurrentTrack = e.CurrentTrack;
+        TracksScanned =
+            e.TracksScanned;
+
+        TotalTracks =
+            e.TotalTracks;
+
+        Progress =
+            e.Progress;
+
+        CurrentTrack =
+            e.CurrentTrack;
+    }
+
+    // ============================================================
+    // Category Selection
+    // ============================================================
+
+    [RelayCommand]
+    private void SelectCategory(
+        AnalysisCategoryInfo? category)
+    {
+        if (category is null)
+            return;
+
+        SelectedCategory = category;
     }
 
     // ============================================================
@@ -290,20 +511,21 @@ public partial class AnalysisWorkspaceViewModel : WorkspaceViewModel
     [RelayCommand]
     private void Previous()
     {
-        App.Services.ApplicationState.NavigateTo(
-            WorkspaceType.Import);
+        App.Services
+            .ApplicationState
+            .NavigateTo(
+                WorkspaceType.Import);
     }
 
     /// <summary>
     /// Moves to the Search workflow.
-    ///
-    /// Search is not implemented yet, so this command
-    /// intentionally does nothing for now.
     /// </summary>
     [RelayCommand]
     private void Next()
     {
-        // Search workspace will be connected here
-        // when the Search workflow is implemented.
+        App.Services
+            .ApplicationState
+            .NavigateTo(
+                WorkspaceType.Search);
     }
 }

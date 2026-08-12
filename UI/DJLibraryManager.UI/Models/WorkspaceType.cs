@@ -14,6 +14,8 @@ public enum WorkspaceType
 
     Analysis,
 
+    Search,
+
     Improve,
 
     Structure,

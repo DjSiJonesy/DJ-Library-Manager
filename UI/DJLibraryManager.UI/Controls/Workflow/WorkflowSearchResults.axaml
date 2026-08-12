@@ -1,0 +1,214 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:DJLibraryManager.UI.Models.Search"
+    x:Class="DJLibraryManager.UI.Controls.Workflow.WorkflowSearchResults"
+    x:Name="Root">
+
+    <Border
+        Classes="card-secondary"
+        Padding="12">
+
+        <Grid
+            RowDefinitions="Auto,12,*">
+
+            <!-- ================================================= -->
+            <!-- Heading -->
+            <!-- ================================================= -->
+
+            <TextBlock
+                Grid.Row="0"
+                Classes="subheading"
+                Text="{Binding Heading,
+                               ElementName=Root}" />
+
+            <!-- ================================================= -->
+            <!-- Results -->
+            <!-- ================================================= -->
+
+            <ScrollViewer
+                Grid.Row="2"
+                VerticalScrollBarVisibility="Auto">
+
+                <ItemsControl
+                    ItemsSource="{Binding Results,
+                                          ElementName=Root}">
+
+                    <ItemsControl.ItemTemplate>
+
+                        <DataTemplate
+                            x:DataType="models:SearchResult">
+
+                            <Border
+                                Padding="10"
+                                Margin="0,4"
+                                BorderBrush="{DynamicResource Brush.Border}"
+                                BorderThickness="1"
+                                CornerRadius="6">
+
+                                <Grid
+                                    RowDefinitions="Auto,Auto,Auto,Auto">
+
+                                    <!-- ================================= -->
+                                    <!-- Track -->
+                                    <!-- ================================= -->
+
+                                    <Grid
+                                        Grid.Row="0"
+                                        ColumnDefinitions="*,Auto">
+
+                                        <StackPanel
+                                            Grid.Column="0"
+                                            Spacing="2">
+
+                                            <TextBlock
+                                                FontSize="13"
+                                                FontWeight="SemiBold"
+                                                Text="{Binding TrackTitle,
+                                                               TargetNullValue=Unknown Track}" />
+
+                                            <TextBlock
+                                                FontSize="12"
+                                                Text="{Binding Artist,
+                                                               TargetNullValue=Unknown Artist}" />
+
+                                            <TextBlock
+                                                Classes="caption"
+                                                Text="{Binding Album,
+                                                               TargetNullValue=No Album}" />
+
+                                        </StackPanel>
+
+                                        <!-- Match -->
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            VerticalAlignment="Center"
+                                            Text="{Binding MatchScore,
+                                                           StringFormat={}{0:F1}%}" />
+
+                                    </Grid>
+
+                                    <!-- ================================= -->
+                                    <!-- Music Information -->
+                                    <!-- ================================= -->
+
+                                    <Grid
+                                        Grid.Row="1"
+                                        Margin="0,8,0,0"
+                                        ColumnDefinitions="*,*,*">
+
+                                        <StackPanel
+                                            Grid.Column="0"
+                                            Spacing="2">
+
+                                            <TextBlock
+                                                Classes="caption"
+                                                Text="BPM" />
+
+                                            <TextBlock
+                                                FontSize="12"
+                                                Text="{Binding Bpm,
+                                                               StringFormat={}{0:F0}}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel
+                                            Grid.Column="1"
+                                            Spacing="2">
+
+                                            <TextBlock
+                                                Classes="caption"
+                                                Text="Key" />
+
+                                            <TextBlock
+                                                FontSize="12"
+                                                Text="{Binding Key,
+                                                               TargetNullValue=—}" />
+
+                                        </StackPanel>
+
+                                        <StackPanel
+                                            Grid.Column="2"
+                                            Spacing="2">
+
+                                            <TextBlock
+                                                Classes="caption"
+                                                Text="Duration" />
+
+                                            <TextBlock
+                                                FontSize="12"
+                                                Text="{Binding Duration,
+                                                               StringFormat={}{0:mm\\:ss}}" />
+
+                                        </StackPanel>
+
+                                    </Grid>
+
+                                    <!-- ================================= -->
+                                    <!-- File -->
+                                    <!-- ================================= -->
+
+                                    <StackPanel
+                                        Grid.Row="2"
+                                        Margin="0,8,0,0"
+                                        Spacing="2">
+
+                                        <TextBlock
+                                            Classes="caption"
+                                            Text="{Binding FilePath}"
+                                            TextTrimming="CharacterEllipsis" />
+
+                                        <TextBlock
+                                            Classes="caption"
+                                            Text="{Binding FileSize,
+                                                           StringFormat=Size: {0:N0} bytes}" />
+
+                                    </StackPanel>
+
+                                    <!-- ================================= -->
+                                    <!-- Recommendation -->
+                                    <!-- ================================= -->
+
+                                    <StackPanel
+                                        Grid.Row="3"
+                                        Margin="0,8,0,0"
+                                        Spacing="4">
+
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Text="{Binding Source}" />
+
+                                        <TextBlock
+                                            Classes="caption"
+                                            Text="{Binding RecommendationReason}"
+                                            TextWrapping="Wrap" />
+
+                                        <TextBlock
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            Text="Recommended"
+                                            IsVisible="{Binding IsRecommended}" />
+
+                                    </StackPanel>
+
+                                </Grid>
+
+                            </Border>
+
+                        </DataTemplate>
+
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+            </ScrollViewer>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>
