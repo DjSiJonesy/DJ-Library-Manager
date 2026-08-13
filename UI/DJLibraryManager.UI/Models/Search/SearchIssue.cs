@@ -85,6 +85,62 @@ public partial class SearchIssue : ObservableObject
     private bool hasResults;
 
     // ============================================================
+    // Duplicate Selection
+    // ============================================================
+
+    /// <summary>
+    /// IDs of all SearchResults the user has chosen to keep.
+    ///
+    /// Multiple results may be selected because a duplicate group
+    /// can contain legitimate versions of the same track, such as:
+    ///
+    /// - Album / studio version
+    /// - Live version
+    /// - Remix
+    /// - Radio edit
+    /// - Acoustic version
+    /// - Instrumental version
+    ///
+    /// This is the persisted source of truth for user selections.
+    /// </summary>
+    public ObservableCollection<string> SelectedResultIds { get; }
+        = new();
+
+    /// <summary>
+    /// IDs of results that were selected by the Select All
+    /// Recommended action.
+    ///
+    /// This allows the bulk action to remove only the selections
+    /// that it created without touching selections made manually
+    /// by the user.
+    /// </summary>
+    public ObservableCollection<string> RecommendedSelectedResultIds { get; }
+        = new();
+
+    /// <summary>
+    /// Legacy single-selection property.
+    ///
+    /// This is retained temporarily so previously persisted Search
+    /// state containing SelectedResultId can still be loaded.
+    ///
+    /// New code should use SelectedResultIds.
+    /// </summary>
+    [ObservableProperty]
+    private string? selectedResultId;
+
+    /// <summary>
+    /// Indicates whether the current legacy selection was applied
+    /// by the Select All Recommended action.
+    ///
+    /// Retained for backwards compatibility with previously
+    /// persisted Search state.
+    ///
+    /// New code should use RecommendedSelectedResultIds.
+    /// </summary>
+    [ObservableProperty]
+    private bool selectionWasRecommended;
+
+    // ============================================================
     // Search Results
     // ============================================================
 

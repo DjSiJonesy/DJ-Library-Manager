@@ -33,4 +33,15 @@ public partial class SearchCategoryInfo : ObservableObject
     /// </summary>
     [ObservableProperty]
     private int issueCount;
+
+    /// <summary>
+    /// Indicates whether Search All can currently be started
+    /// for this category.
+    ///
+    /// While another category is being searched, that category
+    /// remains available for viewing but its Search action is
+    /// disabled.
+    /// </summary>
+    [ObservableProperty]
+    private bool isSearchEnabled = true;
 }

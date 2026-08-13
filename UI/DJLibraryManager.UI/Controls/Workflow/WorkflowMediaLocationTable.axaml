@@ -28,7 +28,7 @@
 
             <Grid
                 Grid.Row="2"
-                ColumnDefinitions="60,220,90,90,90,20,220">
+                ColumnDefinitions="60,*,90,90,90,20,260">
 
                 <TextBlock
                     Grid.Column="0"
@@ -129,7 +129,15 @@
 
             <Grid
                 Grid.Row="6"
-                ColumnDefinitions="60,220,90,90,90,20,220">
+                ColumnDefinitions="60,*,90,90,90,20,260">
+
+                <!-- Totals Label -->
+
+                <TextBlock
+                    Grid.Column="0"
+                    FontWeight="SemiBold"
+                    FontSize="12"
+                    Text="Totals"/>
 
                 <!-- Drive Count -->
 
@@ -140,14 +148,6 @@
                     FontSize="12"
                     Text="{Binding TotalDrives,
                                    ElementName=Root}" />
-
-                <!-- Totals Label -->
-
-                <TextBlock
-                    Grid.Column="0"                    
-                    FontWeight="SemiBold"
-                    FontSize="12"
-                    Text="Totals"/>
 
                 <!-- Folder Total -->
 

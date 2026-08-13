@@ -60,44 +60,48 @@
                     <DataTemplate
                         x:DataType="models:SearchCategoryInfo">
 
+                        <!-- Category selector remains enabled.
+                             Users can still move between categories
+                             while Search All is running. -->
+
                         <Button
-                        Theme="{StaticResource DJLM.PrimaryButton}"
-                        Padding="12,8"
-                        MinWidth="170"
-                        Command="{Binding $parent[ItemsControl].DataContext.SelectCategoryCommand}"
-                        CommandParameter="{Binding}">
+                            Theme="{StaticResource DJLM.PrimaryButton}"
+                            Padding="12,8"
+                            MinWidth="170"
+                            Command="{Binding $parent[ItemsControl].DataContext.SelectCategoryCommand}"
+                            CommandParameter="{Binding}">
 
-                        <Grid
-                            ColumnDefinitions="Auto,*,Auto"
-                            VerticalAlignment="Center">
+                            <Grid
+                                ColumnDefinitions="Auto,*,Auto"
+                                VerticalAlignment="Center">
 
-                            <TextBlock
-                                Grid.Column="0"
-                                FontSize="16"
-                                VerticalAlignment="Center"
-                                Margin="0,0,8,0"
-                                Text="{Binding Icon}"/>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    FontSize="16"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,8,0"
+                                    Text="{Binding Icon}"/>
 
-                            <TextBlock
-                                Grid.Column="1"
-                                FontSize="13"
-                                FontWeight="SemiBold"
-                                VerticalAlignment="Center"
-                                Text="{Binding Name}"/>
+                                <TextBlock
+                                    Grid.Column="1"
+                                    FontSize="13"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center"
+                                    Text="{Binding Name}"/>
 
-                            <TextBlock
-                                Grid.Column="2"
-                                FontSize="12"
-                                FontWeight="SemiBold"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                Margin="12,0,0,0"
-                                Text="{Binding IssueCount,
-                                               StringFormat={}{0:N0}}"/>
+                                <TextBlock
+                                    Grid.Column="2"
+                                    FontSize="12"
+                                    FontWeight="SemiBold"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Margin="12,0,0,0"
+                                    Text="{Binding IssueCount,
+                                                   StringFormat={}{0:N0}}"/>
 
-                        </Grid>
+                            </Grid>
 
-                    </Button>
+                        </Button>
 
                     </DataTemplate>
 
@@ -156,18 +160,23 @@
                             Spacing="8"
                             VerticalAlignment="Center">
 
+                            <!-- Individual Search -->
+
                             <Button
                                 Theme="{StaticResource DJLM.PrimaryButton}"
                                 Content="Search"
                                 Command="{Binding SearchIssueCommand}"
                                 CommandParameter="{Binding SelectedIssue}"
                                 IsEnabled="{Binding !IsSearching}"/>
+
+                            <!-- Search All -->
+
                             <Button
                                 Theme="{StaticResource DJLM.PrimaryButton}"
                                 Content="Search All"
                                 Command="{Binding SearchAllCommand}"
                                 CommandParameter="{Binding SelectedCategory}"
-                                IsEnabled="{Binding !IsSearching}"/>
+                                IsEnabled="{Binding SelectedCategory.IsSearchEnabled}"/>
 
                         </StackPanel>
 
@@ -197,17 +206,63 @@
 
                             <!-- Issues Heading -->
 
-                            <TextBlock
+                            <Grid
                                 Grid.Row="0"
-                                Classes="subheading">
+                                ColumnDefinitions="*,Auto"
+                                VerticalAlignment="Center">
 
-                                <Run Text="Issues — "/>
+                                <!-- ===================================================== -->
+                                <!-- Issues Heading -->
+                                <!-- ===================================================== -->
 
-                                <Run
-                                    Text="{Binding SelectedCategory.Name,
-                                                   TargetNullValue=Search}"/>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Classes="subheading">
 
-                            </TextBlock>
+                                    <Run Text="Issues — "/>
+
+                                    <Run
+                                        Text="{Binding SelectedCategory.Name,
+                                                       TargetNullValue=Search}"/>
+
+                                </TextBlock>
+
+                                <!-- ===================================================== -->
+                                <!-- Select All Recommended -->
+                                <!-- ===================================================== -->
+
+                                <Button
+                                    Grid.Column="1"
+                                    Theme="{StaticResource DJLM.SecondaryButton}"
+                                    Padding="8,4"
+                                    Command="{Binding SelectAllRecommendedCommand}"
+                                    IsVisible="{Binding IsDuplicateCategory}"
+                                    IsEnabled="{Binding !IsSearching}">
+
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Spacing="6">
+
+                                                   <TextBlock
+                                            FontSize="14"
+                                            Text="☑"
+                                            IsVisible="{Binding AllRecommendedSelected}"/>
+
+                                        <TextBlock
+                                            FontSize="14"
+                                            Text="☐"
+                                            IsVisible="{Binding !AllRecommendedSelected}"/>
+
+                                        <TextBlock
+                                            FontSize="11"
+                                            FontWeight="SemiBold"
+                                            Text="Select All Recommended"/>
+
+                                    </StackPanel>
+
+                                </Button>
+
+                            </Grid> 
 
                             <ListBox
                                 Grid.Row="2"
@@ -336,12 +391,16 @@
 
                         </Border>
 
+                        <!-- ================================================= -->
                         <!-- Search Results -->
+                        <!-- ================================================= -->
 
                         <workflow:WorkflowSearchResults
                             Grid.Row="2"
                             Heading="{Binding SelectedCategory.Name}"
-                            Results="{Binding SelectedIssue.Results}"/>
+                            Issue="{Binding SelectedIssue}"
+                            Results="{Binding SelectedIssue.Results}"
+                            ResultSelected="WorkflowSearchResults_ResultSelected"/>
 
                     </Grid>
 

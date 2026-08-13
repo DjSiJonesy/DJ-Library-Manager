@@ -183,6 +183,8 @@ public sealed class ApplicationServices
                 missingFileSearchService,
                 metadataSearchService,
                 musicSearchService,
-                providerSearchService);
-    }
+                providerSearchService,
+                SearchRepository,
+                AnalysisRepository);
+            }
 }

@@ -3,6 +3,7 @@ using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Models.Media;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace DJLibraryManager.UI.Analysis.Modules;
@@ -18,6 +19,12 @@ namespace DJLibraryManager.UI.Analysis.Modules;
 /// it can participate in duplicate detection. This prevents
 /// tracks with missing metadata from being incorrectly grouped
 /// together simply because they have the same duration.
+///
+/// Files located inside folders whose name contains "backup"
+/// are deliberately excluded from duplicate analysis. This
+/// provides an additional safety barrier for backup libraries
+/// that may have entered the DIASISS library through a provider
+/// import or an existing library record.
 /// </summary>
 public sealed class DuplicateAnalysisModule : IAnalysisModule
 {
@@ -52,6 +59,30 @@ public sealed class DuplicateAnalysisModule : IAnalysisModule
         DJLMMediaItem media)
     {
         _trackCount++;
+
+        // --------------------------------------------------------
+        // Backup protection
+        //
+        // Any file located beneath a directory whose name
+        // contains "backup" is excluded from duplicate analysis.
+        //
+        // Examples:
+        //
+        // DJ_Library_Backup
+        // DJ Backup
+        // DJ-Backup
+        // MyBackup
+        // Backups
+        // BackupOldMusic
+        //
+        // The filename itself is not checked. Only directory
+        // names are considered.
+        // --------------------------------------------------------
+
+        if (IsInsideBackupFolder(media.FilePath))
+        {
+            return;
+        }
 
         // --------------------------------------------------------
         // Artist and Title are required for duplicate detection.
@@ -167,6 +198,65 @@ public sealed class DuplicateAnalysisModule : IAnalysisModule
 
                 CanAutoFix = false
             });
+    }
+
+    // ============================================================
+    // Backup Detection
+    // ============================================================
+
+    /// <summary>
+    /// Determines whether a file is located inside a directory
+    /// whose name contains "backup", case-insensitively.
+    ///
+    /// Only directory names are checked. The filename itself is
+    /// deliberately ignored.
+    /// </summary>
+    private static bool IsInsideBackupFolder(
+        string? filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            return false;
+
+        try
+        {
+            var directory =
+                Path.GetDirectoryName(filePath);
+
+            while (!string.IsNullOrWhiteSpace(directory))
+            {
+                var directoryName =
+                    Path.GetFileName(
+                        directory.TrimEnd(
+                            Path.DirectorySeparatorChar,
+                            Path.AltDirectorySeparatorChar));
+
+                if (!string.IsNullOrWhiteSpace(directoryName) &&
+                    directoryName.Contains(
+                        "backup",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                var parent =
+                    Directory.GetParent(directory);
+
+                if (parent is null)
+                    break;
+
+                directory =
+                    parent.FullName;
+            }
+        }
+        catch
+        {
+            // If the path cannot be inspected, do not allow
+            // it to be incorrectly identified as a backup.
+            // Other analysis modules can still report problems
+            // with the file/path.
+        }
+
+        return false;
     }
 
     // ============================================================

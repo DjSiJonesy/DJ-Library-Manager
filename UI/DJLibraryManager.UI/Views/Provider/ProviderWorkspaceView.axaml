@@ -353,6 +353,7 @@
                                     Minimum="0"
                                     Maximum="100"
                                     Value="{Binding CurrentOperation.Percentage}"
+                                    Foreground="{StaticResource Brush.Brand.Gradient}"
                                     IsIndeterminate="{Binding CurrentOperation.IsIndeterminate}"/>
 
                                 <Grid

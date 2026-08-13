@@ -11,42 +11,48 @@ public class MediaLibraryDiscoveryService
 {
     private readonly DriveDiscoveryService _driveDiscoveryService = new();
 
-    private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".mp3",
-        ".wav",
-        ".flac",
-        ".aac",
-        ".m4a",
-        ".aif",
-        ".aiff",
-        ".ogg",
-        ".wma"
-    };
+    private static readonly HashSet<string> AudioExtensions =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".mp3",
+            ".wav",
+            ".flac",
+            ".aac",
+            ".m4a",
+            ".aif",
+            ".aiff",
+            ".ogg",
+            ".wma"
+        };
 
-    private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".mp4",
-        ".m4v",
-        ".mov",
-        ".avi",
-        ".mkv",
-        ".wmv",
-        ".mpeg",
-        ".mpg",
-        ".webm"
-    };
+    private static readonly HashSet<string> VideoExtensions =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".mp4",
+            ".m4v",
+            ".mov",
+            ".avi",
+            ".mkv",
+            ".wmv",
+            ".mpeg",
+            ".mpg",
+            ".webm"
+        };
 
-    private static readonly HashSet<string> IgnoredFolders = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Windows",
-        "Program Files",
-        "Program Files (x86)",
-        "ProgramData",
-        "$Recycle.Bin",
-        "System Volume Information"
-    };
+    private static readonly HashSet<string> IgnoredFolders =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Windows",
+            "Program Files",
+            "Program Files (x86)",
+            "ProgramData",
+            "$Recycle.Bin",
+            "System Volume Information"
+        };
 
+    /// <summary>
+    /// Performs discovery across all available drives.
+    /// </summary>
     public List<MediaLibrary> DiscoverLibraries()
     {
         var libraries = new List<MediaLibrary>();
@@ -58,33 +64,53 @@ public class MediaLibraryDiscoveryService
             if (!Directory.Exists(root))
                 continue;
 
-            ScanFolder(root, libraries);
+            ScanFolder(
+                root,
+                libraries);
         }
 
         return libraries
-            .GroupBy(x => x.Path, StringComparer.OrdinalIgnoreCase)
+            .GroupBy(
+                x => x.Path,
+                StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .OrderBy(x => x.Path)
             .ToList();
     }
 
-    public List<MediaLibrary> DiscoverLibraries(MediaLocation location)
+    /// <summary>
+    /// Performs discovery for a specific media location.
+    /// </summary>
+    public List<MediaLibrary> DiscoverLibraries(
+        MediaLocation location)
     {
+        ArgumentNullException.ThrowIfNull(location);
+
         var libraries = new List<MediaLibrary>();
 
         if (!Directory.Exists(location.Path))
             return libraries;
 
-        ScanFolder(location.Path, libraries);
+        ScanFolder(
+            location.Path,
+            libraries);
 
         return libraries
-            .GroupBy(x => x.Path, StringComparer.OrdinalIgnoreCase)
+            .GroupBy(
+                x => x.Path,
+                StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .OrderBy(x => x.Path)
             .ToList();
     }
 
-    private void ScanFolder(string path, List<MediaLibrary> libraries)
+    // ============================================================
+    // Folder Scanning
+    // ============================================================
+
+    private void ScanFolder(
+        string path,
+        List<MediaLibrary> libraries)
     {
         try
         {
@@ -92,21 +118,30 @@ public class MediaLibraryDiscoveryService
             var videoFiles = 0;
             long totalBytes = 0;
 
+            // ====================================================
+            // Files
+            // ====================================================
+
             foreach (var file in Directory.EnumerateFiles(path))
             {
                 try
                 {
-                    var extension = Path.GetExtension(file);
+                    var extension =
+                        Path.GetExtension(file);
 
                     if (AudioExtensions.Contains(extension))
                     {
                         audioFiles++;
-                        totalBytes += new FileInfo(file).Length;
+
+                        totalBytes +=
+                            new FileInfo(file).Length;
                     }
                     else if (VideoExtensions.Contains(extension))
                     {
                         videoFiles++;
-                        totalBytes += new FileInfo(file).Length;
+
+                        totalBytes +=
+                            new FileInfo(file).Length;
                     }
                 }
                 catch
@@ -115,31 +150,101 @@ public class MediaLibraryDiscoveryService
                 }
             }
 
+            // ====================================================
+            // Library
+            // ====================================================
+
             if (audioFiles > 0 || videoFiles > 0)
             {
-                libraries.Add(new MediaLibrary
-                {
-                    Name = Path.GetFileName(path),
-                    Path = path,
-                    Drive = Path.GetPathRoot(path) ?? string.Empty,
-                    AudioFileCount = audioFiles,
-                    VideoFileCount = videoFiles,
-                    TotalSizeBytes = totalBytes,
-                    IsLibraryRoot = true
-                });
+                libraries.Add(
+                    new MediaLibrary
+                    {
+                        Name =
+                            Path.GetFileName(path),
+
+                        Path =
+                            path,
+
+                        Drive =
+                            Path.GetPathRoot(path)
+                            ?? string.Empty,
+
+                        AudioFileCount =
+                            audioFiles,
+
+                        VideoFileCount =
+                            videoFiles,
+
+                        TotalSizeBytes =
+                            totalBytes,
+
+                        IsLibraryRoot =
+                            true
+                    });
             }
 
-            foreach (var directory in Directory.EnumerateDirectories(path))
+            // ====================================================
+            // Subdirectories
+            // ====================================================
+
+            foreach (var directory in
+                     Directory.EnumerateDirectories(path))
             {
-                var directoryInfo = new DirectoryInfo(directory);
+                var directoryInfo =
+                    new DirectoryInfo(directory);
 
-                if (IgnoredFolders.Contains(directoryInfo.Name))
+                // ------------------------------------------------
+                // Existing system-folder exclusions
+                // ------------------------------------------------
+
+                if (IgnoredFolders.Contains(
+                        directoryInfo.Name))
+                {
                     continue;
+                }
 
-                if ((directoryInfo.Attributes & FileAttributes.ReparsePoint) != 0)
+                // ------------------------------------------------
+                // Backup-folder exclusion
+                //
+                // Any directory whose NAME contains "backup" is
+                // completely excluded from Discovery.
+                //
+                // StringComparison.OrdinalIgnoreCase means this
+                // also catches:
+                //
+                // Backup
+                // BACKUP
+                // Backups
+                // DJ Backup
+                // DJ_Backup
+                // DJ-Backup
+                // MyBackupFiles
+                // BackupOldMusic
+                //
+                // Everything beneath the excluded directory is
+                // therefore excluded automatically.
+                // ------------------------------------------------
+
+                if (directoryInfo.Name.Contains(
+                        "backup",
+                        StringComparison.OrdinalIgnoreCase))
+                {
                     continue;
+                }
 
-                ScanFolder(directory, libraries);
+                // ------------------------------------------------
+                // Reparse points / junctions
+                // ------------------------------------------------
+
+                if ((directoryInfo.Attributes &
+                     FileAttributes.ReparsePoint) != 0)
+                {
+                    continue;
+                }
+
+                ScanFolder(
+                    directory,
+                    libraries);
             }
         }
         catch

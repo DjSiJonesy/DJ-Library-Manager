@@ -3,6 +3,7 @@ using DJLibraryManager.UI.Models.Media;
 using DJLibraryManager.UI.Models.Search;
 using DJLibraryManager.UI.Search.Interfaces;
 using DJLibraryManager.UI.Services;
+using DJLibraryManager.UI.Services.Media;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,10 +19,19 @@ namespace DJLibraryManager.UI.Search.Services;
 /// This service does not identify duplicates itself. Analysis has
 /// already established the duplicate group. Search evaluates the
 /// files within that group and recommends the strongest candidate.
+///
+/// Physical files are inspected so Search can distinguish between
+/// files that merely exist and files that can actually be opened
+/// and inspected successfully.
+///
+/// Search does not modify the DIASISS library.
 /// </summary>
 public sealed class DuplicateSearchService : ISearchService
 {
     private readonly LibraryRepository _libraryRepository;
+
+    private readonly FileInspectionService
+        _fileInspectionService = new();
 
     public DuplicateSearchService(
         LibraryRepository libraryRepository)
@@ -61,6 +71,18 @@ public sealed class DuplicateSearchService : ISearchService
         var results =
             new List<SearchResult>();
 
+        // --------------------------------------------------------
+        // Physical file inspection cache
+        //
+        // A duplicate group can contain the same physical path
+        // more than once. Avoid inspecting the same path twice
+        // within this search operation.
+        // --------------------------------------------------------
+
+        var inspectionCache =
+            new Dictionary<string, FileInspectionResult>(
+                StringComparer.OrdinalIgnoreCase);
+
         foreach (var path in paths)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -69,15 +91,58 @@ public sealed class DuplicateSearchService : ISearchService
                 await _libraryRepository.GetMediaItemAsync(
                     path);
 
+            var inspection =
+                await InspectFileAsync(
+                    path,
+                    inspectionCache,
+                    cancellationToken);
+
             results.Add(
                 CreateResult(
                     path,
-                    media));
+                    media,
+                    inspection));
         }
+
+        // --------------------------------------------------------
+        // Recommendation
+        //
+        // Determine the strongest candidate and then place that
+        // candidate first in the results collection.
+        //
+        // The recommendation calculation itself is unchanged.
+        // --------------------------------------------------------
 
         RecommendBestResult(results);
 
         return results;
+    }
+
+    // ============================================================
+    // Physical File Inspection
+    // ============================================================
+
+    private async Task<FileInspectionResult> InspectFileAsync(
+        string filePath,
+        Dictionary<string, FileInspectionResult> cache,
+        CancellationToken cancellationToken)
+    {
+        if (cache.TryGetValue(
+                filePath,
+                out var cached))
+        {
+            return cached;
+        }
+
+        var inspection =
+            await _fileInspectionService.InspectAsync(
+                filePath,
+                cancellationToken);
+
+        cache[filePath] =
+            inspection;
+
+        return inspection;
     }
 
     // ============================================================
@@ -109,7 +174,8 @@ public sealed class DuplicateSearchService : ISearchService
 
     private static SearchResult CreateResult(
         string filePath,
-        DJLMMediaItem? media)
+        DJLMMediaItem? media,
+        FileInspectionResult inspection)
     {
         var result =
             new SearchResult
@@ -124,64 +190,85 @@ public sealed class DuplicateSearchService : ISearchService
                     filePath,
 
                 FileExists =
-                    File.Exists(filePath)
+                    inspection.Exists,
+
+                FileSize =
+                    inspection.Exists
+                        ? TryGetFileSize(filePath)
+                        : null,
+
+                // ------------------------------------------------
+                // Physical File Inspection
+                // ------------------------------------------------
+
+                IsInspected =
+                    true,
+
+                IsHealthy =
+                    inspection.IsHealthy,
+
+                IntegrityStatus =
+                    inspection.IntegrityStatus,
+
+                Format =
+                    inspection.Format,
+
+                Codec =
+                    inspection.Codec,
+
+                IsLossless =
+                    inspection.IsLossless,
+
+                Bitrate =
+                    inspection.Bitrate,
+
+                SampleRate =
+                    inspection.SampleRate,
+
+                BitDepth =
+                    inspection.BitDepth,
+
+                Channels =
+                    inspection.Channels
             };
 
-        if (media is null)
+        // ========================================================
+        // Library Media Information
+        // ========================================================
+
+        if (media is not null)
         {
-            result.MatchScore = 0;
+            result.Artist =
+                media.Artist;
 
-            result.RecommendationReason =
-                result.FileExists
-                    ? "File exists, but the track is no longer present in the DIASISS library."
-                    : "File is missing and the track is no longer present in the DIASISS library.";
+            result.TrackTitle =
+                media.Title;
 
-            return result;
+            result.Album =
+                media.Album;
+
+            result.Genre =
+                media.Genre;
+
+            result.Bpm =
+                media.BPM;
+
+            result.Key =
+                media.Key;
+
+            result.Duration =
+                media.Duration;
         }
-
-        // ========================================================
-        // Media Information
-        // ========================================================
-
-        result.Artist =
-            media.Artist;
-
-        result.TrackTitle =
-            media.Title;
-
-        result.Album =
-            media.Album;
-
-        result.Genre =
-            media.Genre;
-
-        result.Bpm =
-            media.BPM;
-
-        result.Key =
-            media.Key;
-
-        result.Duration =
-            media.Duration;
-
-        // ========================================================
-        // File Information
-        // ========================================================
-
-        if (result.FileExists)
+        else
         {
-            try
-            {
-                var fileInfo =
-                    new FileInfo(filePath);
+            // ----------------------------------------------------
+            // If the DIASISS library no longer contains the media
+            // record, still retain the physical file information
+            // discovered by inspection.
+            // ----------------------------------------------------
 
-                result.FileSize =
-                    fileInfo.Length;
-            }
-            catch
-            {
-                result.FileExists = false;
-            }
+            result.Duration =
+                inspection.Duration;
         }
 
         // ========================================================
@@ -195,6 +282,26 @@ public sealed class DuplicateSearchService : ISearchService
             BuildRecommendationReason(result);
 
         return result;
+    }
+
+    // ============================================================
+    // File Size
+    // ============================================================
+
+    private static long? TryGetFileSize(
+        string filePath)
+    {
+        try
+        {
+            if (!File.Exists(filePath))
+                return null;
+
+            return new FileInfo(filePath).Length;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     // ============================================================
@@ -223,12 +330,45 @@ public sealed class DuplicateSearchService : ISearchService
             BuildRecommendationReason(
                 recommended,
                 true);
+
+        // --------------------------------------------------------
+        // Put the recommended result first.
+        //
+        // The remaining candidates retain their existing order.
+        //
+        // This is presentation ordering only. It does not alter
+        // the duplicate group or the user's eventual selection.
+        // --------------------------------------------------------
+
+        var recommendedIndex =
+            results.IndexOf(recommended);
+
+        if (recommendedIndex > 0)
+        {
+            results.RemoveAt(
+                recommendedIndex);
+
+            results.Insert(
+                0,
+                recommended);
+        }
     }
 
     // ============================================================
-    // Scoring
+    // Current Scoring
     // ============================================================
 
+    /// <summary>
+    /// Calculates the current Search candidate score.
+    ///
+    /// IMPORTANT:
+    /// This is deliberately the existing scoring algorithm.
+    ///
+    /// The physical inspection information is now available to
+    /// Search, but it is NOT yet used to change the recommendation
+    /// score. The quality/integrity scoring will be redesigned
+    /// separately once the inspection results have been validated.
+    /// </summary>
     private static double CalculateMatchScore(
         SearchResult result)
     {
@@ -307,8 +447,73 @@ public sealed class DuplicateSearchService : ISearchService
         var reasons =
             new List<string>();
 
+        // --------------------------------------------------------
+        // Physical File
+        // --------------------------------------------------------
+
         reasons.Add(
             "File exists");
+
+        if (result.IsInspected == true)
+        {
+            if (result.IsHealthy == true)
+            {
+                reasons.Add(
+                    "File inspection passed");
+            }
+            else
+            {
+                reasons.Add(
+                    "File inspection failed");
+            }
+        }
+
+        // --------------------------------------------------------
+        // Audio Information
+        // --------------------------------------------------------
+
+        if (!string.IsNullOrWhiteSpace(
+                result.Format))
+        {
+            reasons.Add(
+                $"{result.Format} format");
+        }
+
+        if (result.IsLossless == true)
+        {
+            reasons.Add(
+                "Lossless audio");
+        }
+        else if (result.IsLossless == false)
+        {
+            reasons.Add(
+                "Lossy audio");
+        }
+
+        if (result.Bitrate.HasValue &&
+            result.Bitrate.Value > 0)
+        {
+            reasons.Add(
+                $"Bitrate {result.Bitrate.Value / 1000:N0} kbps");
+        }
+
+        if (result.SampleRate.HasValue &&
+            result.SampleRate.Value > 0)
+        {
+            reasons.Add(
+                $"Sample rate {result.SampleRate.Value:N0} Hz");
+        }
+
+        if (result.BitDepth.HasValue &&
+            result.BitDepth.Value > 0)
+        {
+            reasons.Add(
+                $"{result.BitDepth.Value}-bit");
+        }
+
+        // --------------------------------------------------------
+        // Metadata
+        // --------------------------------------------------------
 
         if (!string.IsNullOrWhiteSpace(
                 result.Artist))

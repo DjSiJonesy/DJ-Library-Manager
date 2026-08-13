@@ -144,7 +144,8 @@
                     Minimum="0"
                     Maximum="100"
                     Value="{Binding Progress,
-                                    ElementName=Root}"/>
+                                    ElementName=Root}"
+                    Foreground="{StaticResource Brush.Brand.Gradient}"/>
 
             </StackPanel>
 

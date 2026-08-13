@@ -9,7 +9,7 @@
         Margin="0,2">
 
         <Grid
-            ColumnDefinitions="60,220,90,90,90,20,220"
+            ColumnDefinitions="60,*,90,90,90,20,260"
             VerticalAlignment="Center">
 
             <!-- ===================================================== -->

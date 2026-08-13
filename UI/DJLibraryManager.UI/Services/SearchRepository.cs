@@ -1,5 +1,6 @@
 ﻿using DJLibraryManager.Core.Services;
 using DJLibraryManager.UI.Models.Search;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,10 +12,12 @@ namespace DJLibraryManager.UI.Services;
 ///
 /// Search persistence is independent of the Search workspace UI.
 /// It allows completed searches and their results to survive
-/// application restarts.
+/// application restarts, including interrupted Search All runs.
 /// </summary>
 public sealed class SearchRepository
 {
+    private const int CurrentVersion = 2;
+
     private static readonly JsonSerializerOptions JsonOptions =
         new()
         {
@@ -34,8 +37,12 @@ public sealed class SearchRepository
         Load();
     }
 
+    // ============================================================
+    // Current Search
+    // ============================================================
+
     /// <summary>
-    /// The latest completed Search state.
+    /// The latest Search state.
     /// </summary>
     public SearchState? CurrentSearch { get; private set; }
 
@@ -45,12 +52,21 @@ public sealed class SearchRepository
     public bool HasSearch =>
         CurrentSearch is not null;
 
+    // ============================================================
+    // Save
+    // ============================================================
+
     /// <summary>
     /// Saves the latest Search state.
     /// </summary>
-    public void Save(SearchState state)
+    public void Save(
+        SearchState state)
     {
-        CurrentSearch = state;
+        ArgumentNullException.ThrowIfNull(
+            state);
+
+        CurrentSearch =
+            state;
 
         Directory.CreateDirectory(
             ApplicationPaths.Search);
@@ -58,8 +74,11 @@ public sealed class SearchRepository
         var document =
             new SearchDocument
             {
-                Version = 1,
-                Search = state
+                Version =
+                    CurrentVersion,
+
+                Search =
+                    state
             };
 
         File.WriteAllText(
@@ -68,6 +87,10 @@ public sealed class SearchRepository
                 document,
                 JsonOptions));
     }
+
+    // ============================================================
+    // Load
+    // ============================================================
 
     /// <summary>
     /// Loads the latest Search state from disk.
@@ -80,30 +103,70 @@ public sealed class SearchRepository
             return;
         }
 
-        var json =
-            File.ReadAllText(
-                ApplicationPaths.LatestSearch);
-
-        var document =
-            JsonSerializer.Deserialize<SearchDocument>(
-                json,
-                JsonOptions);
-
-        if (document is null)
-            return;
-
-        switch (document.Version)
+        try
         {
-            case 1:
-                CurrentSearch =
-                    document.Search;
-                break;
+            var json =
+                File.ReadAllText(
+                    ApplicationPaths.LatestSearch);
 
-            default:
+            var document =
+                JsonSerializer.Deserialize<SearchDocument>(
+                    json,
+                    JsonOptions);
+
+            if (document is null)
+            {
                 CurrentSearch = null;
-                break;
+                return;
+            }
+
+            switch (document.Version)
+            {
+                // ------------------------------------------------
+                // Version 1
+                //
+                // Version 1 did not contain SearchRun information.
+                // The existing Search results remain valid.
+                // ------------------------------------------------
+
+                case 1:
+                    CurrentSearch =
+                        document.Search;
+
+                    break;
+
+                // ------------------------------------------------
+                // Version 2
+                //
+                // Version 2 supports resumable Search All.
+                // ------------------------------------------------
+
+                case 2:
+                    CurrentSearch =
+                        document.Search;
+
+                    break;
+
+                // ------------------------------------------------
+                // Unknown version
+                // ------------------------------------------------
+
+                default:
+                    CurrentSearch = null;
+                    break;
+            }
+        }
+        catch
+        {
+            // A corrupt or unreadable Search file must not prevent
+            // the application from starting.
+            CurrentSearch = null;
         }
     }
+
+    // ============================================================
+    // Clear
+    // ============================================================
 
     /// <summary>
     /// Clears the current Search state.

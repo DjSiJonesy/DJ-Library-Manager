@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
+using System.Text.Json.Serialization;
 
 namespace DJLibraryManager.UI.Models.Search;
 
@@ -27,11 +28,15 @@ public partial class SearchResult : ObservableObject
     private string source = string.Empty;
 
     // ============================================================
-    // Match
+    // Match / Recommendation
     // ============================================================
 
     /// <summary>
     /// Confidence or suitability score for this result.
+    ///
+    /// This is currently used by the Search recommendation
+    /// system. It will eventually represent the final Keep
+    /// Recommendation score.
     /// </summary>
     [ObservableProperty]
     private double matchScore;
@@ -48,6 +53,22 @@ public partial class SearchResult : ObservableObject
     /// </summary>
     [ObservableProperty]
     private string recommendationReason = string.Empty;
+
+    // ============================================================
+    // Selection
+    // ============================================================
+
+    /// <summary>
+    /// Indicates whether this result is currently selected by
+    /// the user as the preferred copy to keep.
+    ///
+    /// This is presentation state only and is deliberately not
+    /// persisted. The persisted source of truth is
+    /// SearchIssue.SelectedResultId.
+    /// </summary>
+    [ObservableProperty]
+    [JsonIgnore]
+    private bool isSelected;
 
     // ============================================================
     // Media
@@ -92,4 +113,84 @@ public partial class SearchResult : ObservableObject
     /// </summary>
     [ObservableProperty]
     private bool fileExists;
+
+    // ============================================================
+    // Physical File Inspection
+    // ============================================================
+
+    /// <summary>
+    /// Indicates whether the physical file has been inspected.
+    ///
+    /// Null means inspection has not yet been performed.
+    /// </summary>
+    [ObservableProperty]
+    private bool? isInspected;
+
+    /// <summary>
+    /// Indicates whether the physical file passed the current
+    /// integrity/readability checks.
+    ///
+    /// Null means the file has not yet been inspected.
+    /// </summary>
+    [ObservableProperty]
+    private bool? isHealthy;
+
+    /// <summary>
+    /// Human-readable description of the physical file integrity
+    /// result.
+    /// </summary>
+    [ObservableProperty]
+    private string integrityStatus = string.Empty;
+
+    // ============================================================
+    // Audio Format
+    // ============================================================
+
+    /// <summary>
+    /// Physical file format, for example MP3, FLAC or WAV.
+    /// </summary>
+    [ObservableProperty]
+    private string format = string.Empty;
+
+    /// <summary>
+    /// Audio codec reported by the physical file.
+    /// </summary>
+    [ObservableProperty]
+    private string codec = string.Empty;
+
+    /// <summary>
+    /// Indicates whether the physical audio format is lossless.
+    ///
+    /// Null means the format could not be classified.
+    /// </summary>
+    [ObservableProperty]
+    private bool? isLossless;
+
+    // ============================================================
+    // Audio Quality
+    // ============================================================
+
+    /// <summary>
+    /// Audio bitrate in bits per second, when available.
+    /// </summary>
+    [ObservableProperty]
+    private int? bitrate;
+
+    /// <summary>
+    /// Audio sample rate in Hz, when available.
+    /// </summary>
+    [ObservableProperty]
+    private int? sampleRate;
+
+    /// <summary>
+    /// Audio bit depth, when available.
+    /// </summary>
+    [ObservableProperty]
+    private int? bitDepth;
+
+    /// <summary>
+    /// Number of audio channels, when available.
+    /// </summary>
+    [ObservableProperty]
+    private int? channels;
 }

@@ -206,12 +206,12 @@ public partial class DashboardViewModel : ViewModelBase
     /// <summary>
     /// Opens the Search workflow.
     /// </summary>
-    //[RelayCommand]
-    //private void OpenSearch()
-    //{
-    //    App.Services.ApplicationState.NavigateTo(
-    //        WorkspaceType.Search);
-    //}
+    [RelayCommand]
+    private void OpenSearch()
+    {
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Search);
+    }
 
     /// <summary>
     /// Opens the Improve workflow.

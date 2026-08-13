@@ -22,14 +22,17 @@ public partial class MediaLocationImportInfo : ObservableObject
     /// </summary>
     public required MediaLocationDiscoverySummary Summary { get; init; }
 
-    public string Path => Summary.MediaLocation.Path;
+    public string Path =>
+        Summary.MediaLocation.Path;
 
-    public int FolderCount => Summary.FolderCount;
+    public int FolderCount =>
+        Summary.FolderCount;
 
     /// <summary>
     /// Total media files currently discovered.
     /// </summary>
-    public int TotalMediaFiles => Summary.TotalMediaFiles;
+    public int TotalMediaFiles =>
+        Summary.TotalMediaFiles;
 
     // ============================================================
     // Persisted Import Statistics
@@ -54,7 +57,8 @@ public partial class MediaLocationImportInfo : ObservableObject
     private int failedFiles;
 
     [ObservableProperty]
-    private MediaImportState importState = MediaImportState.Ready;
+    private MediaImportState importState =
+        MediaImportState.Ready;
 
     [ObservableProperty]
     private DateTime? lastImported;
@@ -66,7 +70,8 @@ public partial class MediaLocationImportInfo : ObservableObject
     private DateTime? lastDiscoveryDate;
 
     /// <summary>
-    /// Total number of files discovered during the last successful import.
+    /// Total number of files discovered during the last
+    /// successful import.
     /// </summary>
     [ObservableProperty]
     private int importedTotalFiles;
@@ -83,6 +88,9 @@ public partial class MediaLocationImportInfo : ObservableObject
 
     /// <summary>
     /// Files already present in the DIASISS Library.
+    ///
+    /// This is derived from SkippedFiles because the import
+    /// service skips files that are already present.
     /// </summary>
     public int AlreadyInLibrary =>
         SkippedFiles;
@@ -112,17 +120,24 @@ public partial class MediaLocationImportInfo : ObservableObject
     public string ImportStatus =>
         ImportState switch
         {
-            MediaImportState.Ready => "Ready to Import",
-            MediaImportState.Importing => "Importing...",
-            MediaImportState.Failed => "Import Failed",
+            MediaImportState.Ready =>
+                "Ready to Import",
 
-            MediaImportState.Imported when HasChanges
-                => "Changes Detected",
+            MediaImportState.Importing =>
+                "Importing...",
+
+            MediaImportState.Failed =>
+                "Import Failed",
 
             MediaImportState.Imported
-                => "Fully Imported",
+                when HasChanges =>
+                "Changes Detected",
 
-            _ => "Unknown"
+            MediaImportState.Imported =>
+                "Fully Imported",
+
+            _ =>
+                "Unknown"
         };
 
     /// <summary>
@@ -131,13 +146,15 @@ public partial class MediaLocationImportInfo : ObservableObject
     public string ImportActionText =>
         ImportState switch
         {
-            MediaImportState.Imported when HasChanges
-                => "Re-Import",
-
             MediaImportState.Imported
-                => "Re-Import",
+                when HasChanges =>
+                "Re-Import",
 
-            _ => "Import"
+            MediaImportState.Imported =>
+                "Re-Import",
+
+            _ =>
+                "Import"
         };
 
     /// <summary>
@@ -146,43 +163,89 @@ public partial class MediaLocationImportInfo : ObservableObject
     public IBrush ImportStatusBrush =>
         ImportState switch
         {
-            MediaImportState.Ready => Brushes.Orange,
-            MediaImportState.Importing => Brushes.DeepSkyBlue,
+            MediaImportState.Ready =>
+                Brushes.Orange,
 
-            MediaImportState.Imported when HasChanges
-                => Brushes.Goldenrod,
+            MediaImportState.Importing =>
+                Brushes.DeepSkyBlue,
 
             MediaImportState.Imported
-                => Brushes.LimeGreen,
+                when HasChanges =>
+                Brushes.Goldenrod,
 
-            MediaImportState.Failed => Brushes.Red,
+            MediaImportState.Imported =>
+                Brushes.LimeGreen,
 
-            _ => Brushes.Gray
+            MediaImportState.Failed =>
+                Brushes.Red,
+
+            _ =>
+                Brushes.Gray
         };
 
-    partial void OnImportStateChanged(MediaImportState value)
+    // ============================================================
+    // Property Change Notifications
+    // ============================================================
+
+    partial void OnSkippedFilesChanged(
+        int value)
     {
-        OnPropertyChanged(nameof(IsImporting));
-        OnPropertyChanged(nameof(CanImport));
-        OnPropertyChanged(nameof(HasChanges));
-        OnPropertyChanged(nameof(ImportStatus));
-        OnPropertyChanged(nameof(ImportActionText));
-        OnPropertyChanged(nameof(ImportStatusBrush));
+        // AlreadyInLibrary is calculated from SkippedFiles.
+        OnPropertyChanged(
+            nameof(AlreadyInLibrary));
     }
 
-    partial void OnLastDiscoveryDateChanged(DateTime? value)
+    partial void OnImportStateChanged(
+        MediaImportState value)
     {
-        OnPropertyChanged(nameof(HasChanges));
-        OnPropertyChanged(nameof(ImportStatus));
-        OnPropertyChanged(nameof(ImportActionText));
-        OnPropertyChanged(nameof(ImportStatusBrush));
+        OnPropertyChanged(
+            nameof(IsImporting));
+
+        OnPropertyChanged(
+            nameof(CanImport));
+
+        OnPropertyChanged(
+            nameof(HasChanges));
+
+        OnPropertyChanged(
+            nameof(ImportStatus));
+
+        OnPropertyChanged(
+            nameof(ImportActionText));
+
+        OnPropertyChanged(
+            nameof(ImportStatusBrush));
     }
 
-    partial void OnImportedTotalFilesChanged(int value)
+    partial void OnLastDiscoveryDateChanged(
+        DateTime? value)
     {
-        OnPropertyChanged(nameof(HasChanges));
-        OnPropertyChanged(nameof(ImportStatus));
-        OnPropertyChanged(nameof(ImportActionText));
-        OnPropertyChanged(nameof(ImportStatusBrush));
+        OnPropertyChanged(
+            nameof(HasChanges));
+
+        OnPropertyChanged(
+            nameof(ImportStatus));
+
+        OnPropertyChanged(
+            nameof(ImportActionText));
+
+        OnPropertyChanged(
+            nameof(ImportStatusBrush));
+    }
+
+    partial void OnImportedTotalFilesChanged(
+        int value)
+    {
+        OnPropertyChanged(
+            nameof(HasChanges));
+
+        OnPropertyChanged(
+            nameof(ImportStatus));
+
+        OnPropertyChanged(
+            nameof(ImportActionText));
+
+        OnPropertyChanged(
+            nameof(ImportStatusBrush));
     }
 }

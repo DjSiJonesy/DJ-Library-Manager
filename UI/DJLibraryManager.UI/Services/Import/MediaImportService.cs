@@ -14,6 +14,10 @@ namespace DJLibraryManager.UI.Services.Import;
 
 /// <summary>
 /// Imports media discovered on local storage into the DIASISS library.
+///
+/// Backup folders are deliberately excluded from the import scope.
+/// Any directory whose name contains "backup", case-insensitively,
+/// is not entered and therefore none of its contents can be imported.
 /// </summary>
 public sealed class MediaImportService
 {
@@ -24,12 +28,20 @@ public sealed class MediaImportService
         IProgressReporter progressReporter,
         LibraryRepository libraryRepository)
     {
-        _progressReporter = progressReporter
-            ?? throw new ArgumentNullException(nameof(progressReporter));
+        _progressReporter =
+            progressReporter
+            ?? throw new ArgumentNullException(
+                nameof(progressReporter));
 
-        _libraryRepository = libraryRepository
-            ?? throw new ArgumentNullException(nameof(libraryRepository));
+        _libraryRepository =
+            libraryRepository
+            ?? throw new ArgumentNullException(
+                nameof(libraryRepository));
     }
+
+    // ============================================================
+    // Import
+    // ============================================================
 
     /// <summary>
     /// Imports all supported media from one or more media locations.
@@ -39,17 +51,21 @@ public sealed class MediaImportService
     {
         ArgumentNullException.ThrowIfNull(mediaLocations);
 
-        var result = new MediaImportResult();
+        var result =
+            new MediaImportResult();
 
-        _progressReporter.BeginOperation("Import Media Library");
+        _progressReporter.BeginOperation(
+            "Import Media Library");
 
         //
         // Load the library once and build a fast lookup index.
         //
 
-        var library = await _libraryRepository.LoadLibraryAsync();
+        var library =
+            await _libraryRepository.LoadLibraryAsync();
 
-        var existingPaths = await _libraryRepository.BuildPathIndexAsync();
+        var existingPaths =
+            await _libraryRepository.BuildPathIndexAsync();
 
         try
         {
@@ -67,12 +83,17 @@ public sealed class MediaImportService
                 //
                 // Build the list once so we know the total.
                 //
+                // EnumerateFilesSafe() deliberately excludes
+                // directories containing "backup".
+                //
 
-                var files = EnumerateFiles(location)
-                    .Where(MediaFileTypes.IsSupported)
-                    .ToList();
+                var files =
+                    EnumerateFilesSafe(location.Path)
+                        .Where(MediaFileTypes.IsSupported)
+                        .ToList();
 
-                var totalFiles = files.Count;
+                var totalFiles =
+                    files.Count;
 
                 foreach (var file in files)
                 {
@@ -91,19 +112,29 @@ public sealed class MediaImportService
 
                     try
                     {
-                        var mediaItem = new DJLMMediaItem
-                        {
-                            Provider = "Discovery",
-                            FilePath = file,
-                            FileSize = new FileInfo(file).Length,
-                            MediaType = MediaFileTypes.IsAudio(file)
-                                ? "Audio"
-                                : "Video"
-                        };
+                        var mediaItem =
+                            new DJLMMediaItem
+                            {
+                                Provider =
+                                    "Discovery",
 
-                        library.Add(mediaItem);
+                                FilePath =
+                                    file,
 
-                        existingPaths.Add(file);
+                                FileSize =
+                                    new FileInfo(file).Length,
+
+                                MediaType =
+                                    MediaFileTypes.IsAudio(file)
+                                        ? "Audio"
+                                        : "Video"
+                            };
+
+                        library.Add(
+                            mediaItem);
+
+                        existingPaths.Add(
+                            file);
 
                         result.Imported++;
                     }
@@ -118,9 +149,11 @@ public sealed class MediaImportService
             // Save the library once.
             //
 
-            await _libraryRepository.SaveLibraryAsync(library);
+            await _libraryRepository.SaveLibraryAsync(
+                library);
 
-            _progressReporter.ReportStage("Finalising...");
+            _progressReporter.ReportStage(
+                "Finalising...");
 
             _progressReporter.Complete();
 
@@ -128,20 +161,131 @@ public sealed class MediaImportService
         }
         catch (Exception ex)
         {
-            _progressReporter.Fail(ex.Message);
+            _progressReporter.Fail(
+                ex.Message);
+
             throw;
         }
     }
 
+    // ============================================================
+    // File Enumeration
+    // ============================================================
+
     /// <summary>
-    /// Enumerates every file beneath a media location.
+    /// Enumerates supported filesystem files beneath a media
+    /// location while deliberately excluding Backup folders.
+    ///
+    /// A directory is excluded when its name contains "backup",
+    /// case-insensitively.
+    ///
+    /// Examples:
+    ///
+    /// Backup
+    /// Backups
+    /// DJ Backup
+    /// DJ_Backup
+    /// DJ-Backup
+    /// MyBackupFiles
+    /// BackupOldMusic
+    ///
+    /// None of these directories are entered.
     /// </summary>
-    private static IEnumerable<string> EnumerateFiles(
-        MediaLocation mediaLocation)
+    private static IEnumerable<string> EnumerateFilesSafe(
+        string rootPath)
     {
-        return Directory.EnumerateFiles(
-            mediaLocation.Path,
-            "*.*",
-            SearchOption.AllDirectories);
+        if (!Directory.Exists(rootPath))
+            yield break;
+
+        foreach (var file in EnumerateFilesInDirectory(
+                     rootPath))
+        {
+            yield return file;
+        }
+    }
+
+    /// <summary>
+    /// Recursively enumerates files while controlling directory
+    /// traversal so Backup folders are never entered.
+    /// </summary>
+    private static IEnumerable<string> EnumerateFilesInDirectory(
+        string directoryPath)
+    {
+        IEnumerable<string> files;
+
+        try
+        {
+            files =
+                Directory.EnumerateFiles(
+                    directoryPath,
+                    "*.*",
+                    SearchOption.TopDirectoryOnly);
+        }
+        catch
+        {
+            yield break;
+        }
+
+        foreach (var file in files)
+        {
+            yield return file;
+        }
+
+        IEnumerable<string> directories;
+
+        try
+        {
+            directories =
+                Directory.EnumerateDirectories(
+                    directoryPath,
+                    "*",
+                    SearchOption.TopDirectoryOnly);
+        }
+        catch
+        {
+            yield break;
+        }
+
+        foreach (var directory in directories)
+        {
+            DirectoryInfo directoryInfo;
+
+            try
+            {
+                directoryInfo =
+                    new DirectoryInfo(directory);
+            }
+            catch
+            {
+                continue;
+            }
+
+            // ----------------------------------------------------
+            // Backup exclusion
+            // ----------------------------------------------------
+
+            if (directoryInfo.Name.Contains(
+                    "backup",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            // ----------------------------------------------------
+            // Reparse points / junctions
+            // ----------------------------------------------------
+
+            if ((directoryInfo.Attributes &
+                 FileAttributes.ReparsePoint) != 0)
+            {
+                continue;
+            }
+
+            foreach (var file in
+                     EnumerateFilesInDirectory(directory))
+            {
+                yield return file;
+            }
+        }
     }
 }

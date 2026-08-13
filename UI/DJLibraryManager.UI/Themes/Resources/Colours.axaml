@@ -19,6 +19,10 @@
     <Color x:Key="Colour.Accent">#AB58FA</Color>
     <Color x:Key="Colour.Accent.Hover">#BE7BFF</Color>
 
+    <!-- DIASISS Brand Blue -->
+
+    <Color x:Key="Colour.Brand.Blue">#00A9F4</Color>
+
     <!-- Text -->
 
     <Color x:Key="Colour.Text">#FFFFFF</Color>
@@ -63,16 +67,16 @@
         Color="{StaticResource Colour.Panel}" />
 
     <SolidColorBrush
-    x:Key="Brush.Panel.Secondary"
-    Color="{StaticResource Colour.Panel.Secondary}" />
+        x:Key="Brush.Panel.Secondary"
+        Color="{StaticResource Colour.Panel.Secondary}" />
 
     <SolidColorBrush
         x:Key="Brush.Panel.Border"
         Color="{StaticResource Colour.Panel.Border}" />
 
     <SolidColorBrush
-    x:Key="Brush.Panel.Secondary.Border"
-    Color="{StaticResource Colour.Panel.Secondary.Border}" />
+        x:Key="Brush.Panel.Secondary.Border"
+        Color="{StaticResource Colour.Panel.Secondary.Border}" />
 
     <SolidColorBrush
         x:Key="Brush.Accent"
@@ -81,6 +85,29 @@
     <SolidColorBrush
         x:Key="Brush.Accent.Hover"
         Color="{StaticResource Colour.Accent.Hover}" />
+
+    <!-- ========================================================= -->
+    <!-- DIASISS Brand Gradient                                     -->
+    <!-- ========================================================= -->
+
+    <LinearGradientBrush
+        x:Key="Brush.Brand.Gradient"
+        StartPoint="0%,0%"
+        EndPoint="100%,0%">
+
+        <GradientStop
+            Offset="0"
+            Color="#C84CFF" />
+
+        <GradientStop
+            Offset="0.75"
+            Color="#704CFF" />
+
+        <GradientStop
+            Offset="1"
+            Color="{StaticResource Colour.Brand.Blue}" />
+
+    </LinearGradientBrush>
 
     <SolidColorBrush
         x:Key="Brush.Text"
@@ -130,9 +157,24 @@
         x:Key="Brush.Button.Hover.Foreground"
         Color="{StaticResource Colour.Button.Hover.Foreground}" />
 
-    <SolidColorBrush
+        <LinearGradientBrush
         x:Key="Brush.Button.Pressed.Background"
-        Color="{StaticResource Colour.Button.Pressed.Background}" />
+        StartPoint="0%,0%"
+        EndPoint="100%,0%">
+
+        <GradientStop
+            Offset="0"
+            Color="#C84CFF" />
+
+        <GradientStop
+            Offset="0.75"
+            Color="#704CFF" />
+
+        <GradientStop
+            Offset="1"
+            Color="{StaticResource Colour.Brand.Blue}" />
+
+    </LinearGradientBrush>
 
     <SolidColorBrush
         x:Key="Brush.Button.Pressed.Border"
