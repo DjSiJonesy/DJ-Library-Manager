@@ -54,11 +54,31 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     // Search Issues
     // ============================================================
 
+    /// <summary>
+    /// Complete collection of issues for the selected category.
+    ///
+    /// This collection represents the actual Search state and is
+    /// deliberately not modified by the UI filtering.
+    /// </summary>
     public ObservableCollection<SearchIssue> Issues { get; }
+        = new();
+
+    /// <summary>
+    /// Filtered and alphabetically sorted view of Issues used by
+    /// the Search UI.
+    /// </summary>
+    public ObservableCollection<SearchIssue> FilteredIssues { get; }
         = new();
 
     [ObservableProperty]
     private SearchIssue? selectedIssue;
+
+    // ============================================================
+    // Issue Filtering
+    // ============================================================
+
+    [ObservableProperty]
+    private string issueSearchText = string.Empty;
 
     // ============================================================
     // Search State
@@ -150,6 +170,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
             Issues.Clear();
 
+            FilteredIssues.Clear();
+
             SelectedIssue = null;
 
             SearchStatus =
@@ -231,6 +253,10 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     partial void OnSelectedCategoryChanged(
         SearchCategoryInfo? value)
     {
+        // A search entered for one category should not carry over
+        // into another category.
+        IssueSearchText = string.Empty;
+
         SelectIssuesForCategory();
 
         UpdateSearchRunStatus();
@@ -242,6 +268,127 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         OnPropertyChanged(
             nameof(AllRecommendedSelected));
+    }
+
+    // ============================================================
+    // Issue Search Text
+    // ============================================================
+
+    partial void OnIssueSearchTextChanged(
+        string value)
+    {
+        FilterIssues();
+    }
+
+    // ============================================================
+    // Issue Filtering
+    // ============================================================
+
+    /// <summary>
+    /// Rebuilds the UI issue collection from the complete issue
+    /// collection using the current search text.
+    ///
+    /// Issues are always presented alphabetically by DisplayName,
+    /// followed by FilePath as a deterministic secondary sort.
+    /// </summary>
+    private void FilterIssues()
+    {
+        var previousSelectedId =
+            SelectedIssue?.Id;
+
+        FilteredIssues.Clear();
+
+        var searchText =
+            IssueSearchText?.Trim();
+
+        IEnumerable<SearchIssue> filtered =
+            Issues;
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            filtered =
+                Issues.Where(
+                    issue =>
+                        ContainsIgnoreCase(
+                            issue.DisplayName,
+                            searchText)
+                        ||
+                        ContainsIgnoreCase(
+                            issue.Artist,
+                            searchText)
+                        ||
+                        ContainsIgnoreCase(
+                            issue.TrackTitle,
+                            searchText)
+                        ||
+                        ContainsIgnoreCase(
+                            issue.Album,
+                            searchText)
+                        ||
+                        ContainsIgnoreCase(
+                            issue.Description,
+                            searchText)
+                        ||
+                        ContainsIgnoreCase(
+                            issue.FilePath,
+                            searchText));
+        }
+
+        var sorted =
+            filtered
+                .OrderBy(
+                    x => x.DisplayName,
+                    StringComparer.OrdinalIgnoreCase)
+                .ThenBy(
+                    x => x.FilePath,
+                    StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        foreach (var issue in sorted)
+        {
+            FilteredIssues.Add(issue);
+        }
+
+        // --------------------------------------------------------
+        // Preserve the selected issue when it is still visible.
+        // --------------------------------------------------------
+
+        if (!string.IsNullOrWhiteSpace(previousSelectedId))
+        {
+            var previouslySelected =
+                FilteredIssues.FirstOrDefault(
+                    x => string.Equals(
+                        x.Id,
+                        previousSelectedId,
+                        StringComparison.OrdinalIgnoreCase));
+
+            if (previouslySelected is not null)
+            {
+                SelectedIssue =
+                    previouslySelected;
+
+                return;
+            }
+        }
+
+        // --------------------------------------------------------
+        // If the previous selection has been filtered out, select
+        // the first visible issue.
+        // --------------------------------------------------------
+
+        SelectedIssue =
+            FilteredIssues.FirstOrDefault();
+    }
+
+    private static bool ContainsIgnoreCase(
+        string? value,
+        string searchText)
+    {
+        return !string.IsNullOrWhiteSpace(value)
+            &&
+            value.Contains(
+                searchText,
+                StringComparison.OrdinalIgnoreCase);
     }
 
     // ============================================================
@@ -259,6 +406,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 SelectedCategory,
                 category))
         {
+            IssueSearchText = string.Empty;
+
             SelectIssuesForCategory();
 
             UpdateSearchRunStatus();
@@ -285,6 +434,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     private void SelectIssuesForCategory()
     {
         Issues.Clear();
+
+        FilteredIssues.Clear();
 
         SelectedIssue = null;
 
@@ -352,8 +503,11 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 searchIssue);
         }
 
-        SelectedIssue =
-            Issues.FirstOrDefault();
+        // ========================================================
+        // Build sorted / filtered UI collection.
+        // ========================================================
+
+        FilterIssues();
 
         SearchStatus =
             Issues.Count == 0
@@ -389,11 +543,35 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 Description =
                     issue.Description,
 
+                // ------------------------------------------------
+                // Existing library metadata
+                //
+                // These are the actual values currently stored in
+                // DIASISS. They must remain separate from any
+                // filename-derived search information.
+                // ------------------------------------------------
+
                 Artist =
                     issue.Artist,
 
                 TrackTitle =
                     issue.TrackTitle,
+
+                Album =
+                    issue.Album,
+
+                Duration =
+                    issue.Duration,
+
+                // ------------------------------------------------
+                // Filename-derived search information
+                //
+                // These are search hints only. They are not confirmed
+                // Artist or Title metadata.
+                // ------------------------------------------------
+
+                FilenameSearchHint =
+                    issue.FilenameSearchHint,
 
                 FilePath =
                     issue.FilePath,
@@ -918,10 +1096,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         if (alreadySelected)
         {
-            // ----------------------------------------------------
-            // User is removing this copy from the Keep selection.
-            // ----------------------------------------------------
-
             matchingResult.IsSelected =
                 false;
 
@@ -935,23 +1109,12 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         }
         else
         {
-            // ----------------------------------------------------
-            // User is explicitly keeping this copy.
-            //
-            // Do NOT clear any other selections.
-            // ----------------------------------------------------
-
             matchingResult.IsSelected =
                 true;
 
             AddId(
                 issue.SelectedResultIds,
                 matchingResult.Id);
-
-            // ----------------------------------------------------
-            // This is a manual selection, so it must not be treated
-            // as a bulk recommendation selection.
-            // ----------------------------------------------------
 
             RemoveId(
                 issue.RecommendedSelectedResultIds,
@@ -1067,19 +1230,15 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             foreach (var issue in Issues)
             {
                 if (!string.Equals(
-                        issue.Category,
-                        "Duplicates",
-                        StringComparison.OrdinalIgnoreCase))
+                    issue.Category,
+                    "Duplicates",
+                    StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
                 if (issue.RecommendedSelectedResultIds.Count == 0)
                     continue;
-
-                // ------------------------------------------------
-                // Remove only IDs created by the bulk action.
-                // ------------------------------------------------
 
                 var bulkIds =
                     issue.RecommendedSelectedResultIds.ToList();
@@ -1134,23 +1293,15 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         foreach (var issue in Issues)
         {
             if (!string.Equals(
-                    issue.Category,
-                    "Duplicates",
-                    StringComparison.OrdinalIgnoreCase))
+                issue.Category,
+                "Duplicates",
+                StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
-            // ----------------------------------------------------
-            // NEVER overwrite an existing user selection.
-            // ----------------------------------------------------
-
             if (issue.SelectedResultIds.Count > 0)
                 continue;
-
-            // ----------------------------------------------------
-            // Find the recommendation.
-            // ----------------------------------------------------
 
             var recommended =
                 issue.Results.FirstOrDefault(
@@ -1158,10 +1309,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
             if (recommended is null)
                 continue;
-
-            // ----------------------------------------------------
-            // Apply recommendation.
-            // ----------------------------------------------------
 
             recommended.IsSelected =
                 true;

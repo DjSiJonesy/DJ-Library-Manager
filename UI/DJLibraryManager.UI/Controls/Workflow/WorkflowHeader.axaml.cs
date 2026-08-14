@@ -1,7 +1,10 @@
-﻿using System.Windows.Input;
-
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
+using CommunityToolkit.Mvvm.Input;
+using DJLibraryManager.Core.Services;
+using DJLibraryManager.UI.Services;
+using System.IO;
+using System.Windows.Input;
 
 namespace DJLibraryManager.UI.Controls.Workflow;
 
@@ -10,6 +13,9 @@ public partial class WorkflowHeader : UserControl
     public WorkflowHeader()
     {
         InitializeComponent();
+
+        OpenDuplicatesCommand =
+            new RelayCommand(OpenDuplicatesFolder);
     }
 
     // ============================================================
@@ -152,5 +158,69 @@ public partial class WorkflowHeader : UserControl
     {
         get => GetValue(NextCommandProperty);
         set => SetValue(NextCommandProperty, value);
+    }
+
+    // ============================================================
+    // Duplicate Protection
+    // ============================================================
+
+    /// <summary>
+    /// Determines whether the Duplicate Protection notification
+    /// is displayed in the workflow header.
+    /// </summary>
+    public static readonly StyledProperty<bool>
+        ShowDuplicateProtectionProperty =
+            AvaloniaProperty.Register<WorkflowHeader, bool>(
+                nameof(ShowDuplicateProtection),
+                false);
+
+    public bool ShowDuplicateProtection
+    {
+        get => GetValue(ShowDuplicateProtectionProperty);
+        set => SetValue(ShowDuplicateProtectionProperty, value);
+    }
+
+    /// <summary>
+    /// Location where DIASISS retains duplicate files that the
+    /// user has not selected to keep.
+    /// </summary>
+    public static readonly StyledProperty<string>
+        DuplicateFolderPathProperty =
+            AvaloniaProperty.Register<WorkflowHeader, string>(
+                nameof(DuplicateFolderPath),
+                ApplicationPaths.DiasissDuplicates);
+
+    public string DuplicateFolderPath
+    {
+        get => GetValue(DuplicateFolderPathProperty);
+        set => SetValue(DuplicateFolderPathProperty, value);
+    }
+
+    /// <summary>
+    /// Opens the DIASISS Duplicates folder.
+    ///
+    /// The folder is created when the user explicitly chooses
+    /// to open it.
+    /// </summary>
+    public ICommand OpenDuplicatesCommand { get; }
+
+    private void OpenDuplicatesFolder()
+    {
+        var path = DuplicateFolderPath;
+
+        if (string.IsNullOrWhiteSpace(path))
+            return;
+
+        try
+        {
+            Directory.CreateDirectory(path);
+
+            FolderLauncher.Open(path);
+        }
+        catch
+        {
+            // FolderLauncher already handles Explorer failures.
+            // Do not allow a UI action to crash the application.
+        }
     }
 }

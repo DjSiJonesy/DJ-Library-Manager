@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using DJLibraryManager.Core.Services;
+
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Import;
 using DJLibraryManager.UI.Models.Media;
@@ -12,6 +15,10 @@ namespace DJLibraryManager.UI.Providers.VirtualDJ.Services;
 
 /// <summary>
 /// Imports a VirtualDJ library into the common DJLM media model.
+///
+/// Provider database records are filtered before they enter the
+/// active DIASISS provider library. Protected paths, including
+/// files located beneath Backup folders, are excluded here.
 /// </summary>
 public sealed class VirtualDJImporter : IProviderImporter
 {
@@ -21,80 +28,163 @@ public sealed class VirtualDJImporter : IProviderImporter
 
     private readonly IProgressReporter _progressReporter;
 
-    public VirtualDJImporter(IProgressReporter progressReporter)
+    public VirtualDJImporter(
+        IProgressReporter progressReporter)
     {
-        _progressReporter = progressReporter
-            ?? throw new ArgumentNullException(nameof(progressReporter));
+        _progressReporter =
+            progressReporter
+            ?? throw new ArgumentNullException(
+                nameof(progressReporter));
     }
 
-    public string ProviderName => "VirtualDJ";
+    public string ProviderName =>
+        "VirtualDJ";
 
-    public Task<ImportResult> ImportAsync(ProviderInfo provider)
+    // ============================================================
+    // Import
+    // ============================================================
+
+    public Task<ImportResult> ImportAsync(
+        ProviderInfo provider)
     {
         ArgumentNullException.ThrowIfNull(provider);
 
         try
         {
-            if (string.IsNullOrWhiteSpace(provider.DatabasePath))
+            if (string.IsNullOrWhiteSpace(
+                    provider.DatabasePath))
             {
-                return Task.FromResult(new ImportResult
-                {
-                    Success = false,
-                    ProviderName = ProviderName,
-                    ImportedAt = DateTime.Now,
-                    ErrorMessage = "No VirtualDJ database path has been configured."
-                });
+                return Task.FromResult(
+                    new ImportResult
+                    {
+                        Success = false,
+                        ProviderName = ProviderName,
+                        ImportedAt = DateTime.Now,
+                        ErrorMessage =
+                            "No VirtualDJ database path " +
+                            "has been configured."
+                    });
             }
 
-            _progressReporter.ReportStage("Opening VirtualDJ database...");
+            _progressReporter.ReportStage(
+                "Opening VirtualDJ database...");
 
-            var database = _databaseLoader.Load(provider.DatabasePath);
+            var database =
+                _databaseLoader.Load(
+                    provider.DatabasePath);
 
-            _progressReporter.ReportStage("Reading songs...");
+            _progressReporter.ReportStage(
+                "Reading songs...");
 
-            var songs = _songReader.ReadSongs(database);
+            var songs =
+                _songReader.ReadSongs(
+                    database);
 
-            _progressReporter.ReportStage("Translating media...");
+            _progressReporter.ReportStage(
+                "Translating media...");
 
-            var songList = new List<dynamic>(songs);
+            var songList =
+                new List<dynamic>(songs);
 
-            var mediaItems = new List<DJLMMediaItem>(songList.Count);
+            var mediaItems =
+                new List<DJLMMediaItem>(
+                    songList.Count);
 
-            for (int i = 0; i < songList.Count; i++)
+            var excludedCount =
+                0;
+
+            for (int i = 0;
+                 i < songList.Count;
+                 i++)
             {
-                var mediaItem = _translator.Translate(songList[i]);
+                var mediaItem =
+                    _translator.Translate(
+                        songList[i]);
 
-                mediaItems.Add(mediaItem);
+                // ------------------------------------------------
+                // Protected path check
+                //
+                // Provider databases can contain records that
+                // belong to Backup folders even though Discovery
+                // correctly excludes those folders.
+                //
+                // Do not allow those records to enter the active
+                // DIASISS provider library.
+                // ------------------------------------------------
+
+                if (ProtectedPathService.IsInsideBackupFolder(
+                        mediaItem.FilePath))
+                {
+                    excludedCount++;
+
+                    _progressReporter.ReportProgress(
+                        i + 1,
+                        songList.Count,
+                        $"Excluded Backup: " +
+                        $"{mediaItem.FilePath}");
+
+                    continue;
+                }
+
+                mediaItems.Add(
+                    mediaItem);
 
                 _progressReporter.ReportProgress(
                     i + 1,
                     songList.Count,
-                    $"{mediaItem.Artist} - {mediaItem.Title}");
+                    $"{mediaItem.Artist} - " +
+                    $"{mediaItem.Title}");
             }
 
-            _progressReporter.ReportStage("Building media library...");
+            _progressReporter.ReportStage(
+                "Building media library...");
 
-            var result = new ImportResult
-            {
-                Success = true,
-                ProviderName = ProviderName,
-                ImportedAt = DateTime.Now,
-                TrackCount = mediaItems.Count,
-                PlaylistCount = 0,
-                MediaItems = mediaItems
-            };
+            var result =
+                new ImportResult
+                {
+                    Success = true,
 
-            return Task.FromResult(result);
+                    ProviderName =
+                        ProviderName,
+
+                    ImportedAt =
+                        DateTime.Now,
+
+                    TrackCount =
+                        mediaItems.Count,
+
+                    PlaylistCount =
+                        0,
+
+                    MediaItems =
+                        mediaItems
+                };
+
+            _progressReporter.ReportStage(
+                excludedCount > 0
+                    ? $"Excluded {excludedCount:N0} " +
+                      $"Backup records."
+                    : "No protected Backup records found.");
+
+            return Task.FromResult(
+                result);
         }
         catch (Exception ex)
         {
-            return Task.FromResult(new ImportResult
-            {
-                Success = false,
-                ProviderName = ProviderName,
-                ImportedAt = DateTime.Now,
-                ErrorMessage = ex.Message
-            });
+            return Task.FromResult(
+                new ImportResult
+                {
+                    Success = false,
+
+                    ProviderName =
+                        ProviderName,
+
+                    ImportedAt =
+                        DateTime.Now,
+
+                    ErrorMessage =
+                        ex.Message
+                });
         }
     }
 }

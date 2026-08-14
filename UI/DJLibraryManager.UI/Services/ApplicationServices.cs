@@ -1,8 +1,12 @@
-﻿using DJLibraryManager.Core.Services;
+﻿using System;
+
+using DJLibraryManager.Core.Services;
 using DJLibraryManager.Core.Services.Library;
 
 using DJLibraryManager.UI.Providers.VirtualDJ.Services;
+using DJLibraryManager.UI.Search.Interfaces;
 using DJLibraryManager.UI.Search.Services;
+using DJLibraryManager.UI.Search.Services.Providers;
 using DJLibraryManager.UI.Services.Discovery;
 using DJLibraryManager.UI.Services.Import;
 
@@ -166,8 +170,25 @@ public sealed class ApplicationServices
         var missingFileSearchService =
             new MissingFileSearchService();
 
+        // --------------------------------------------------------
+        // Metadata Search Providers
+        // --------------------------------------------------------
+
+        var metadataProviders =
+            new IMetadataSearchProvider[]
+            {
+                new MusicBrainzMetadataProvider(),
+                new DiscogsMetadataProvider(),
+                new FreqBlogMetadataProvider()
+            };
+
         var metadataSearchService =
-            new MetadataSearchService();
+            new MetadataSearchService(
+                metadataProviders);
+
+        // --------------------------------------------------------
+        // Other Search Services
+        // --------------------------------------------------------
 
         var musicSearchService =
             new MusicSearchService(
@@ -176,6 +197,10 @@ public sealed class ApplicationServices
         var providerSearchService =
             new ProviderSearchService(
                 LibraryRepository);
+
+        // --------------------------------------------------------
+        // Search Coordinator
+        // --------------------------------------------------------
 
         Search =
             new SearchService(
@@ -186,5 +211,5 @@ public sealed class ApplicationServices
                 providerSearchService,
                 SearchRepository,
                 AnalysisRepository);
-            }
+    }
 }

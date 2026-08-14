@@ -23,9 +23,11 @@
         <!-- ===================================================== -->
 
         <workflow:WorkflowHeader
+            x:Name="SearchHeader"
             Grid.Row="0"
             Title="Search"
             Description="Find information and potential solutions for issues identified during library analysis."
+            ShowDuplicateProtection="True"
             PreviousText="← Analysis"
             PreviousCommand="{Binding PreviousCommand}"
             NextText="Improve →"
@@ -40,74 +42,99 @@
             RowDefinitions="Auto,20,*">
 
             <!-- ===================================================== -->
-            <!-- Search Category Selector -->
+            <!-- Search Category Selector / Duplicate Folder -->
             <!-- ===================================================== -->
 
-            <ItemsControl
+            <Grid
                 Grid.Row="0"
-                ItemsSource="{Binding Categories}">
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="12">
 
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel
-                            Orientation="Horizontal"
-                            Spacing="12"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+                <!-- ================================================= -->
+                <!-- Search Categories -->
+                <!-- ================================================= -->
 
-                <ItemsControl.ItemTemplate>
+                <ItemsControl
+                    Grid.Column="0"
+                    ItemsSource="{Binding Categories}">
 
-                    <DataTemplate
-                        x:DataType="models:SearchCategoryInfo">
+                    <ItemsControl.ItemsPanel>
 
-                        <!-- Category selector remains enabled.
-                             Users can still move between categories
-                             while Search All is running. -->
+                        <ItemsPanelTemplate>
 
-                        <Button
-                            Theme="{StaticResource DJLM.PrimaryButton}"
-                            Padding="12,8"
-                            MinWidth="170"
-                            Command="{Binding $parent[ItemsControl].DataContext.SelectCategoryCommand}"
-                            CommandParameter="{Binding}">
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="12"/>
 
-                            <Grid
-                                ColumnDefinitions="Auto,*,Auto"
-                                VerticalAlignment="Center">
+                        </ItemsPanelTemplate>
 
-                                <TextBlock
-                                    Grid.Column="0"
-                                    FontSize="16"
-                                    VerticalAlignment="Center"
-                                    Margin="0,0,8,0"
-                                    Text="{Binding Icon}"/>
+                    </ItemsControl.ItemsPanel>
 
-                                <TextBlock
-                                    Grid.Column="1"
-                                    FontSize="13"
-                                    FontWeight="SemiBold"
-                                    VerticalAlignment="Center"
-                                    Text="{Binding Name}"/>
+                    <ItemsControl.ItemTemplate>
 
-                                <TextBlock
-                                    Grid.Column="2"
-                                    FontSize="12"
-                                    FontWeight="SemiBold"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Center"
-                                    Margin="12,0,0,0"
-                                    Text="{Binding IssueCount,
-                                                   StringFormat={}{0:N0}}"/>
+                        <DataTemplate
+                            x:DataType="models:SearchCategoryInfo">
 
-                            </Grid>
+                            <Button
+                                Theme="{StaticResource DJLM.PrimaryButton}"
+                                Padding="12,8"
+                                MinWidth="170"
+                                Command="{Binding $parent[ItemsControl].DataContext.SelectCategoryCommand}"
+                                CommandParameter="{Binding}">
 
-                        </Button>
+                                <Grid
+                                    ColumnDefinitions="Auto,*,Auto"
+                                    VerticalAlignment="Center">
 
-                    </DataTemplate>
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        FontSize="16"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0"
+                                        Text="{Binding Icon}"/>
 
-                </ItemsControl.ItemTemplate>
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding Name}"/>
 
-            </ItemsControl>
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Margin="12,0,0,0"
+                                        Text="{Binding IssueCount,
+                                                       StringFormat={}{0:N0}}"/>
+
+                                </Grid>
+
+                            </Button>
+
+                        </DataTemplate>
+
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+                <!-- ================================================= -->
+                <!-- DIASISS Duplicates Folder -->
+                <!-- ================================================= -->
+
+                <Button
+                    Grid.Column="1"
+                    Theme="{StaticResource DJLM.SecondaryButton}"
+                    Padding="12,8"
+                    MinHeight="46"
+                    VerticalAlignment="Center"
+                    Content="📁 Open DIASISS Duplicates →"
+                    Command="{Binding OpenDuplicatesCommand,
+                                      ElementName=SearchHeader}"/>
+
+            </Grid>
 
             <!-- ================================================= -->
             <!-- Category Content -->
@@ -202,18 +229,16 @@
                         Padding="12">
 
                         <Grid
-                            RowDefinitions="Auto,12,*">
+                            RowDefinitions="Auto,8,Auto,12,*">
 
+                            <!-- ================================================= -->
                             <!-- Issues Heading -->
+                            <!-- ================================================= -->
 
                             <Grid
                                 Grid.Row="0"
                                 ColumnDefinitions="*,Auto"
                                 VerticalAlignment="Center">
-
-                                <!-- ===================================================== -->
-                                <!-- Issues Heading -->
-                                <!-- ===================================================== -->
 
                                 <TextBlock
                                     Grid.Column="0"
@@ -227,9 +252,9 @@
 
                                 </TextBlock>
 
-                                <!-- ===================================================== -->
+                                <!-- ================================================= -->
                                 <!-- Select All Recommended -->
-                                <!-- ===================================================== -->
+                                <!-- ================================================= -->
 
                                 <Button
                                     Grid.Column="1"
@@ -241,32 +266,52 @@
 
                                     <StackPanel
                                         Orientation="Horizontal"
-                                        Spacing="6">
+                                        Spacing="6"
+                                        VerticalAlignment="Center">
 
-                                                   <TextBlock
+                                        <TextBlock
                                             FontSize="14"
+                                            VerticalAlignment="Center"
                                             Text="☑"
                                             IsVisible="{Binding AllRecommendedSelected}"/>
 
                                         <TextBlock
                                             FontSize="14"
+                                            VerticalAlignment="Center"
                                             Text="☐"
                                             IsVisible="{Binding !AllRecommendedSelected}"/>
 
                                         <TextBlock
                                             FontSize="11"
                                             FontWeight="SemiBold"
+                                            VerticalAlignment="Center"
                                             Text="Select All Recommended"/>
 
                                     </StackPanel>
 
                                 </Button>
 
-                            </Grid> 
+                            </Grid>
+
+                            <!-- ================================================= -->
+                            <!-- Issue Search -->
+                            <!-- ================================================= -->
+
+                            <TextBox
+                                Grid.Row="2"
+                                Watermark="Search issues..."
+                                Text="{Binding IssueSearchText,
+                                               UpdateSourceTrigger=PropertyChanged}"
+                                Padding="8,6"
+                                HorizontalContentAlignment="Stretch"/>
+
+                            <!-- ================================================= -->
+                            <!-- Issue List -->
+                            <!-- ================================================= -->
 
                             <ListBox
-                                Grid.Row="2"
-                                ItemsSource="{Binding Issues}"
+                                Grid.Row="4"
+                                ItemsSource="{Binding FilteredIssues}"
                                 SelectedItem="{Binding SelectedIssue}">
 
                                 <ListBox.ItemTemplate>
@@ -284,32 +329,16 @@
                                                 RowDefinitions="Auto,Auto">
 
                                                 <!-- ================================= -->
-                                                <!-- Artist / Title -->
+                                                <!-- Issue Display Name -->
                                                 <!-- ================================= -->
 
-                                                <StackPanel
+                                                <TextBlock
                                                     Grid.Row="0"
                                                     Grid.Column="0"
-                                                    Orientation="Horizontal"
-                                                    Spacing="0">
-
-                                                    <TextBlock
-                                                        FontSize="12"
-                                                        FontWeight="SemiBold"
-                                                        Text="{Binding Artist}"/>
-
-                                                    <TextBlock
-                                                        FontSize="12"
-                                                        FontWeight="SemiBold"
-                                                        Text=" — "/>
-
-                                                    <TextBlock
-                                                        FontSize="12"
-                                                        FontWeight="SemiBold"
-                                                        Text="{Binding TrackTitle}"
-                                                        TextTrimming="CharacterEllipsis"/>
-
-                                                </StackPanel>
+                                                    FontSize="12"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding DisplayName}"
+                                                    TextTrimming="CharacterEllipsis"/>
 
                                                 <!-- ================================= -->
                                                 <!-- Searched -->

@@ -41,18 +41,57 @@ public sealed class AnalysisIssue
 
     /// <summary>
     /// Artist associated with the affected track.
+    ///
+    /// This represents the Artist currently stored in the
+    /// DIASISS library. It is not a filename-derived value.
     /// </summary>
     public string Artist { get; init; } = string.Empty;
 
     /// <summary>
     /// Title of the affected track.
+    ///
+    /// This represents the Title currently stored in the
+    /// DIASISS library. It is not a filename-derived value.
     /// </summary>
     public string TrackTitle { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Album associated with the affected track.
+    ///
+    /// This represents the Album currently stored in the
+    /// DIASISS library. It is not a filename-derived value.
+    /// </summary>
+    public string Album { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Duration of the affected track, when available.
+    ///
+    /// This represents the Duration currently stored in the
+    /// DIASISS library and may be used as supporting evidence
+    /// when matching external metadata.
+    /// </summary>
+    public TimeSpan? Duration { get; init; }
 
     /// <summary>
     /// The file this issue relates to.
     /// </summary>
     public string FilePath { get; init; } = string.Empty;
+
+    // ============================================================
+    // Filename Search Hints
+    // ============================================================
+
+    /// <summary>
+    /// Search information derived from the physical filename.
+    ///
+    /// These are search hints only. They are not confirmed
+    /// metadata and must not be written back to the DIASISS
+    /// library as Artist or Title values.
+    ///
+    /// This is normally populated when Analysis identifies that
+    /// Artist and/or Title metadata is missing.
+    /// </summary>
+    public FilenameSearchHint? FilenameSearchHint { get; init; }
 
     // ============================================================
     // Related Files

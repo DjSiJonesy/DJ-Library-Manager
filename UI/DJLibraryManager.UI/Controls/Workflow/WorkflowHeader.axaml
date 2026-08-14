@@ -5,7 +5,7 @@
     x:Name="Root">
 
     <Grid
-        RowDefinitions="Auto,6,Auto,8,Auto"
+        RowDefinitions="Auto,6,Auto,8,Auto,6,Auto"
         ColumnDefinitions="*,Auto,10,Auto,10,Auto">
 
         <!-- ===================================================== -->
@@ -92,7 +92,7 @@
             Padding="8,5">
 
             <TextBlock
-                FontSize="10"
+                FontSize="11"
                 TextWrapping="Wrap">
 
                 <Run
@@ -108,6 +108,43 @@
 
                 <Run
                     Text=" in their name are excluded from this workflow and will not be modified by DIASISS." />
+
+            </TextBlock>
+
+        </Border>
+
+        <!-- ===================================================== -->
+        <!-- Duplicate Protection -->
+        <!-- ===================================================== -->
+
+        <Border
+            Grid.Row="6"
+            Grid.Column="0"
+            Grid.ColumnSpan="6"
+            IsVisible="{Binding ShowDuplicateProtection, ElementName=Root}"
+            Background="{StaticResource Brush.Brand.Gradient}"
+            BorderBrush="#5A3A70"
+            BorderThickness="1"
+            CornerRadius="5"
+            Padding="8,5">
+
+            <TextBlock
+                FontSize="11"
+                TextWrapping="Wrap">
+
+                <Run
+                    Text="📁 Duplicate Protection: "
+                    FontWeight="SemiBold" />
+
+                <Run
+                    Text="Duplicate copies you do not select to keep will not be deleted. They will be retained in " />
+
+                <Run
+                    Text="DIASISS Duplicates"
+                    FontWeight="SemiBold" />
+
+                <Run
+                    Text=" during Structure." />
 
             </TextBlock>
 

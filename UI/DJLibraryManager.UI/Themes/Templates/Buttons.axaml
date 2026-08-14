@@ -15,6 +15,7 @@
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="24,12"/>
         <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="Foreground" Value="{DynamicResource Brush.Button.Foreground}"/>
         <Setter Property="Background" Value="{DynamicResource Brush.Button.Background}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource Brush.Button.Border}"/>

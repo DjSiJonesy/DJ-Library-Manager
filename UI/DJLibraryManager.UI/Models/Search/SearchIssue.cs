@@ -1,5 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using DJLibraryManager.UI.Analysis.Models;
+
+using System;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace DJLibraryManager.UI.Models.Search;
 
@@ -43,14 +47,148 @@ public partial class SearchIssue : ObservableObject
     // Media
     // ============================================================
 
+    /// <summary>
+    /// Artist currently stored in the DIASISS library.
+    ///
+    /// This is actual library metadata and must not be replaced
+    /// with a filename-derived search value.
+    /// </summary>
     [ObservableProperty]
     private string artist = string.Empty;
 
+    /// <summary>
+    /// Title currently stored in the DIASISS library.
+    ///
+    /// This is actual library metadata and must not be replaced
+    /// with a filename-derived search value.
+    /// </summary>
     [ObservableProperty]
     private string trackTitle = string.Empty;
 
+    /// <summary>
+    /// Album currently stored in the DIASISS library.
+    /// </summary>
+    [ObservableProperty]
+    private string album = string.Empty;
+
+    /// <summary>
+    /// Duration currently stored in the DIASISS library.
+    /// </summary>
+    [ObservableProperty]
+    private TimeSpan? duration;
+
+    /// <summary>
+    /// Search information derived from the physical filename.
+    ///
+    /// These are search hints only. They are not confirmed Artist
+    /// or Title metadata.
+    ///
+    /// FilenameSearchHint may contain multiple possible
+    /// Artist/Title interpretations because filenames can use
+    /// different conventions, such as:
+    ///
+    ///     Artist - Title
+    ///     Title - Artist
+    /// </summary>
+    public FilenameSearchHint? FilenameSearchHint { get; set; }
+
+    /// <summary>
+    /// Physical file path of the affected track.
+    /// </summary>
     [ObservableProperty]
     private string filePath = string.Empty;
+
+    // ============================================================
+    // Display Name
+    // ============================================================
+
+    /// <summary>
+    /// Human-readable name used by the Search issue list.
+    ///
+    /// The display follows this priority:
+    ///
+    /// 1. Artist + Title
+    /// 2. Title
+    /// 3. Artist
+    /// 4. Filename without extension
+    /// 5. Unknown Track
+    ///
+    /// Filename-derived information is only used as a display
+    /// fallback. It does not populate Artist or TrackTitle.
+    /// </summary>
+    public string DisplayName
+    {
+        get
+        {
+            var currentArtist =
+                Artist?.Trim() ?? string.Empty;
+
+            var currentTitle =
+                TrackTitle?.Trim() ?? string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(currentArtist) &&
+                !string.IsNullOrWhiteSpace(currentTitle))
+            {
+                return $"{currentArtist} — {currentTitle}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(currentTitle))
+            {
+                return currentTitle;
+            }
+
+            if (!string.IsNullOrWhiteSpace(currentArtist))
+            {
+                return currentArtist;
+            }
+
+            if (!string.IsNullOrWhiteSpace(FilePath))
+            {
+                try
+                {
+                    var filename =
+                        Path.GetFileNameWithoutExtension(
+                            FilePath);
+
+                    if (!string.IsNullOrWhiteSpace(filename))
+                    {
+                        return filename;
+                    }
+                }
+                catch
+                {
+                    // Fall through to Unknown Track.
+                }
+            }
+
+            return "Unknown Track";
+        }
+    }
+
+    /// <summary>
+    /// Filename of the affected file without its extension.
+    ///
+    /// Useful when Artist and Title are missing and the filename
+    /// is being used as a search hint.
+    /// </summary>
+    public string FilenameDisplay
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(FilePath))
+                return string.Empty;
+
+            try
+            {
+                return Path.GetFileNameWithoutExtension(
+                    FilePath);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+    }
 
     // ============================================================
     // Related Files
@@ -100,8 +238,6 @@ public partial class SearchIssue : ObservableObject
     /// - Radio edit
     /// - Acoustic version
     /// - Instrumental version
-    ///
-    /// This is the persisted source of truth for user selections.
     /// </summary>
     public ObservableCollection<string> SelectedResultIds { get; }
         = new();
@@ -120,10 +256,8 @@ public partial class SearchIssue : ObservableObject
     /// <summary>
     /// Legacy single-selection property.
     ///
-    /// This is retained temporarily so previously persisted Search
-    /// state containing SelectedResultId can still be loaded.
-    ///
-    /// New code should use SelectedResultIds.
+    /// Retained temporarily so previously persisted Search state
+    /// containing SelectedResultId can still be loaded.
     /// </summary>
     [ObservableProperty]
     private string? selectedResultId;
@@ -131,11 +265,6 @@ public partial class SearchIssue : ObservableObject
     /// <summary>
     /// Indicates whether the current legacy selection was applied
     /// by the Select All Recommended action.
-    ///
-    /// Retained for backwards compatibility with previously
-    /// persisted Search state.
-    ///
-    /// New code should use RecommendedSelectedResultIds.
     /// </summary>
     [ObservableProperty]
     private bool selectionWasRecommended;
@@ -152,4 +281,24 @@ public partial class SearchIssue : ObservableObject
     /// </summary>
     public ObservableCollection<SearchResult> Results { get; }
         = new();
+
+    // ============================================================
+    // Property Change Notifications
+    // ============================================================
+
+    partial void OnArtistChanged(string value)
+    {
+        OnPropertyChanged(nameof(DisplayName));
+    }
+
+    partial void OnTrackTitleChanged(string value)
+    {
+        OnPropertyChanged(nameof(DisplayName));
+    }
+
+    partial void OnFilePathChanged(string value)
+    {
+        OnPropertyChanged(nameof(DisplayName));
+        OnPropertyChanged(nameof(FilenameDisplay));
+    }
 }

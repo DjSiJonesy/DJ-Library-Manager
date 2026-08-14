@@ -1,9 +1,11 @@
 ﻿using DJLibraryManager.UI.Analysis.Interfaces;
 using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Models.Media;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace DJLibraryManager.UI.Analysis.Modules;
 
@@ -196,6 +198,11 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
                 ", ",
                 missingFields);
 
+        var filenameSearchHint =
+            CreateFilenameSearchHint(
+                media,
+                missingFields);
+
         return new AnalysisIssue
         {
             Category = "Metadata",
@@ -205,7 +212,18 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
             Title = "Incomplete Metadata",
 
             Description =
-                $"{trackName} — Missing: {missing}",
+                BuildDescription(
+                    trackName,
+                    missing,
+                    filenameSearchHint),
+
+            // ----------------------------------------------------
+            // Existing library metadata
+            //
+            // These values are the actual metadata currently
+            // stored in DIASISS. They are deliberately kept
+            // separate from filename-derived search hints.
+            // ----------------------------------------------------
 
             Artist =
                 media.Artist ?? string.Empty,
@@ -213,14 +231,420 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
             TrackTitle =
                 media.Title ?? string.Empty,
 
+            Album =
+                media.Album ?? string.Empty,
+
+            Duration =
+                media.Duration,
+
             FilePath =
                 media.FilePath,
+
+            // ----------------------------------------------------
+            // Filename-derived search information
+            //
+            // This is search evidence only and is never treated
+            // as confirmed Artist or Title metadata.
+            // ----------------------------------------------------
+
+            FilenameSearchHint =
+                filenameSearchHint,
 
             MissingFields =
                 missingFields,
 
             CanAutoFix = true
         };
+    }
+
+    // ============================================================
+    // Filename Search Hint
+    // ============================================================
+
+    /// <summary>
+    /// Creates search hints from the filename when Artist or Title
+    /// metadata is missing.
+    ///
+    /// The filename is deliberately treated as ambiguous.
+    ///
+    /// For:
+    ///
+    ///     Artist - Title.mp3
+    ///
+    /// we create both:
+    ///
+    ///     Artist = Artist
+    ///     Title  = Title
+    ///
+    /// and:
+    ///
+    ///     Artist = Title
+    ///     Title  = Artist
+    ///
+    /// Search is responsible for determining which interpretation
+    /// produces the strongest external metadata match.
+    /// </summary>
+    private static FilenameSearchHint?
+        CreateFilenameSearchHint(
+            DJLMMediaItem media,
+            IReadOnlyList<string> missingFields)
+    {
+        var artistMissing =
+            missingFields.Contains(
+                "Artist",
+                StringComparer.OrdinalIgnoreCase);
+
+        var titleMissing =
+            missingFields.Contains(
+                "Title",
+                StringComparer.OrdinalIgnoreCase);
+
+        // --------------------------------------------------------
+        // If both Artist and Title already exist, there is no need
+        // for filename-derived search information.
+        // --------------------------------------------------------
+
+        if (!artistMissing &&
+            !titleMissing)
+        {
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(
+                media.FilePath))
+        {
+            return null;
+        }
+
+        var filename =
+            Path.GetFileName(
+                media.FilePath);
+
+        if (string.IsNullOrWhiteSpace(filename))
+        {
+            return null;
+        }
+
+        var cleanedFilename =
+            CleanFilename(
+                filename);
+
+        if (string.IsNullOrWhiteSpace(
+                cleanedFilename))
+        {
+            return null;
+        }
+
+        var separatorIndex =
+            FindFilenameSeparator(
+                cleanedFilename);
+
+        // --------------------------------------------------------
+        // We need two meaningful parts before we can safely create
+        // Artist/Title interpretations.
+        // --------------------------------------------------------
+
+        if (separatorIndex <= 0 ||
+            separatorIndex >=
+                cleanedFilename.Length - 3)
+        {
+            return new FilenameSearchHint
+            {
+                Filename =
+                    filename,
+
+                CleanedFilename =
+                    cleanedFilename,
+
+                PartA =
+                    cleanedFilename,
+
+                PartB =
+                    string.Empty,
+
+                Candidates =
+                    []
+            };
+        }
+
+        var partA =
+            cleanedFilename[..separatorIndex]
+                .Trim();
+
+        var partB =
+            cleanedFilename[(separatorIndex + 3)..]
+                .Trim();
+
+        if (string.IsNullOrWhiteSpace(partA) ||
+            string.IsNullOrWhiteSpace(partB))
+        {
+            return new FilenameSearchHint
+            {
+                Filename =
+                    filename,
+
+                CleanedFilename =
+                    cleanedFilename,
+
+                PartA =
+                    partA,
+
+                PartB =
+                    partB,
+
+                Candidates =
+                    []
+            };
+        }
+
+        var candidates =
+            new List<FilenameSearchCandidate>();
+
+        // --------------------------------------------------------
+        // Interpretation 1:
+        //
+        // Artist - Title
+        // --------------------------------------------------------
+
+        candidates.Add(
+            new FilenameSearchCandidate
+            {
+                Artist =
+                    partA,
+
+                Title =
+                    partB,
+
+                Interpretation =
+                    "Filename interpreted as Artist - Title"
+            });
+
+        // --------------------------------------------------------
+        // Interpretation 2:
+        //
+        // Title - Artist
+        // --------------------------------------------------------
+
+        candidates.Add(
+            new FilenameSearchCandidate
+            {
+                Artist =
+                    partB,
+
+                Title =
+                    partA,
+
+                Interpretation =
+                    "Filename interpreted as Title - Artist"
+            });
+
+        return new FilenameSearchHint
+        {
+            Filename =
+                filename,
+
+            CleanedFilename =
+                cleanedFilename,
+
+            PartA =
+                partA,
+
+            PartB =
+                partB,
+
+            Candidates =
+                candidates
+        };
+    }
+
+    // ============================================================
+    // Filename Separator
+    // ============================================================
+
+    private static int FindFilenameSeparator(
+        string filename)
+    {
+        // --------------------------------------------------------
+        // Most common DJ convention:
+        //
+        // Artist - Title
+        //
+        // Use " - " rather than a bare hyphen so that normal
+        // hyphens inside titles are not incorrectly treated as
+        // separators.
+        // --------------------------------------------------------
+
+        var index =
+            filename.IndexOf(
+                " - ",
+                StringComparison.Ordinal);
+
+        if (index >= 0)
+            return index;
+
+        // --------------------------------------------------------
+        // Support an en-dash as another common filename separator.
+        // --------------------------------------------------------
+
+        return filename.IndexOf(
+            " – ",
+            StringComparison.Ordinal);
+    }
+
+    // ============================================================
+    // Filename Cleanup
+    // ============================================================
+
+    private static string CleanFilename(
+        string filename)
+    {
+        var extension =
+            Path.GetExtension(
+                filename);
+
+        var result =
+            !string.IsNullOrWhiteSpace(extension)
+                ? filename[..^extension.Length]
+                : filename;
+
+        result =
+            result.Trim();
+
+        // --------------------------------------------------------
+        // Remove recognised technical suffixes repeatedly.
+        //
+        // Examples:
+        //
+        // (720p60fps)
+        // (1080p)
+        // [720p]
+        // --------------------------------------------------------
+
+        while (true)
+        {
+            var original =
+                result;
+
+            result =
+                RemoveTrailingBracketedTechnicalValue(
+                    result);
+
+            if (string.Equals(
+                    original,
+                    result,
+                    StringComparison.Ordinal))
+            {
+                break;
+            }
+        }
+
+        return result.Trim();
+    }
+
+    private static string
+        RemoveTrailingBracketedTechnicalValue(
+            string value)
+    {
+        var trimmed =
+            value.TrimEnd();
+
+        if (trimmed.EndsWith(")"))
+        {
+            var openIndex =
+                trimmed.LastIndexOf('(');
+
+            if (openIndex >= 0)
+            {
+                var contents =
+                    trimmed[(openIndex + 1)..^1]
+                        .Trim();
+
+                if (IsTechnicalValue(contents))
+                {
+                    return trimmed[..openIndex]
+                        .TrimEnd();
+                }
+            }
+        }
+
+        if (trimmed.EndsWith("]"))
+        {
+            var openIndex =
+                trimmed.LastIndexOf('[');
+
+            if (openIndex >= 0)
+            {
+                var contents =
+                    trimmed[(openIndex + 1)..^1]
+                        .Trim();
+
+                if (IsTechnicalValue(contents))
+                {
+                    return trimmed[..openIndex]
+                        .TrimEnd();
+                }
+            }
+        }
+
+        return value;
+    }
+
+    private static bool IsTechnicalValue(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var lower =
+            value.Trim()
+                .ToLowerInvariant();
+
+        return
+            lower.Contains("fps") ||
+            lower.Contains("720p") ||
+            lower.Contains("1080p") ||
+            lower.Contains("2160p") ||
+            lower.Contains("4k") ||
+            lower.Contains("video") ||
+            lower.Contains("web-dl") ||
+            lower.Contains("webrip") ||
+            lower.Contains("bluray") ||
+            lower.Contains("brrip") ||
+            lower.Contains("dvdrip");
+    }
+
+    // ============================================================
+    // Description
+    // ============================================================
+
+    private static string BuildDescription(
+        string trackName,
+        string missing,
+        FilenameSearchHint? filenameSearchHint)
+    {
+        var description =
+            $"{trackName} — Missing: {missing}";
+
+        if (filenameSearchHint is null)
+        {
+            return description;
+        }
+
+        if (filenameSearchHint.Candidates.Count == 0)
+        {
+            return
+                $"{description} — Filename search information: " +
+                $"{filenameSearchHint.CleanedFilename}";
+        }
+
+        var candidate =
+            filenameSearchHint.Candidates[0];
+
+        return
+            $"{description} — Filename search: " +
+            $"{candidate.Artist} - {candidate.Title}";
     }
 
     // ============================================================

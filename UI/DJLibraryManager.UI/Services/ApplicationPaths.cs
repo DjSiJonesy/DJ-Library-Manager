@@ -13,8 +13,32 @@ public static class ApplicationPaths
     /// </summary>
     public static string Root =>
         Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            Environment.GetFolderPath(
+                Environment.SpecialFolder.LocalApplicationData),
             "DIASISS DJ");
+
+    // ============================================================
+    // User Music
+    // ============================================================
+
+    /// <summary>
+    /// The user's Windows Music folder.
+    /// </summary>
+    public static string Music =>
+        Environment.GetFolderPath(
+            Environment.SpecialFolder.MyMusic);
+
+    /// <summary>
+    /// Folder used by DIASISS to retain duplicate files that the
+    /// user has not selected to keep.
+    ///
+    /// This folder is intentionally not created by EnsureCreated().
+    /// It will be created when it is actually required.
+    /// </summary>
+    public static string DiasissDuplicates =>
+        Path.Combine(
+            Music,
+            "DIASISS Duplicates");
 
     // ============================================================
     // Data Folders
