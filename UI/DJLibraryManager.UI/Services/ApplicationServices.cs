@@ -179,7 +179,7 @@ public sealed class ApplicationServices
             {
                 new MusicBrainzMetadataProvider(),
                 new DiscogsMetadataProvider(),
-                new FreqBlogMetadataProvider()
+                new ReccoBeatsMetadataProvider()
             };
 
         var metadataSearchService =

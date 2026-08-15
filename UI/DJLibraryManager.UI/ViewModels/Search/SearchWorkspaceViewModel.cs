@@ -4,7 +4,9 @@ using DJLibraryManager.Core.Workflow;
 using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Search;
+using DJLibraryManager.UI.Search.Models;
 using DJLibraryManager.UI.ViewModels.Workspace;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -54,19 +56,9 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     // Search Issues
     // ============================================================
 
-    /// <summary>
-    /// Complete collection of issues for the selected category.
-    ///
-    /// This collection represents the actual Search state and is
-    /// deliberately not modified by the UI filtering.
-    /// </summary>
     public ObservableCollection<SearchIssue> Issues { get; }
         = new();
 
-    /// <summary>
-    /// Filtered and alphabetically sorted view of Issues used by
-    /// the Search UI.
-    /// </summary>
     public ObservableCollection<SearchIssue> FilteredIssues { get; }
         = new();
 
@@ -89,6 +81,72 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
     [ObservableProperty]
     private string searchStatus = "Ready";
+
+    // ============================================================
+    // Metadata Recommendation Threshold
+    // ============================================================
+
+    /// <summary>
+    /// Minimum confidence required for the bulk
+    /// "Confirm Recommended Changes" action.
+    ///
+    /// This controls UI selection only.
+    /// It does not itself modify the library.
+    /// </summary>
+    [ObservableProperty]
+    private double metadataRecommendationThreshold = 90.0;
+
+    /// <summary>
+    /// Indicates whether the selected metadata issue has at
+    /// least one recommended change meeting the configured
+    /// confirmation threshold.
+    /// </summary>
+    public bool HasConfirmableMetadataChanges =>
+        SelectedIssue?
+            .MetadataRecommendations
+            .Any(
+                recommendation =>
+                    recommendation.IsRecommended &&
+                    recommendation.IsChange &&
+                    recommendation.AgreementPercentage >=
+                        MetadataRecommendationThreshold)
+        ?? false;
+
+    /// <summary>
+    /// Indicates whether the currently selected issue is a
+    /// metadata issue.
+    /// </summary>
+    public bool IsMetadataIssue =>
+        string.Equals(
+            SelectedIssue?.Category,
+            "Metadata",
+            StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Number of metadata changes currently selected for the
+    /// selected issue.
+    /// </summary>
+    public int SelectedMetadataChangeCount =>
+        SelectedIssue?
+            .MetadataRecommendations
+            .Count(
+                x => x.IsSelected)
+        ?? 0;
+
+    /// <summary>
+    /// Number of metadata changes that DIASISS recommends and
+    /// which meet the configured bulk confirmation threshold.
+    /// </summary>
+    public int ConfirmableMetadataChangeCount =>
+        SelectedIssue?
+            .MetadataRecommendations
+            .Count(
+                recommendation =>
+                    recommendation.IsRecommended &&
+                    recommendation.IsChange &&
+                    recommendation.AgreementPercentage >=
+                        MetadataRecommendationThreshold)
+        ?? 0;
 
     // ============================================================
     // Constructor
@@ -253,8 +311,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     partial void OnSelectedCategoryChanged(
         SearchCategoryInfo? value)
     {
-        // A search entered for one category should not carry over
-        // into another category.
         IssueSearchText = string.Empty;
 
         SelectIssuesForCategory();
@@ -267,7 +323,37 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             nameof(IsDuplicateCategory));
 
         OnPropertyChanged(
+            nameof(IsMetadataIssue));
+
+        OnPropertyChanged(
             nameof(AllRecommendedSelected));
+
+        NotifyMetadataRecommendationProperties();
+    }
+
+    // ============================================================
+    // Selected Issue
+    // ============================================================
+
+    partial void OnSelectedIssueChanged(
+        SearchIssue? value)
+    {
+        OnPropertyChanged(
+            nameof(IsMetadataIssue));
+
+        NotifyMetadataRecommendationProperties();
+    }
+
+    private void NotifyMetadataRecommendationProperties()
+    {
+        OnPropertyChanged(
+            nameof(HasConfirmableMetadataChanges));
+
+        OnPropertyChanged(
+            nameof(SelectedMetadataChangeCount));
+
+        OnPropertyChanged(
+            nameof(ConfirmableMetadataChangeCount));
     }
 
     // ============================================================
@@ -284,13 +370,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     // Issue Filtering
     // ============================================================
 
-    /// <summary>
-    /// Rebuilds the UI issue collection from the complete issue
-    /// collection using the current search text.
-    ///
-    /// Issues are always presented alphabetically by DisplayName,
-    /// followed by FilePath as a deterministic secondary sort.
-    /// </summary>
     private void FilterIssues()
     {
         var previousSelectedId =
@@ -349,10 +428,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             FilteredIssues.Add(issue);
         }
 
-        // --------------------------------------------------------
-        // Preserve the selected issue when it is still visible.
-        // --------------------------------------------------------
-
         if (!string.IsNullOrWhiteSpace(previousSelectedId))
         {
             var previouslySelected =
@@ -370,11 +445,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 return;
             }
         }
-
-        // --------------------------------------------------------
-        // If the previous selection has been filtered out, select
-        // the first visible issue.
-        // --------------------------------------------------------
 
         SelectedIssue =
             FilteredIssues.FirstOrDefault();
@@ -418,7 +488,12 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 nameof(IsDuplicateCategory));
 
             OnPropertyChanged(
+                nameof(IsMetadataIssue));
+
+            OnPropertyChanged(
                 nameof(AllRecommendedSelected));
+
+            NotifyMetadataRecommendationProperties();
 
             return;
         }
@@ -464,10 +539,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         if (category is null)
             return;
 
-        // ========================================================
-        // Build a dictionary of saved Search issues once.
-        // ========================================================
-
         var savedSearch =
             GetCurrentSearchState(
                 analysis);
@@ -480,10 +551,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                     StringComparer.OrdinalIgnoreCase)
             ?? new Dictionary<string, SearchIssue>(
                 StringComparer.OrdinalIgnoreCase);
-
-        // ========================================================
-        // Build current category
-        // ========================================================
 
         foreach (var issue in category.Issues)
         {
@@ -503,10 +570,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 searchIssue);
         }
 
-        // ========================================================
-        // Build sorted / filtered UI collection.
-        // ========================================================
-
         FilterIssues();
 
         SearchStatus =
@@ -516,6 +579,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         OnPropertyChanged(
             nameof(AllRecommendedSelected));
+
+        NotifyMetadataRecommendationProperties();
     }
 
     // ============================================================
@@ -543,14 +608,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 Description =
                     issue.Description,
 
-                // ------------------------------------------------
-                // Existing library metadata
-                //
-                // These are the actual values currently stored in
-                // DIASISS. They must remain separate from any
-                // filename-derived search information.
-                // ------------------------------------------------
-
                 Artist =
                     issue.Artist,
 
@@ -560,15 +617,20 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 Album =
                     issue.Album,
 
+                Genre =
+                    issue.Genre,
+
+                Year =
+                    issue.Year,
+
+                Bpm =
+                    issue.BPM,
+
+                Key =
+                    issue.Key,
+
                 Duration =
                     issue.Duration,
-
-                // ------------------------------------------------
-                // Filename-derived search information
-                //
-                // These are search hints only. They are not confirmed
-                // Artist or Title metadata.
-                // ------------------------------------------------
 
                 FilenameSearchHint =
                     issue.FilenameSearchHint,
@@ -621,10 +683,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         target.HasResults =
             saved.HasResults;
 
-        // --------------------------------------------------------
-        // Restore multi-selection state.
-        // --------------------------------------------------------
-
         target.SelectedResultIds.Clear();
 
         foreach (var resultId in
@@ -655,13 +713,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             }
         }
 
-        // --------------------------------------------------------
-        // Backwards compatibility.
-        //
-        // Existing saved Search state may only contain the old
-        // single SelectedResultId property.
-        // --------------------------------------------------------
-
         if (target.SelectedResultIds.Count == 0 &&
             !string.IsNullOrWhiteSpace(
                 saved.SelectedResultId))
@@ -679,16 +730,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 saved.SelectedResultId);
         }
 
-        // --------------------------------------------------------
-        // Keep legacy fields synchronised for compatibility.
-        // --------------------------------------------------------
-
         SyncLegacySelectionState(
             target);
-
-        // --------------------------------------------------------
-        // Restore related files.
-        // --------------------------------------------------------
 
         target.RelatedFilePaths.Clear();
 
@@ -702,10 +745,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             }
         }
 
-        // --------------------------------------------------------
-        // Restore Search results.
-        // --------------------------------------------------------
-
         target.Results.Clear();
 
         foreach (var result in
@@ -718,6 +757,53 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
             target.Results.Add(
                 result);
+        }
+
+        // --------------------------------------------------------
+        // Restore metadata recommendations.
+        //
+        // These are independent of SearchResult and therefore
+        // must be restored separately.
+        // --------------------------------------------------------
+
+        target.MetadataRecommendations.Clear();
+
+        foreach (var recommendation in
+                 saved.MetadataRecommendations)
+        {
+            target.MetadataRecommendations.Add(
+                new MetadataChangeRecommendation
+                {
+                    Field =
+                        recommendation.Field,
+
+                    CurrentValue =
+                        recommendation.CurrentValue,
+
+                    RecommendedValue =
+                        recommendation.RecommendedValue,
+
+                    AgreementPercentage =
+                        recommendation.AgreementPercentage,
+
+                    SupportingProviders =
+                        recommendation.SupportingProviders,
+
+                    ProvidersWithValue =
+                        recommendation.ProvidersWithValue,
+
+                    Strength =
+                        recommendation.Strength,
+
+                    IsRecommended =
+                        recommendation.IsRecommended,
+
+                    IsSelected =
+                        recommendation.IsSelected,
+
+                    Reason =
+                        recommendation.Reason
+                });
         }
     }
 
@@ -1002,13 +1088,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
             issue.Results.Clear();
 
-            // ----------------------------------------------------
-            // A fresh Search produces a fresh set of result IDs.
-            //
-            // Therefore existing selections cannot safely be
-            // carried over to the new result collection.
-            // ----------------------------------------------------
-
             issue.SelectedResultIds.Clear();
 
             issue.RecommendedSelectedResultIds.Clear();
@@ -1034,6 +1113,15 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             issue.HasResults =
                 issue.Results.Count > 0;
 
+            // ----------------------------------------------------
+            // Metadata recommendations are produced by the
+            // Search service and stored on SearchIssue.
+            //
+            // Do not convert them into SearchResult objects.
+            // ----------------------------------------------------
+
+            NotifyMetadataRecommendationProperties();
+
             SaveSearchState();
 
             SearchStatus =
@@ -1053,22 +1141,96 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             IsSearching = false;
 
             UpdateCategorySearchAvailability();
+
+            NotifyMetadataRecommendationProperties();
         }
+    }
+
+    // ============================================================
+    // Metadata Recommendation Selection
+    // ============================================================
+
+    /// <summary>
+    /// Toggles a single metadata change recommendation.
+    ///
+    /// This only records the user's selection. It does not modify
+    /// the physical file or DIASISS library.
+    /// </summary>
+    [RelayCommand]
+    private void ToggleMetadataRecommendation(
+        MetadataChangeRecommendation? recommendation)
+    {
+        if (recommendation is null)
+            return;
+
+        if (!recommendation.IsRecommended)
+            return;
+
+        if (!recommendation.IsChange)
+            return;
+
+        recommendation.IsSelected =
+            !recommendation.IsSelected;
+
+        SaveSearchState();
+
+        NotifyMetadataRecommendationProperties();
+    }
+
+    // ============================================================
+    // Confirm Recommended Metadata Changes
+    // ============================================================
+
+    /// <summary>
+    /// Selects all recommended metadata changes that meet the
+    /// configured confidence threshold.
+    ///
+    /// This does NOT modify the library.
+    ///
+    /// It prepares the changes for the later Improve / Recovery
+    /// workflow where the user will explicitly confirm and apply
+    /// them.
+    /// </summary>
+    [RelayCommand]
+    private void ConfirmRecommendedMetadataChanges()
+    {
+        var issue =
+            SelectedIssue;
+
+        if (issue is null)
+            return;
+
+        if (!IsMetadataIssue)
+            return;
+
+        foreach (var recommendation in
+                 issue.MetadataRecommendations)
+        {
+            if (!recommendation.IsRecommended)
+                continue;
+
+            if (!recommendation.IsChange)
+                continue;
+
+            if (recommendation.AgreementPercentage <
+                MetadataRecommendationThreshold)
+            {
+                continue;
+            }
+
+            recommendation.IsSelected =
+                true;
+        }
+
+        SaveSearchState();
+
+        NotifyMetadataRecommendationProperties();
     }
 
     // ============================================================
     // Duplicate Result Selection
     // ============================================================
 
-    /// <summary>
-    /// Selects or deselects an individual SearchResult.
-    ///
-    /// Multiple results may be selected simultaneously.
-    ///
-    /// A direct user selection is always treated as a manual
-    /// decision. It therefore cannot later be removed by the
-    /// bulk recommendation action.
-    /// </summary>
     public void SelectResult(
         SearchResult? result)
     {
@@ -1175,19 +1337,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     // Select All Recommended
     // ============================================================
 
-    /// <summary>
-    /// Toggles application of Search recommendations.
-    ///
-    /// When applying recommendations:
-    ///
-    /// - An issue with an existing user selection is left alone.
-    /// - An issue with no selection receives its recommendation.
-    ///
-    /// When removing recommendations:
-    ///
-    /// - Only selections created by this bulk action are removed.
-    /// - Manual selections are never removed.
-    /// </summary>
     [RelayCommand]
     private void SelectAllRecommended()
     {
@@ -1207,10 +1356,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         {
             return;
         }
-
-        // ========================================================
-        // CHECKED → REMOVE BULK RECOMMENDATIONS
-        // ========================================================
 
         var hasBulkSelections =
             Issues.Any(
@@ -1283,10 +1428,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             return;
         }
 
-        // ========================================================
-        // UNCHECKED → APPLY RECOMMENDATIONS
-        // ========================================================
-
         var selectionChanged =
             false;
 
@@ -1341,12 +1482,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     // All Recommended State
     // ============================================================
 
-    /// <summary>
-    /// Indicates whether the Select All Recommended action has
-    /// currently created one or more bulk recommendation selections.
-    ///
-    /// Manual selections do not affect this state.
-    /// </summary>
     public bool AllRecommendedSelected
     {
         get
@@ -1362,10 +1497,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         }
     }
 
-    /// <summary>
-    /// Indicates whether the currently selected Search category
-    /// represents duplicate issues.
-    /// </summary>
     public bool IsDuplicateCategory =>
         string.Equals(
             SelectedCategory?.Name,
@@ -1433,6 +1564,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 $"{run.IssuesSearched:N0} " +
                 $"{category.Name.ToLowerInvariant()} searched • " +
                 $"{run.IssuesWithResults:N0} with results";
+
+            NotifyMetadataRecommendationProperties();
         }
         catch
         {
@@ -1444,6 +1577,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         finally
         {
             UpdateCategorySearchAvailability();
+
+            NotifyMetadataRecommendationProperties();
         }
     }
 
@@ -1542,6 +1677,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         RestoreActiveSearchRun();
 
         UpdateCategorySearchAvailability();
+
+        NotifyMetadataRecommendationProperties();
     }
 
     private static int GetIssueCount(

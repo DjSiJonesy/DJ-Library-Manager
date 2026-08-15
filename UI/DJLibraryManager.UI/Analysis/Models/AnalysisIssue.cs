@@ -40,35 +40,51 @@ public sealed class AnalysisIssue
     // ============================================================
 
     /// <summary>
-    /// Artist associated with the affected track.
+    /// Artist currently stored in the DIASISS library.
     ///
-    /// This represents the Artist currently stored in the
-    /// DIASISS library. It is not a filename-derived value.
+    /// This is actual library metadata and is not derived from
+    /// the physical filename.
     /// </summary>
     public string Artist { get; init; } = string.Empty;
 
     /// <summary>
-    /// Title of the affected track.
+    /// Title currently stored in the DIASISS library.
     ///
-    /// This represents the Title currently stored in the
-    /// DIASISS library. It is not a filename-derived value.
+    /// This is actual library metadata and is not derived from
+    /// the physical filename.
     /// </summary>
     public string TrackTitle { get; init; } = string.Empty;
 
     /// <summary>
-    /// Album associated with the affected track.
-    ///
-    /// This represents the Album currently stored in the
-    /// DIASISS library. It is not a filename-derived value.
+    /// Album currently stored in the DIASISS library.
     /// </summary>
     public string Album { get; init; } = string.Empty;
 
     /// <summary>
-    /// Duration of the affected track, when available.
+    /// Genre currently stored in the DIASISS library.
+    /// </summary>
+    public string Genre { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Year currently stored in the DIASISS library.
+    /// </summary>
+    public int? Year { get; init; }
+
+    /// <summary>
+    /// BPM currently stored in the DIASISS library.
+    /// </summary>
+    public double? BPM { get; init; }
+
+    /// <summary>
+    /// Musical key currently stored in the DIASISS library.
+    /// </summary>
+    public string Key { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Duration currently stored in the DIASISS library.
     ///
-    /// This represents the Duration currently stored in the
-    /// DIASISS library and may be used as supporting evidence
-    /// when matching external metadata.
+    /// This may also be used as supporting evidence when
+    /// matching external metadata.
     /// </summary>
     public TimeSpan? Duration { get; init; }
 

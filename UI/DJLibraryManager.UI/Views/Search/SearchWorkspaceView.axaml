@@ -299,7 +299,7 @@
 
                             <TextBox
                                 Grid.Row="2"
-                                Watermark="Search issues..."
+                                PlaceholderText="Search issues..."
                                 Text="{Binding IssueSearchText,
                                                UpdateSourceTrigger=PropertyChanged}"
                                 Padding="8,6"
@@ -427,6 +427,7 @@
                         <workflow:WorkflowSearchResults
                             Grid.Row="2"
                             Heading="{Binding SelectedCategory.Name}"
+                            ResultType="{Binding SelectedCategory.Name}"
                             Issue="{Binding SelectedIssue}"
                             Results="{Binding SelectedIssue.Results}"
                             ResultSelected="WorkflowSearchResults_ResultSelected"/>

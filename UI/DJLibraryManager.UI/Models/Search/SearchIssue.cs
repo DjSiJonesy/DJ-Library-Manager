@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DJLibraryManager.UI.Analysis.Models;
+using DJLibraryManager.UI.Search.Models;
+using System.Collections.Generic;
 
 using System;
 using System.Collections.ObjectModel;
@@ -13,6 +15,10 @@ namespace DJLibraryManager.UI.Models.Search;
 ///
 /// Search does not modify the DIASISS library. It uses this
 /// information to locate possible solutions or candidates.
+///
+/// The issue also contains the metadata currently known by
+/// DIASISS so that Search can clearly distinguish existing
+/// metadata from newly discovered metadata.
 /// </summary>
 public partial class SearchIssue : ObservableObject
 {
@@ -44,7 +50,7 @@ public partial class SearchIssue : ObservableObject
     private string description = string.Empty;
 
     // ============================================================
-    // Media
+    // Existing Metadata
     // ============================================================
 
     /// <summary>
@@ -57,10 +63,7 @@ public partial class SearchIssue : ObservableObject
     private string artist = string.Empty;
 
     /// <summary>
-    /// Title currently stored in the DIASISS library.
-    ///
-    /// This is actual library metadata and must not be replaced
-    /// with a filename-derived search value.
+    /// Track title currently stored in the DIASISS library.
     /// </summary>
     [ObservableProperty]
     private string trackTitle = string.Empty;
@@ -72,10 +75,38 @@ public partial class SearchIssue : ObservableObject
     private string album = string.Empty;
 
     /// <summary>
+    /// Genre currently stored in the DIASISS library.
+    /// </summary>
+    [ObservableProperty]
+    private string genre = string.Empty;
+
+    /// <summary>
+    /// Year currently stored in the DIASISS library.
+    /// </summary>
+    [ObservableProperty]
+    private int? year;
+
+    /// <summary>
+    /// BPM currently stored in the DIASISS library.
+    /// </summary>
+    [ObservableProperty]
+    private double? bpm;
+
+    /// <summary>
+    /// Musical key currently stored in the DIASISS library.
+    /// </summary>
+    [ObservableProperty]
+    private string key = string.Empty;
+
+    /// <summary>
     /// Duration currently stored in the DIASISS library.
     /// </summary>
     [ObservableProperty]
     private TimeSpan? duration;
+
+    // ============================================================
+    // Search Information
+    // ============================================================
 
     /// <summary>
     /// Search information derived from the physical filename.
@@ -230,14 +261,7 @@ public partial class SearchIssue : ObservableObject
     /// IDs of all SearchResults the user has chosen to keep.
     ///
     /// Multiple results may be selected because a duplicate group
-    /// can contain legitimate versions of the same track, such as:
-    ///
-    /// - Album / studio version
-    /// - Live version
-    /// - Remix
-    /// - Radio edit
-    /// - Acoustic version
-    /// - Instrumental version
+    /// can contain legitimate versions of the same track.
     /// </summary>
     public ObservableCollection<string> SelectedResultIds { get; }
         = new();
@@ -281,6 +305,34 @@ public partial class SearchIssue : ObservableObject
     /// </summary>
     public ObservableCollection<SearchResult> Results { get; }
         = new();
+
+    // ============================================================
+    // Metadata Recommendations
+    // ============================================================
+
+    /// <summary>
+    /// Metadata changes discovered by the Search workflow.
+    ///
+    /// Each item represents a proposed change only. Selecting an
+    /// item does not modify the physical file or DIASISS library.
+    /// </summary>
+    public ObservableCollection<MetadataChangeRecommendation>
+        MetadataRecommendations
+    { get; }
+        = new();
+
+    /// <summary>
+    /// Metadata fields identified by Analysis as missing from the
+    /// affected track.
+    ///
+    /// Search uses this as the authoritative list of metadata fields
+    /// that need investigation.
+    ///
+    /// These values come from Analysis. Search must not attempt to
+    /// reconstruct the missing fields from the issue Type or title.
+    /// </summary>
+    public IReadOnlyList<string> MissingFields { get; set; }
+        = Array.Empty<string>();
 
     // ============================================================
     // Property Change Notifications
