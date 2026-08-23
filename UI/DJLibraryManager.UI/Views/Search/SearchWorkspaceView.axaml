@@ -382,50 +382,13 @@
                     </Border>
 
                     <!-- ================================================= -->
-                    <!-- Selected Issue / Results -->
+                    <!-- Search Results -->
                     <!-- ================================================= -->
 
                     <Grid
-                        Grid.Column="2"
-                        RowDefinitions="Auto,20,*">
-
-                        <!-- Selected Issue -->
-
-                        <Border
-                            Grid.Row="0"
-                            Classes="card-secondary"
-                            Padding="12">
-
-                            <StackPanel
-                                Spacing="4">
-
-                                <TextBlock
-                                    Classes="subheading"
-                                    Text="{Binding SelectedIssue.Title,
-                                                   TargetNullValue=Select an Issue}"/>
-
-                                <TextBlock
-                                    Classes="caption"
-                                    Text="{Binding SelectedIssue.Description,
-                                                   TargetNullValue=Select an issue from the list to investigate it.}"
-                                    TextWrapping="Wrap"/>
-
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    Classes="caption"
-                                    Text="{Binding SelectedIssue.FilePath}"
-                                    TextTrimming="CharacterEllipsis"/>
-
-                            </StackPanel>
-
-                        </Border>
-
-                        <!-- ================================================= -->
-                        <!-- Search Results -->
-                        <!-- ================================================= -->
+                        Grid.Column="2">
 
                         <workflow:WorkflowSearchResults
-                            Grid.Row="2"
                             Heading="{Binding SelectedCategory.Name}"
                             ResultType="{Binding SelectedCategory.Name}"
                             Issue="{Binding SelectedIssue}"

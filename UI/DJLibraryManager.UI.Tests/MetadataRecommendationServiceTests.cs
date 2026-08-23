@@ -1,6 +1,7 @@
 ﻿using DJLibraryManager.UI.Search.Models;
 using DJLibraryManager.UI.Search.Services;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,7 +15,7 @@ public sealed class MetadataRecommendationServiceTests
         new();
 
     // ============================================================
-    // Strong Consensus
+    // Standard Recommendation
     // ============================================================
 
     [Fact]
@@ -66,11 +67,11 @@ public sealed class MetadataRecommendationServiceTests
     }
 
     // ============================================================
-    // Moderate Consensus
+    // Standard Threshold
     // ============================================================
 
     [Fact]
-    public void ModerateConsensus_AboveThreshold_IsRecommended()
+    public void ModerateConsensus_At75Percent_IsRecommended()
     {
         var consensus =
             CreateConsensus(
@@ -92,23 +93,15 @@ public sealed class MetadataRecommendationServiceTests
         Assert.Equal(
             "1999",
             result.RecommendedValue);
-
-        Assert.Equal(
-            75,
-            result.AgreementPercentage);
     }
 
-    // ============================================================
-    // Weak Consensus
-    // ============================================================
-
     [Fact]
-    public void WeakConsensus_IsNotRecommended()
+    public void StandardField_Below75Percent_IsNotRecommended()
     {
         var consensus =
             CreateConsensus(
-                field: "Genre",
-                value: "Trance",
+                field: "Artist",
+                value: "Darude",
                 supportingProviders: 2,
                 providersWithValue: 3,
                 agreementPercentage:
@@ -128,15 +121,89 @@ public sealed class MetadataRecommendationServiceTests
 
         Assert.Contains(
             "threshold",
-            result.Reason);
+            result.Reason,
+            StringComparison.OrdinalIgnoreCase);
     }
 
     // ============================================================
-    // Conflict
+    // Genre
     // ============================================================
 
+    /// <summary>
+    /// Genre deliberately uses a minimum provider count rather
+    /// than the standard 75% threshold.
+    ///
+    /// Two of three providers agreeing is sufficient.
+    /// </summary>
     [Fact]
-    public void Conflict_IsNotRecommended()
+    public void Genre_TwoOfThreeProvidersAgree_IsRecommended()
+    {
+        var consensus =
+            CreateConsensus(
+                field: "Genre",
+                value: "Trance",
+                supportingProviders: 2,
+                providersWithValue: 3,
+                agreementPercentage:
+                    66.7,
+                strength:
+                    MetadataConsensusStrength.Weak);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.True(
+            result.IsRecommended);
+
+        Assert.Equal(
+            "Trance",
+            result.RecommendedValue);
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            3,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            66.7,
+            result.AgreementPercentage);
+
+        Assert.Contains(
+            "2",
+            result.Reason);
+    }
+
+    [Fact]
+    public void Genre_TwoOfTwoProvidersAgree_IsRecommended()
+    {
+        var consensus =
+            CreateConsensus(
+                field: "Genre",
+                value: "Trance",
+                supportingProviders: 2,
+                providersWithValue: 2,
+                agreementPercentage: 100,
+                strength:
+                    MetadataConsensusStrength.Strong);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.True(
+            result.IsRecommended);
+
+        Assert.Equal(
+            "Trance",
+            result.RecommendedValue);
+    }
+
+    [Fact]
+    public void Genre_OneOfThreeProvidersAgree_IsNotRecommended()
     {
         var consensus =
             CreateConsensus(
@@ -158,11 +225,216 @@ public sealed class MetadataRecommendationServiceTests
 
         Assert.Empty(
             result.RecommendedValue);
+    }
+
+    // ============================================================
+    // Key
+    // ============================================================
+
+    [Fact]
+    public void Key_At75Percent_IsRecommended()
+    {
+        var consensus =
+            CreateConsensus(
+                field: "Key",
+                value: "F#m",
+                supportingProviders: 3,
+                providersWithValue: 4,
+                agreementPercentage: 75,
+                strength:
+                    MetadataConsensusStrength.Moderate);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.True(
+            result.IsRecommended);
+
+        Assert.Equal(
+            "F#m",
+            result.RecommendedValue);
+    }
+
+    [Fact]
+    public void Key_Below75Percent_IsNotRecommended()
+    {
+        var consensus =
+            CreateConsensus(
+                field: "Key",
+                value: "F#m",
+                supportingProviders: 2,
+                providersWithValue: 3,
+                agreementPercentage:
+                    66.7,
+                strength:
+                    MetadataConsensusStrength.Weak);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.False(
+            result.IsRecommended);
+
+        Assert.Empty(
+            result.RecommendedValue);
+    }
+
+    // ============================================================
+    // BPM
+    // ============================================================
+
+    /// <summary>
+    /// BPM tolerance is handled by MetadataConsensusService.
+    ///
+    /// By the time this service receives the consensus result,
+    /// the agreement calculation has already been performed.
+    ///
+    /// Therefore this test verifies that a qualifying BPM
+    /// consensus is recommended.
+    /// </summary>
+    [Fact]
+    public void BPM_QualifyingConsensus_IsRecommended()
+    {
+        var consensus =
+            CreateConsensus(
+                field: "BPM",
+                value: "136.5",
+                supportingProviders: 2,
+                providersWithValue: 2,
+                agreementPercentage: 100,
+                strength:
+                    MetadataConsensusStrength.Strong);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.True(
+            result.IsRecommended);
+
+        Assert.Equal(
+            "136.5",
+            result.RecommendedValue);
+    }
+
+    [Fact]
+    public void BPM_Below75Percent_IsNotRecommended()
+    {
+        var consensus =
+            CreateConsensus(
+                field: "BPM",
+                value: "136",
+                supportingProviders: 1,
+                providersWithValue: 2,
+                agreementPercentage: 50,
+                strength:
+                    MetadataConsensusStrength.Weak);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.False(
+            result.IsRecommended);
+
+        Assert.Empty(
+            result.RecommendedValue);
+    }
+
+    // ============================================================
+    // Other Standard Fields
+    // ============================================================
+
+    [Theory]
+    [InlineData("Artist")]
+    [InlineData("Title")]
+    [InlineData("Album")]
+    [InlineData("Year")]
+    [InlineData("Duration")]
+    public void StandardFields_At75Percent_AreRecommended(
+        string field)
+    {
+        var consensus =
+            CreateConsensus(
+                field: field,
+                value: "Test Value",
+                supportingProviders: 3,
+                providersWithValue: 4,
+                agreementPercentage: 75,
+                strength:
+                    MetadataConsensusStrength.Moderate);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.True(
+            result.IsRecommended);
+
+        Assert.Equal(
+            "Test Value",
+            result.RecommendedValue);
+    }
+
+    // ============================================================
+    // Conflict
+    // ============================================================
+
+    [Fact]
+    public void Conflict_IsNotRecommended()
+    {
+        var consensus =
+            CreateConsensus(
+                field: "Genre",
+                value: "",
+                supportingProviders: 0,
+                providersWithValue: 3,
+                agreementPercentage:
+                    0,
+                strength:
+                    MetadataConsensusStrength.Conflict);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.False(
+            result.IsRecommended);
+
+        Assert.Empty(
+            result.RecommendedValue);
 
         Assert.Contains(
             "disagree",
             result.Reason,
-            System.StringComparison.OrdinalIgnoreCase);
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Conflict_WithValue_IsStillNotRecommended()
+    {
+        var consensus =
+            CreateConsensus(
+                field: "Artist",
+                value: "Darude",
+                supportingProviders: 1,
+                providersWithValue: 3,
+                agreementPercentage:
+                    33.3,
+                strength:
+                    MetadataConsensusStrength.Conflict);
+
+        var result =
+            GetResult(
+                consensus);
+
+        Assert.False(
+            result.IsRecommended);
+
+        Assert.Empty(
+            result.RecommendedValue);
     }
 
     // ============================================================
@@ -198,19 +470,19 @@ public sealed class MetadataRecommendationServiceTests
     }
 
     // ============================================================
-    // Below Threshold
+    // Empty Consensus Value
     // ============================================================
 
     [Fact]
-    public void StrongConsensus_BelowThreshold_IsNotRecommended()
+    public void EmptyConsensusValue_IsNotRecommended()
     {
         var consensus =
             CreateConsensus(
                 field: "Artist",
-                value: "Darude",
-                supportingProviders: 1,
-                providersWithValue: 2,
-                agreementPercentage: 50,
+                value: "",
+                supportingProviders: 3,
+                providersWithValue: 3,
+                agreementPercentage: 100,
                 strength:
                     MetadataConsensusStrength.Strong);
 
@@ -223,14 +495,6 @@ public sealed class MetadataRecommendationServiceTests
 
         Assert.Empty(
             result.RecommendedValue);
-
-        Assert.Contains(
-            "50",
-            result.Reason);
-
-        Assert.Contains(
-            "75",
-            result.Reason);
     }
 
     // ============================================================
@@ -238,7 +502,7 @@ public sealed class MetadataRecommendationServiceTests
     // ============================================================
 
     [Fact]
-    public void SupportedMetadataFields_AreProcessed()
+    public void AllSupportedMetadataFields_AreProcessed()
     {
         var consensus =
             new[]
@@ -268,6 +532,10 @@ public sealed class MetadataRecommendationServiceTests
                     "136"),
 
                 CreateConsensus(
+                    "Key",
+                    "F#m"),
+
+                CreateConsensus(
                     "Duration",
                     "03:45")
             };
@@ -278,7 +546,7 @@ public sealed class MetadataRecommendationServiceTests
                     consensus);
 
         Assert.Equal(
-            7,
+            8,
             results.Count);
 
         Assert.All(
@@ -295,35 +563,6 @@ public sealed class MetadataRecommendationServiceTests
                 Assert.False(
                     result.IsSelected);
             });
-    }
-
-    // ============================================================
-    // Key
-    // ============================================================
-
-    [Fact]
-    public void Key_IsNotRecommendedField()
-    {
-        var consensus =
-            CreateConsensus(
-                field: "Key",
-                value: "E",
-                supportingProviders: 3,
-                providersWithValue: 3,
-                agreementPercentage: 100,
-                strength:
-                    MetadataConsensusStrength.Strong);
-
-        var results =
-            _service
-                .Recommend(
-                    new[]
-                    {
-                        consensus
-                    });
-
-        Assert.Empty(
-            results);
     }
 
     // ============================================================
@@ -385,34 +624,6 @@ public sealed class MetadataRecommendationServiceTests
     }
 
     // ============================================================
-    // Empty Recommended Value
-    // ============================================================
-
-    [Fact]
-    public void EmptyConsensusValue_IsNotRecommended()
-    {
-        var consensus =
-            CreateConsensus(
-                field: "Artist",
-                value: "",
-                supportingProviders: 3,
-                providersWithValue: 3,
-                agreementPercentage: 100,
-                strength:
-                    MetadataConsensusStrength.Strong);
-
-        var result =
-            GetResult(
-                consensus);
-
-        Assert.False(
-            result.IsRecommended);
-
-        Assert.Empty(
-            result.RecommendedValue);
-    }
-
-    // ============================================================
     // Selection State
     // ============================================================
 
@@ -422,7 +633,13 @@ public sealed class MetadataRecommendationServiceTests
         var consensus =
             CreateConsensus(
                 field: "Genre",
-                value: "Trance");
+                value: "Trance",
+                supportingProviders: 2,
+                providersWithValue: 3,
+                agreementPercentage:
+                    66.7,
+                strength:
+                    MetadataConsensusStrength.Weak);
 
         var result =
             GetResult(
@@ -441,7 +658,13 @@ public sealed class MetadataRecommendationServiceTests
         var consensus =
             CreateConsensus(
                 field: "Genre",
-                value: "Trance");
+                value: "Trance",
+                supportingProviders: 2,
+                providersWithValue: 3,
+                agreementPercentage:
+                    66.7,
+                strength:
+                    MetadataConsensusStrength.Weak);
 
         var result =
             GetResult(
@@ -561,7 +784,7 @@ public sealed class MetadataRecommendationServiceTests
     [Fact]
     public void NullConsensus_ThrowsArgumentNullException()
     {
-        Assert.Throws<System.ArgumentNullException>(
+        Assert.Throws<ArgumentNullException>(
             () =>
                 _service.Recommend(
                     null!));

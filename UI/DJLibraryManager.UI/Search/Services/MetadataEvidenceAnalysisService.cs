@@ -21,7 +21,7 @@ namespace DJLibraryManager.UI.Search.Services;
 /// is treated only as a search hypothesis and is never written
 /// into the local media item.
 ///
-/// This service identifies viable candidate recordings only.
+/// This service identifies candidate recordings only.
 /// It does not resolve conflicting metadata or modify the
 /// DIASISS library.
 /// </summary>
@@ -44,9 +44,6 @@ public sealed class MetadataEvidenceAnalysisService
     /// <summary>
     /// Evaluates all supplied metadata evidence independently
     /// against the local library track.
-    ///
-    /// This overload preserves the original behaviour for callers
-    /// that do not have filename search hints.
     /// </summary>
     public IReadOnlyList<MetadataEvidenceAnalysisResult> Analyse(
         DJLMMediaItem media,
@@ -83,7 +80,9 @@ public sealed class MetadataEvidenceAnalysisService
         foreach (var item in evidence)
         {
             if (item is null)
+            {
                 continue;
+            }
 
             var match =
                 _candidateMatcher.Match(
@@ -110,10 +109,15 @@ public sealed class MetadataEvidenceAnalysisService
     // ============================================================
 
     /// <summary>
-    /// Returns only evidence candidates that the candidate
-    /// matcher considers viable matches.
+    /// Returns candidates that represent a sufficiently strong
+    /// recording match.
     ///
-    /// This overload preserves the original behaviour.
+    /// Duration is only used as a rejection criterion when BOTH
+    /// the local track and the provider candidate have a valid
+    /// duration.
+    ///
+    /// A missing or zero local duration means that duration is
+    /// unknown and therefore cannot be used to reject a candidate.
     /// </summary>
     public IReadOnlyList<MetadataEvidenceAnalysisResult>
         GetViableCandidates(
@@ -127,9 +131,22 @@ public sealed class MetadataEvidenceAnalysisService
     }
 
     /// <summary>
-    /// Returns only evidence candidates that the candidate
-    /// matcher considers viable matches, optionally using a
-    /// filename-derived search hypothesis.
+    /// Returns candidates that represent a sufficiently strong
+    /// recording match, optionally using a filename-derived
+    /// search hypothesis.
+    ///
+    /// Duration matching is conditional:
+    ///
+    /// - If the local duration is unavailable, duration does not
+    ///   affect candidate viability.
+    ///
+    /// - If the local duration is available but the provider
+    ///   duration is unavailable, duration does not affect
+    ///   candidate viability.
+    ///
+    /// - If BOTH durations are available, a zero DurationScore
+    ///   means the recordings differ too substantially and the
+    ///   candidate is rejected.
     /// </summary>
     public IReadOnlyList<MetadataEvidenceAnalysisResult>
         GetViableCandidates(
@@ -137,14 +154,65 @@ public sealed class MetadataEvidenceAnalysisService
             IEnumerable<MetadataEvidence> evidence,
             FilenameSearchHint? filenameSearchHint)
     {
-        return Analyse(
+        var analysed =
+            Analyse(
                 media,
                 evidence,
-                filenameSearchHint)
+                filenameSearchHint);
+
+        var localDurationAvailable =
+            media.Duration.HasValue &&
+            media.Duration.Value.TotalSeconds > 0;
+
+        return analysed
             .Where(
-                x => x.Match.IsMatch)
+                candidate =>
+                {
+                    if (!candidate.Match.IsMatch)
+                    {
+                        return false;
+                    }
+
+                    //
+                    // No usable local duration.
+                    //
+                    // Duration cannot be used to reject the
+                    // provider candidate.
+                    //
+                    if (!localDurationAvailable)
+                    {
+                        return true;
+                    }
+
+                    //
+                    // Local duration exists, but provider has
+                    // no usable duration.
+                    //
+                    // Again, duration cannot be used to reject.
+                    //
+                    var candidateDuration =
+                        candidate.Evidence.Duration;
+
+                    var candidateDurationAvailable =
+                        candidateDuration.HasValue &&
+                        candidateDuration.Value.TotalSeconds > 0;
+
+                    if (!candidateDurationAvailable)
+                    {
+                        return true;
+                    }
+
+                    //
+                    // Both durations exist.
+                    //
+                    // Now DurationScore is meaningful and a score
+                    // of zero means the recordings differ too much.
+                    //
+                    return candidate.Match.DurationScore > 0;
+                })
             .OrderByDescending(
-                x => x.Match.Score)
+                candidate =>
+                    candidate.Match.Score)
             .ToList();
     }
 }

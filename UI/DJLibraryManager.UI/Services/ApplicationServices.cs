@@ -182,9 +182,19 @@ public sealed class ApplicationServices
                 new ReccoBeatsMetadataProvider()
             };
 
-        var metadataSearchService =
-            new MetadataSearchService(
-                metadataProviders);
+        var metadataEnrichmentProviders =
+                new IMetadataEnrichmentProvider[]
+                {
+                    new MusicBrainzMetadataEnrichmentProvider(),
+                    new DiscogsMetadataEnrichmentProvider(),
+                    new ReccoBeatsMetadataEnrichmentProvider()
+                };
+
+                    var metadataSearchService =
+                        new MetadataSearchService(
+                            metadataProviders,
+                            enrichmentProviders:
+                                metadataEnrichmentProviders);
 
         // --------------------------------------------------------
         // Other Search Services

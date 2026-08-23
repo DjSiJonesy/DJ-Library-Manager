@@ -59,9 +59,49 @@ public sealed class MetadataConsensusServiceTests
         Assert.Equal(
             MetadataConsensusStrength.Strong,
             result.Strength);
+    }
 
-        Assert.Empty(
-            result.ConflictingSources);
+    [Fact]
+    public void Artist_TwoOfThreeAgree_Returns66Point7Percent()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "MusicBrainz",
+                    artist: "Darude"),
+
+                CreateEvidence(
+                    "Discogs",
+                    artist: "Darude"),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    artist: "Other Artist"));
+
+        var result =
+            GetResult(
+                candidates,
+                "Artist");
+
+        Assert.Equal(
+            "Darude",
+            result.Value);
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            3,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            66.7,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Weak,
+            result.Strength);
     }
 
     // ============================================================
@@ -99,6 +139,10 @@ public sealed class MetadataConsensusServiceTests
             result.SupportingProviders);
 
         Assert.Equal(
+            3,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
             100,
             result.AgreementPercentage);
 
@@ -108,11 +152,159 @@ public sealed class MetadataConsensusServiceTests
     }
 
     // ============================================================
+    // Album
+    // ============================================================
+
+    [Fact]
+    public void Album_TwoOfThreeAgree_Returns66Point7Percent()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "MusicBrainz",
+                    album: "Before The Storm"),
+
+                CreateEvidence(
+                    "Discogs",
+                    album: "Before The Storm"),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    album: "Different Album"));
+
+        var result =
+            GetResult(
+                candidates,
+                "Album");
+
+        Assert.Equal(
+            "Before The Storm",
+            result.Value);
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            3,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            66.7,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Weak,
+            result.Strength);
+    }
+
+    // ============================================================
+    // Genre
+    // ============================================================
+
+    /// <summary>
+    /// Genre deliberately permits a two-provider agreement.
+    ///
+    /// The consensus service reports the actual 66.7% consensus.
+    /// MetadataRecommendationService will later interpret this
+    /// as sufficient for Genre because two independent providers
+    /// agree.
+    /// </summary>
+    [Fact]
+    public void Genre_TwoOfThreeAgree_Returns66Point7Percent()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "MusicBrainz",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "Discogs",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    genre: "Electronic"));
+
+        var result =
+            GetResult(
+                candidates,
+                "Genre");
+
+        Assert.Equal(
+            "Trance",
+            result.Value);
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            3,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            66.7,
+            result.AgreementPercentage);
+
+        Assert.Contains(
+            "ReccoBeats",
+            result.ConflictingSources);
+    }
+
+    [Fact]
+    public void Genre_ThreeDifferentValues_ReturnsConflict()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "MusicBrainz",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "Discogs",
+                    genre: "Electronic"),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    genre: "Dance"));
+
+        var result =
+            GetResult(
+                candidates,
+                "Genre");
+
+        Assert.Empty(
+            result.Value);
+
+        Assert.Equal(
+            0,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            3,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            0,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Conflict,
+            result.Strength);
+
+        Assert.Equal(
+            3,
+            result.ConflictingSources.Count);
+    }
+
+    // ============================================================
     // Year
     // ============================================================
 
     [Fact]
-    public void Year_TwoOfThreeProvidersAgree_ReturnsWeakConsensus()
+    public void Year_TwoOfThreeAgree_Returns66Point7Percent()
     {
         var candidates =
             CreateCandidates(
@@ -149,72 +341,6 @@ public sealed class MetadataConsensusServiceTests
             66.7,
             result.AgreementPercentage);
 
-        Assert.Equal(
-            MetadataConsensusStrength.Weak,
-            result.Strength);
-
-        Assert.Contains(
-            "ReccoBeats",
-            result.ConflictingSources);
-    }
-
-    // ============================================================
-    // Genre Conflict
-    // ============================================================
-
-    [Fact]
-    public void Genre_ThreeDifferentValues_ReturnsConflict()
-    {
-        var candidates =
-            CreateCandidates(
-                CreateEvidence(
-                    "MusicBrainz",
-                    genre: "Trance"),
-
-                CreateEvidence(
-                    "Discogs",
-                    genre: "Electronic"),
-
-                CreateEvidence(
-                    "ReccoBeats",
-                    genre: "Dance"));
-
-        var result =
-            GetResult(
-                candidates,
-                "Genre");
-
-        Assert.Equal(
-            0,
-            result.SupportingProviders);
-
-        Assert.Equal(
-            3,
-            result.ProvidersWithValue);
-
-        Assert.Equal(
-            0,
-            result.AgreementPercentage);
-
-        Assert.Empty(
-            result.Value);
-
-        Assert.Equal(
-            MetadataConsensusStrength.Conflict,
-            result.Strength);
-
-        Assert.Equal(
-            3,
-            result.ConflictingSources.Count);
-
-        Assert.Contains(
-            "MusicBrainz",
-            result.ConflictingSources);
-
-        Assert.Contains(
-            "Discogs",
-            result.ConflictingSources);
-
         Assert.Contains(
             "ReccoBeats",
             result.ConflictingSources);
@@ -225,21 +351,17 @@ public sealed class MetadataConsensusServiceTests
     // ============================================================
 
     [Fact]
-    public void BPM_SlightProviderDifferences_ReturnsStrongConsensus()
+    public void BPM_ExactMatch_ReturnsStrongConsensus()
     {
         var candidates =
             CreateCandidates(
                 CreateEvidence(
-                    "MusicBrainz",
-                    bpm: 136.000),
-
-                CreateEvidence(
                     "Discogs",
-                    bpm: 136.067),
+                    bpm: 136.0),
 
                 CreateEvidence(
                     "ReccoBeats",
-                    bpm: 136.065));
+                    bpm: 136.0));
 
         var result =
             GetResult(
@@ -247,11 +369,11 @@ public sealed class MetadataConsensusServiceTests
                 "BPM");
 
         Assert.Equal(
-            3,
+            2,
             result.SupportingProviders);
 
         Assert.Equal(
-            3,
+            2,
             result.ProvidersWithValue);
 
         Assert.Equal(
@@ -262,10 +384,201 @@ public sealed class MetadataConsensusServiceTests
             MetadataConsensusStrength.Strong,
             result.Strength);
 
-        Assert.InRange(
-            double.Parse(result.Value),
-            136.0,
-            136.1);
+        Assert.Equal(
+            "136",
+            result.Value);
+    }
+
+    [Fact]
+    public void BPM_OneBpmDifference_IsAgreement()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "Discogs",
+                    bpm: 136.0),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    bpm: 137.0));
+
+        var result =
+            GetResult(
+                candidates,
+                "BPM");
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            100,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Strong,
+            result.Strength);
+    }
+
+    [Fact]
+    public void BPM_HalfBpmDifference_IsAgreement()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "Discogs",
+                    bpm: 136.0),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    bpm: 136.5));
+
+        var result =
+            GetResult(
+                candidates,
+                "BPM");
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            100,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Strong,
+            result.Strength);
+    }
+
+    [Fact]
+    public void BPM_TwoBpmDifference_IsConflict()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "Discogs",
+                    bpm: 136.0),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    bpm: 138.0));
+
+        var result =
+            GetResult(
+                candidates,
+                "BPM");
+
+        Assert.Empty(
+            result.Value);
+
+        Assert.Equal(
+            0,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            2,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            0,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Conflict,
+            result.Strength);
+    }
+
+    /// <summary>
+    /// MusicBrainz is deliberately not a BPM provider.
+    ///
+    /// Its absence must not reduce BPM agreement.
+    /// </summary>
+    [Fact]
+    public void BPM_MusicBrainzDoesNotSupplyValue_IsIgnored()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "MusicBrainz"),
+
+                CreateEvidence(
+                    "Discogs",
+                    bpm: 136.0),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    bpm: 136.5));
+
+        var result =
+            GetResult(
+                candidates,
+                "BPM");
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            2,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            100,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Strong,
+            result.Strength);
+    }
+
+    /// <summary>
+    /// If Discogs has no BPM but ReccoBeats does, ReccoBeats'
+    /// BPM is still usable evidence.
+    /// </summary>
+    [Fact]
+    public void BPM_DiscogsBlank_ReccoBeatsValueIsUsable()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "MusicBrainz"),
+
+                CreateEvidence(
+                    "Discogs"),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    bpm: 136.5));
+
+        var result =
+            GetResult(
+                candidates,
+                "BPM");
+
+        Assert.Equal(
+            "136.5",
+            result.Value);
+
+        Assert.Equal(
+            1,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            1,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            100,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Strong,
+            result.Strength);
+
+        Assert.Contains(
+            "ReccoBeats",
+            result.SupportingSources);
     }
 
     // ============================================================
@@ -278,7 +591,7 @@ public sealed class MetadataConsensusServiceTests
         var candidates =
             CreateCandidates(
                 CreateEvidence(
-                    "VirtualDJ",
+                    "Discogs",
                     bpm: 86.0),
 
                 CreateEvidence(
@@ -293,6 +606,53 @@ public sealed class MetadataConsensusServiceTests
         Assert.Equal(
             2,
             result.SupportingProviders);
+
+        Assert.Equal(
+            100,
+            result.AgreementPercentage);
+
+        Assert.Equal(
+            MetadataConsensusStrength.Strong,
+            result.Strength);
+    }
+
+    // ============================================================
+    // Key
+    // ============================================================
+
+    [Fact]
+    public void Key_ThreeProvidersAgree_ReturnsStrongConsensus()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "MusicBrainz",
+                    key: "F#m"),
+
+                CreateEvidence(
+                    "Discogs",
+                    key: "F#m"),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    key: "F#m"));
+
+        var result =
+            GetResult(
+                candidates,
+                "Key");
+
+        Assert.Equal(
+            "F#m",
+            result.Value);
+
+        Assert.Equal(
+            3,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            3,
+            result.ProvidersWithValue);
 
         Assert.Equal(
             100,
@@ -352,8 +712,50 @@ public sealed class MetadataConsensusServiceTests
     }
 
     // ============================================================
-    // No Data
+    // Missing Provider Data
     // ============================================================
+
+    [Fact]
+    public void Genre_MissingProviderValuesAreNotDisagreement()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "MusicBrainz",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "Discogs",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "ReccoBeats"));
+
+        var result =
+            GetResult(
+                candidates,
+                "Genre");
+
+        Assert.Equal(
+            "Trance",
+            result.Value);
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            2,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            100,
+            result.AgreementPercentage);
+
+        Assert.DoesNotContain(
+            "ReccoBeats",
+            result.ConflictingSources);
+    }
 
     [Fact]
     public void Genre_NoProvidersSupplyGenre_ReturnsNoData()
@@ -391,16 +793,115 @@ public sealed class MetadataConsensusServiceTests
     }
 
     // ============================================================
+    // Provider Independence
+    // ============================================================
+
+    [Fact]
+    public void Genre_MultipleCandidatesFromSameProvider_CountsProviderOnce()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "ReccoBeats",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "MusicBrainz",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "Discogs",
+                    genre: "Dance"));
+
+        var result =
+            GetResult(
+                candidates,
+                "Genre");
+
+        Assert.Equal(
+            "Trance",
+            result.Value);
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            3,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            66.7,
+            result.AgreementPercentage);
+
+        Assert.Contains(
+            "ReccoBeats",
+            result.SupportingSources);
+
+        Assert.Contains(
+            "MusicBrainz",
+            result.SupportingSources);
+
+        Assert.Contains(
+            "Discogs",
+            result.ConflictingSources);
+    }
+
+    [Fact]
+    public void Genre_SameProviderStrongCandidatesConflict_ProviderDoesNotVote()
+    {
+        var candidates =
+            CreateCandidates(
+                CreateEvidence(
+                    "ReccoBeats",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "ReccoBeats",
+                    genre: "Electronic"),
+
+                CreateEvidence(
+                    "MusicBrainz",
+                    genre: "Trance"),
+
+                CreateEvidence(
+                    "Discogs",
+                    genre: "Trance"));
+
+        var result =
+            GetResult(
+                candidates,
+                "Genre");
+
+        Assert.Equal(
+            "Trance",
+            result.Value);
+
+        Assert.Equal(
+            2,
+            result.SupportingProviders);
+
+        Assert.Equal(
+            2,
+            result.ProvidersWithValue);
+
+        Assert.Equal(
+            100,
+            result.AgreementPercentage);
+
+        Assert.DoesNotContain(
+            "ReccoBeats",
+            result.SupportingSources);
+    }
+
+    // ============================================================
     // Determinism
     // ============================================================
 
-    /// <summary>
-    /// Two providers agreeing must produce the same consensus even
-    /// when the disagreeing provider appears first in the evidence.
-    ///
-    /// This specifically protects against provider/result ordering
-    /// affecting the selected metadata value.
-    /// </summary>
     [Fact]
     public void Year_TwoProvidersAgree_ResultDoesNotDependOnProviderOrder()
     {
@@ -467,138 +968,6 @@ public sealed class MetadataConsensusServiceTests
             secondResult.Strength);
     }
 
-    /// <summary>
-    /// A provider returning multiple candidates must not receive
-    /// multiple votes.
-    ///
-    /// The provider with two candidates represents one independent
-    /// source, not two independent sources.
-    /// </summary>
-   [Fact]
-    public void Genre_MultipleCandidatesWithSameProviderValue_CountsProviderOnlyOnce()
-    {
-        var candidates =
-            CreateCandidates(
-                // ReccoBeats returns two candidates, but both agree
-                // on the same Genre. This is still one provider vote.
-                CreateEvidence(
-                    "ReccoBeats",
-                    genre: "Trance"),
-
-                CreateEvidence(
-                    "ReccoBeats",
-                    genre: "Trance"),
-
-                CreateEvidence(
-                    "MusicBrainz",
-                    genre: "Trance"),
-
-                CreateEvidence(
-                    "Discogs",
-                    genre: "Dance"));
-
-        var result =
-            GetResult(
-                candidates,
-                "Genre");
-
-        // ReccoBeats contributes ONE vote, not two.
-        Assert.Equal(
-            2,
-            result.SupportingProviders);
-
-        // There are three independent providers.
-        Assert.Equal(
-            3,
-            result.ProvidersWithValue);
-
-        Assert.Equal(
-            "Trance",
-            result.Value);
-
-        Assert.Equal(
-            66.7,
-            result.AgreementPercentage);
-
-        Assert.Equal(
-            MetadataConsensusStrength.Weak,
-            result.Strength);
-
-        Assert.Contains(
-            "ReccoBeats",
-            result.SupportingSources);
-
-        Assert.Contains(
-            "MusicBrainz",
-            result.SupportingSources);
-
-        Assert.Contains(
-            "Discogs",
-            result.ConflictingSources);
-    }
-
-    /// <summary>
-    /// If the strongest candidates returned by the same provider
-    /// disagree, that provider cannot provide a deterministic vote.
-    ///
-    /// This prevents an arbitrary candidate from being selected
-    /// simply because it appeared first.
-    /// </summary>
-    [Fact]
-    public void Genre_SameProviderStrongCandidatesConflict_ProviderDoesNotVote()
-    {
-        var candidates =
-            CreateCandidates(
-                CreateEvidence(
-                    "ReccoBeats",
-                    genre: "Trance"),
-
-                CreateEvidence(
-                    "ReccoBeats",
-                    genre: "Electronic"),
-
-                CreateEvidence(
-                    "MusicBrainz",
-                    genre: "Trance"),
-
-                CreateEvidence(
-                    "Discogs",
-                    genre: "Trance"));
-
-        var result =
-            GetResult(
-                candidates,
-                "Genre");
-
-        Assert.Equal(
-            2,
-            result.SupportingProviders);
-
-        Assert.Equal(
-            2,
-            result.ProvidersWithValue);
-
-        Assert.Equal(
-            "Trance",
-            result.Value);
-
-        Assert.Equal(
-            100,
-            result.AgreementPercentage);
-
-        Assert.Equal(
-            MetadataConsensusStrength.Strong,
-            result.Strength);
-
-        Assert.DoesNotContain(
-            "ReccoBeats",
-            result.SupportingSources);
-    }
-
-    /// <summary>
-    /// A complete three-way tie must never select an arbitrary
-    /// provider's value.
-    /// </summary>
     [Fact]
     public void Year_ThreeDifferentValues_NeverSelectsArbitraryWinner()
     {
@@ -663,10 +1032,6 @@ public sealed class MetadataConsensusServiceTests
             secondResult.SupportingProviders);
 
         Assert.Equal(
-            firstResult.AgreementPercentage,
-            secondResult.AgreementPercentage);
-
-        Assert.Equal(
             3,
             firstResult.ProvidersWithValue);
 
@@ -675,10 +1040,6 @@ public sealed class MetadataConsensusServiceTests
             secondResult.ProvidersWithValue);
     }
 
-    /// <summary>
-    /// Running the same evidence repeatedly must always produce
-    /// the same consensus.
-    /// </summary>
     [Fact]
     public void Year_RepeatedAnalysisOfSameEvidence_ReturnsIdenticalConsensus()
     {
@@ -738,7 +1099,7 @@ public sealed class MetadataConsensusServiceTests
     // Helpers
     // ============================================================
 
-    private static IReadOnlyList<MetadataEvidenceAnalysisResult>
+    private IReadOnlyList<MetadataEvidenceAnalysisResult>
         CreateCandidates(
             params MetadataEvidence[] evidence)
     {
@@ -769,6 +1130,7 @@ public sealed class MetadataConsensusServiceTests
         string genre = "",
         int? year = null,
         double? bpm = null,
+        string key = "",
         TimeSpan? duration = null)
     {
         return new MetadataEvidence
@@ -797,6 +1159,9 @@ public sealed class MetadataConsensusServiceTests
             BPM =
                 bpm,
 
+            Key =
+                key,
+
             Duration =
                 duration,
 
@@ -808,12 +1173,12 @@ public sealed class MetadataConsensusServiceTests
         };
     }
 
-    private static MetadataConsensusResult GetResult(
+    private MetadataConsensusResult GetResult(
         IReadOnlyList<MetadataEvidenceAnalysisResult> candidates,
         string field)
     {
         var results =
-            _staticService.Analyse(
+            _service.Analyse(
                 candidates);
 
         return results.Single(
@@ -822,8 +1187,4 @@ public sealed class MetadataConsensusServiceTests
                     field,
                     StringComparison.OrdinalIgnoreCase));
     }
-
-    private static readonly MetadataConsensusService
-        _staticService =
-            new();
 }

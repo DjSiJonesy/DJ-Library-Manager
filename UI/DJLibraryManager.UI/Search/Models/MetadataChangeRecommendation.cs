@@ -8,115 +8,102 @@ namespace DJLibraryManager.UI.Search.Models;
 ///
 /// This model represents a proposed change only. It does not modify
 /// the DIASISS library and does not represent a provider search result.
-///
-/// The Search UI can use this model to display:
-///
-/// - the metadata currently stored in the library
-/// - the metadata recommended by DIASISS
-/// - the confidence supporting the recommendation
-/// - whether the user has selected the change for confirmation
 /// </summary>
 public sealed class MetadataChangeRecommendation
 {
-    // ============================================================
-    // Metadata Field
-    // ============================================================
-
-    /// <summary>
-    /// Metadata field being proposed for change.
-    ///
-    /// Examples:
-    /// Artist, Title, Album, Genre, Year, BPM, Duration.
-    /// </summary>
     public string Field { get; init; } = string.Empty;
 
-    // ============================================================
-    // Existing Metadata
-    // ============================================================
-
-    /// <summary>
-    /// Value currently stored in the DIASISS library.
-    ///
-    /// An empty value indicates that the metadata field is currently
-    /// missing.
-    /// </summary>
     public string CurrentValue { get; init; } = string.Empty;
 
-    // ============================================================
-    // Recommended Metadata
-    // ============================================================
-
-    /// <summary>
-    /// Metadata value recommended by DIASISS based on independent
-    /// provider evidence.
-    /// </summary>
     public string RecommendedValue { get; init; } = string.Empty;
 
-    // ============================================================
-    // Confidence
-    // ============================================================
-
-    /// <summary>
-    /// Percentage of providers supporting the recommended value.
-    /// </summary>
     public double AgreementPercentage { get; init; }
 
-    /// <summary>
-    /// Number of independent providers supporting the recommended
-    /// value.
-    /// </summary>
     public int SupportingProviders { get; init; }
 
-    /// <summary>
-    /// Total number of independent providers that supplied a value
-    /// for this field.
-    /// </summary>
     public int ProvidersWithValue { get; init; }
 
-    /// <summary>
-    /// Strength of the provider consensus.
-    /// </summary>
     public MetadataConsensusStrength Strength { get; init; }
-
-    // ============================================================
-    // Recommendation
-    // ============================================================
 
     /// <summary>
     /// Indicates whether DIASISS considers this change suitable
     /// to recommend to the user.
-    ///
-    /// This does NOT mean that the change has been approved.
     /// </summary>
     public bool IsRecommended { get; init; }
 
     /// <summary>
-    /// Indicates whether the user has selected this recommendation
-    /// for confirmation.
+    /// Indicates whether this recommendation is currently selected.
     ///
-    /// Selection is presentation/workflow state and does not itself
-    /// modify the library.
+    /// This remains publicly settable because existing Search
+    /// services and controls use this property directly.
     /// </summary>
     public bool IsSelected { get; set; }
 
-    // ============================================================
-    // Explanation
-    // ============================================================
-
     /// <summary>
-    /// Human-readable explanation of why DIASISS made this
+    /// Indicates that the user has explicitly changed this
     /// recommendation.
+    ///
+    /// Automatic bulk selection must never overwrite a
+    /// user-modified recommendation.
     /// </summary>
+    public bool IsUserModified { get; private set; }
+
     public string Reason { get; init; } = string.Empty;
 
-    // ============================================================
-    // Convenience
-    // ============================================================
+    /// <summary>
+    /// Records an explicit user selection.
+    /// </summary>
+    public void SetUserSelection(
+        bool selected)
+    {
+        IsSelected =
+            selected;
+
+        IsUserModified =
+            true;
+    }
 
     /// <summary>
-    /// Indicates whether this recommendation represents an actual
-    /// change to the current library metadata.
+    /// Applies an automatic recommendation selection.
+    ///
+    /// User-modified recommendations are deliberately protected.
     /// </summary>
+    public void SetRecommendedSelection(
+        bool selected)
+    {
+        if (IsUserModified)
+            return;
+
+        IsSelected =
+            selected;
+    }
+
+    /// <summary>
+    /// Restores persisted selection state.
+    /// </summary>
+    public void RestoreSelection(
+        bool selected,
+        bool userModified)
+    {
+        IsSelected =
+            selected;
+
+        IsUserModified =
+            userModified;
+    }
+
+    /// <summary>
+    /// Explicitly resets the user decision.
+    /// </summary>
+    public void ResetUserSelection()
+    {
+        IsSelected =
+            false;
+
+        IsUserModified =
+            false;
+    }
+
     public bool IsChange =>
         !string.Equals(
             CurrentValue?.Trim(),

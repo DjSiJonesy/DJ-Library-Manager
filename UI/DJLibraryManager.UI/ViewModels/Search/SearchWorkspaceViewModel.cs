@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 using DJLibraryManager.Core.Workflow;
 using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Models;
@@ -473,8 +474,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             return;
 
         if (ReferenceEquals(
-                SelectedCategory,
-                category))
+            SelectedCategory,
+            category))
         {
             IssueSearchText = string.Empty;
 
@@ -631,6 +632,17 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
                 Duration =
                     issue.Duration,
+
+                // ------------------------------------------------
+                // Preserve Analysis' authoritative missing fields.
+                //
+                // Analysis determines what is actually missing.
+                // Search must not reconstruct this information
+                // from the issue description or issue type.
+                // ------------------------------------------------
+
+                MissingFields =
+                    issue.MissingFields,
 
                 FilenameSearchHint =
                     issue.FilenameSearchHint,

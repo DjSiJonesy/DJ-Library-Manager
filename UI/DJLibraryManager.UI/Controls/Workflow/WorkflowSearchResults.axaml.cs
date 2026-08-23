@@ -20,8 +20,10 @@ namespace DJLibraryManager.UI.Controls.Workflow;
 /// The control supports category-specific presentation:
 ///
 /// - Duplicate Search displays SearchResult candidates.
-/// - Metadata Search displays the affected file and proposed
+/// - Metadata Search displays current metadata and proposed
 ///   metadata changes.
+/// - Missing File Search displays the affected track and its
+///   last known file location.
 ///
 /// The control does not modify the DIASISS library.
 /// It only presents Search information and records presentation
@@ -44,7 +46,7 @@ public partial class WorkflowSearchResults :
     // Property Changed
     // ============================================================
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    public new event PropertyChangedEventHandler? PropertyChanged;
 
     private void RaisePropertyChanged(
         [CallerMemberName] string? propertyName = null)
@@ -99,7 +101,8 @@ public partial class WorkflowSearchResults :
         set => SetValue(ResultTypeProperty, value);
     }
 
-    public static readonly StyledProperty<bool> IsDuplicateResultsProperty =
+    public static readonly StyledProperty<bool>
+        IsDuplicateResultsProperty =
         AvaloniaProperty.Register<WorkflowSearchResults, bool>(
             nameof(IsDuplicateResults),
             true);
@@ -112,7 +115,8 @@ public partial class WorkflowSearchResults :
             value);
     }
 
-    public static readonly StyledProperty<bool> IsMetadataResultsProperty =
+    public static readonly StyledProperty<bool>
+        IsMetadataResultsProperty =
         AvaloniaProperty.Register<WorkflowSearchResults, bool>(
             nameof(IsMetadataResults),
             false);
@@ -122,6 +126,20 @@ public partial class WorkflowSearchResults :
         get => GetValue(IsMetadataResultsProperty);
         private set => SetValue(
             IsMetadataResultsProperty,
+            value);
+    }
+
+    public static readonly StyledProperty<bool>
+        IsMissingFileResultsProperty =
+        AvaloniaProperty.Register<WorkflowSearchResults, bool>(
+            nameof(IsMissingFileResults),
+            false);
+
+    public bool IsMissingFileResults
+    {
+        get => GetValue(IsMissingFileResultsProperty);
+        private set => SetValue(
+            IsMissingFileResultsProperty,
             value);
     }
 
@@ -152,6 +170,22 @@ public partial class WorkflowSearchResults :
     public string MetadataFilePath =>
         Issue?.FilePath
         ?? string.Empty;
+
+    // ============================================================
+    // Missing File Identity
+    // ============================================================
+
+    public string MissingFileDisplayName =>
+        Issue?.DisplayName
+        ?? "Unknown Track";
+
+    public string MissingFilePath =>
+        Issue?.FilePath
+        ?? string.Empty;
+
+    public bool HasMissingFilePath =>
+        !string.IsNullOrWhiteSpace(
+            Issue?.FilePath);
 
     // ============================================================
     // Existing Metadata
@@ -333,6 +367,15 @@ public partial class WorkflowSearchResults :
         if (change.Property == IssueProperty)
         {
             RaiseMetadataPropertiesChanged();
+
+            RaisePropertyChanged(
+                nameof(MissingFileDisplayName));
+
+            RaisePropertyChanged(
+                nameof(MissingFilePath));
+
+            RaisePropertyChanged(
+                nameof(HasMissingFilePath));
         }
     }
 
@@ -351,17 +394,29 @@ public partial class WorkflowSearchResults :
                 "Duplicates",
                 StringComparison.OrdinalIgnoreCase);
 
+        var isMissingFiles =
+            string.Equals(
+                resultType,
+                "Missing Files",
+                StringComparison.OrdinalIgnoreCase);
+
         IsMetadataResults =
             isMetadata;
 
         IsDuplicateResults =
             isDuplicates;
 
+        IsMissingFileResults =
+            isMissingFiles;
+
         RaisePropertyChanged(
             nameof(IsMetadataResults));
 
         RaisePropertyChanged(
             nameof(IsDuplicateResults));
+
+        RaisePropertyChanged(
+            nameof(IsMissingFileResults));
     }
 
     // ============================================================

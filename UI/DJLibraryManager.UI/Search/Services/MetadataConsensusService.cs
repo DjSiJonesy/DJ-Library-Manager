@@ -7,31 +7,59 @@ using System.Linq;
 namespace DJLibraryManager.UI.Search.Services;
 
 /// <summary>
-/// Analyses independently validated provider candidates and
-/// determines the level of consensus for each metadata field.
+/// Analyses independently validated provider evidence
+/// field-by-field and determines the strongest consensus
+/// for each metadata field.
 ///
-/// Each provider has one independent vote for a metadata value.
-/// Multiple candidates returned by the same provider therefore
-/// cannot give that provider additional influence.
+/// Each provider has at most one vote for each metadata field.
+/// Missing provider data is not treated as disagreement.
 ///
-/// Providers are never compared by passing information from one
-/// provider into another. Each provider's independently validated
-/// evidence is considered together only at this analysis stage.
+/// Artist identity receives specialised handling because
+/// providers may legitimately represent the same recording using
+/// different levels of artist detail, for example:
+///
+///     Luude
+///     Luude, Colin Hay
+///
+/// In those cases the more complete compatible identity is preferred
+/// rather than treating the values as a conflict.
 ///
 /// This service does not modify the DIASISS library and does not
-/// decide whether a candidate is the correct recording. That has
-/// already been handled by MetadataCandidateMatcher.
+/// decide whether a metadata change should be applied.
+///
+/// Recommendation policy is handled separately by
+/// MetadataRecommendationService.
 /// </summary>
 public sealed class MetadataConsensusService
 {
+    // ============================================================
+    // Configuration
+    // ============================================================
+
+    /// <summary>
+    /// BPM values within this tolerance are considered equivalent.
+    /// </summary>
+    private const double BpmTolerance = 1.0;
+
+    /// <summary>
+    /// Duration values within this tolerance are considered
+    /// equivalent.
+    /// </summary>
+    private const double DurationToleranceSeconds = 3.0;
+
     // ============================================================
     // Public API
     // ============================================================
 
     /// <summary>
-    /// Analyses independently validated provider candidates and
-    /// returns consensus results for the metadata fields currently
-    /// supported by DIASISS.
+    /// Analyses independently validated provider evidence
+    /// independently for each supported metadata field.
+    ///
+    /// A provider may contribute at most one vote to each field.
+    ///
+    /// Providers that do not supply a value for a field are
+    /// excluded from that field's evidence pool and are not
+    /// considered to disagree.
     /// </summary>
     public IReadOnlyList<MetadataConsensusResult> Analyse(
         IEnumerable<MetadataEvidenceAnalysisResult> candidates)
@@ -41,19 +69,17 @@ public sealed class MetadataConsensusService
         var viableCandidates =
             candidates
                 .Where(
-                    x =>
-                        x is not null &&
-                        x.Match is not null &&
-                        x.Match.IsMatch &&
-                        x.Evidence is not null)
+                    candidate =>
+                        candidate is not null &&
+                        candidate.Match is not null &&
+                        candidate.Match.IsMatch &&
+                        candidate.Evidence is not null)
                 .ToList();
 
         return new[]
         {
-            AnalyseTextField(
-                "Artist",
-                viableCandidates,
-                x => x.Evidence.Artist),
+            AnalyseArtistField(
+                viableCandidates),
 
             AnalyseTextField(
                 "Title",
@@ -73,7 +99,10 @@ public sealed class MetadataConsensusService
             AnalyseYearField(
                 viableCandidates),
 
-            AnalyseBPMField(
+            AnalyseBpmField(
+                viableCandidates),
+
+            AnalyseKeyField(
                 viableCandidates),
 
             AnalyseDurationField(
@@ -82,806 +111,205 @@ public sealed class MetadataConsensusService
     }
 
     // ============================================================
-    // Text Fields
-    // ============================================================
-
-    private static MetadataConsensusResult AnalyseTextField(
-        string field,
-        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates,
-        Func<MetadataEvidenceAnalysisResult, string?> selector)
-    {
-        var providerValues =
-            GetProviderValues(
-                candidates,
-                selector,
-                NormaliseText);
-
-        if (providerValues.Count == 0)
-        {
-            return CreateNoDataResult(field);
-        }
-
-        var groups =
-            providerValues
-                .GroupBy(
-                    x => x.NormalisedValue,
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderByDescending(
-                    x => x.Count())
-                .ThenBy(
-                    x => x.Key,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var highestCount =
-            groups[0].Count();
-
-        var winningGroups =
-            groups
-                .Where(
-                    x => x.Count() == highestCount)
-                .ToList();
-
-        // --------------------------------------------------------
-        // A tie is a genuine conflict.
-        //
-        // We deliberately do NOT use groups[0] when two different
-        // values have equal provider support.
-        // --------------------------------------------------------
-
-        if (winningGroups.Count > 1)
-        {
-            return CreateConflictResult(
-                field,
-                providerValues);
-        }
-
-        var winningGroup =
-            winningGroups[0];
-
-        var supporting =
-            winningGroup
-                .Select(
-                    x => x.Provider)
-                .Distinct(
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var conflicting =
-            providerValues
-                .Where(
-                    x =>
-                        !string.Equals(
-                            x.NormalisedValue,
-                            winningGroup.Key,
-                            StringComparison.OrdinalIgnoreCase))
-                .Select(
-                    x => x.Provider)
-                .Distinct(
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var agreement =
-            (double)supporting.Count /
-            providerValues.Count *
-            100;
-
-        return new MetadataConsensusResult
-        {
-            Field =
-                field,
-
-            Value =
-                winningGroup
-                    .OrderBy(
-                        x => x.OriginalValue,
-                        StringComparer.OrdinalIgnoreCase)
-                    .First()
-                    .OriginalValue,
-
-            SupportingProviders =
-                supporting.Count,
-
-            ProvidersWithValue =
-                providerValues.Count,
-
-            AgreementPercentage =
-                Math.Round(
-                    agreement,
-                    1),
-
-            Strength =
-                DetermineStrength(
-                    supporting.Count,
-                    providerValues.Count,
-                    agreement),
-
-            SupportingSources =
-                supporting,
-
-            ConflictingSources =
-                conflicting
-        };
-    }
-
-    // ============================================================
-    // Year
-    // ============================================================
-
-    private static MetadataConsensusResult AnalyseYearField(
-        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
-    {
-        var providerValues =
-            GetProviderValues(
-                candidates,
-                x =>
-                    x.Evidence.Year?.ToString(),
-                NormaliseText);
-
-        if (providerValues.Count == 0)
-        {
-            return CreateNoDataResult("Year");
-        }
-
-        var groups =
-            providerValues
-                .GroupBy(
-                    x => x.NormalisedValue,
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderByDescending(
-                    x => x.Count())
-                .ThenBy(
-                    x => x.Key,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var highestCount =
-            groups[0].Count();
-
-        var winningGroups =
-            groups
-                .Where(
-                    x => x.Count() == highestCount)
-                .ToList();
-
-        if (winningGroups.Count > 1)
-        {
-            return CreateConflictResult(
-                "Year",
-                providerValues);
-        }
-
-        var winningGroup =
-            winningGroups[0];
-
-        var supporting =
-            winningGroup
-                .Select(
-                    x => x.Provider)
-                .Distinct(
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var conflicting =
-            providerValues
-                .Where(
-                    x =>
-                        !string.Equals(
-                            x.NormalisedValue,
-                            winningGroup.Key,
-                            StringComparison.OrdinalIgnoreCase))
-                .Select(
-                    x => x.Provider)
-                .Distinct(
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var agreement =
-            (double)supporting.Count /
-            providerValues.Count *
-            100;
-
-        return new MetadataConsensusResult
-        {
-            Field =
-                "Year",
-
-            Value =
-                winningGroup.Key,
-
-            SupportingProviders =
-                supporting.Count,
-
-            ProvidersWithValue =
-                providerValues.Count,
-
-            AgreementPercentage =
-                Math.Round(
-                    agreement,
-                    1),
-
-            Strength =
-                DetermineStrength(
-                    supporting.Count,
-                    providerValues.Count,
-                    agreement),
-
-            SupportingSources =
-                supporting,
-
-            ConflictingSources =
-                conflicting
-        };
-    }
-
-    // ============================================================
-    // BPM
-    // ============================================================
-
-    private static MetadataConsensusResult AnalyseBPMField(
-        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
-    {
-        var providerValues =
-            GetNumericProviderValues(
-                candidates,
-                x => x.Evidence.BPM);
-
-        if (providerValues.Count == 0)
-        {
-            return CreateNoDataResult("BPM");
-        }
-
-        var clusters =
-            BuildBPMClusters(
-                providerValues);
-
-        var largestClusterSize =
-            clusters.Max(
-                x => x.Count);
-
-        var winningClusters =
-            clusters
-                .Where(
-                    x => x.Count == largestClusterSize)
-                .ToList();
-
-        // --------------------------------------------------------
-        // Equal support for different BPM groups is a conflict.
-        // --------------------------------------------------------
-
-        if (winningClusters.Count > 1)
-        {
-            return CreateConflictResult(
-                "BPM",
-                providerValues
-                    .Select(
-                        x =>
-                            new ProviderValue
-                            {
-                                Provider =
-                                    x.Provider,
-
-                                OriginalValue =
-                                    x.Value
-                                        .ToString(
-                                            "0.###"),
-
-                                NormalisedValue =
-                                    x.Value
-                                        .ToString(
-                                            "0.###")
-                            })
-                    .ToList());
-        }
-
-        var winningCluster =
-            winningClusters[0];
-
-        var supporting =
-            winningCluster.Values
-                .Select(
-                    x => x.Provider)
-                .Distinct(
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var conflicting =
-            providerValues
-                .Where(
-                    x =>
-                        !winningCluster.Values.Any(
-                            winning =>
-                                string.Equals(
-                                    winning.Provider,
-                                    x.Provider,
-                                    StringComparison.OrdinalIgnoreCase)))
-                .Select(
-                    x => x.Provider)
-                .Distinct(
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var agreement =
-            (double)supporting.Count /
-            providerValues.Count *
-            100;
-
-        var consensusValue =
-            winningCluster.Values
-                .Average(
-                    x => x.Value);
-
-        return new MetadataConsensusResult
-        {
-            Field =
-                "BPM",
-
-            Value =
-                Math.Round(
-                    consensusValue,
-                    3)
-                .ToString("0.###"),
-
-            SupportingProviders =
-                supporting.Count,
-
-            ProvidersWithValue =
-                providerValues.Count,
-
-            AgreementPercentage =
-                Math.Round(
-                    agreement,
-                    1),
-
-            Strength =
-                DetermineStrength(
-                    supporting.Count,
-                    providerValues.Count,
-                    agreement),
-
-            SupportingSources =
-                supporting,
-
-            ConflictingSources =
-                conflicting
-        };
-    }
-
-    // ============================================================
-    // Duration
-    // ============================================================
-
-    private static MetadataConsensusResult AnalyseDurationField(
-        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
-    {
-        var providerValues =
-            GetDurationProviderValues(
-                candidates);
-
-        if (providerValues.Count == 0)
-        {
-            return CreateNoDataResult("Duration");
-        }
-
-        var clusters =
-            BuildDurationClusters(
-                providerValues);
-
-        var largestClusterSize =
-            clusters.Max(
-                x => x.Count);
-
-        var winningClusters =
-            clusters
-                .Where(
-                    x => x.Count == largestClusterSize)
-                .ToList();
-
-        if (winningClusters.Count > 1)
-        {
-            return CreateConflictResult(
-                "Duration",
-                providerValues
-                    .Select(
-                        x =>
-                            new ProviderValue
-                            {
-                                Provider =
-                                    x.Provider,
-
-                                OriginalValue =
-                                    x.Value.ToString(
-                                        @"mm\:ss"),
-
-                                NormalisedValue =
-                                    x.Value.TotalSeconds
-                                        .ToString("0.###")
-                            })
-                    .ToList());
-        }
-
-        var winningCluster =
-            winningClusters[0];
-
-        var supporting =
-            winningCluster.Values
-                .Select(
-                    x => x.Provider)
-                .Distinct(
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var conflicting =
-            providerValues
-                .Where(
-                    x =>
-                        !winningCluster.Values.Any(
-                            winning =>
-                                string.Equals(
-                                    winning.Provider,
-                                    x.Provider,
-                                    StringComparison.OrdinalIgnoreCase)))
-                .Select(
-                    x => x.Provider)
-                .Distinct(
-                    StringComparer.OrdinalIgnoreCase)
-                .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-        var agreement =
-            (double)supporting.Count /
-            providerValues.Count *
-            100;
-
-        var consensusMilliseconds =
-            winningCluster.Values
-                .Average(
-                    x => x.Value.TotalMilliseconds);
-
-        return new MetadataConsensusResult
-        {
-            Field =
-                "Duration",
-
-            Value =
-                TimeSpan
-                    .FromMilliseconds(
-                        consensusMilliseconds)
-                    .ToString(
-                        @"mm\:ss"),
-
-            SupportingProviders =
-                supporting.Count,
-
-            ProvidersWithValue =
-                providerValues.Count,
-
-            AgreementPercentage =
-                Math.Round(
-                    agreement,
-                    1),
-
-            Strength =
-                DetermineStrength(
-                    supporting.Count,
-                    providerValues.Count,
-                    agreement),
-
-            SupportingSources =
-                supporting,
-
-            ConflictingSources =
-                conflicting
-        };
-    }
-
-    // ============================================================
-    // Provider Value Extraction
+    // Artist
     // ============================================================
 
     /// <summary>
-    /// Gets at most one value from each provider.
+    /// Analyses Artist identity using compatibility rather than
+    /// strict string equality.
     ///
-    /// If a provider returns several candidates, the candidate
-    /// with the strongest match score is used.
+    /// Providers may legitimately return different levels of
+    /// artist detail for the same recording.
     ///
-    /// If the provider has equally strong candidates with
-    /// different values, that provider is considered ambiguous
-    /// for this field and contributes no vote.
+    /// Example:
+    ///
+    ///     Provider A -> Luude
+    ///     Provider B -> Luude, Colin Hay
+    ///
+    /// These values are considered compatible because the shorter
+    /// identity is contained within the more complete identity.
+    ///
+    /// When compatible identities are found, the most complete
+    /// identity is selected.
+    ///
+    /// Genuine unrelated artist identities still produce a
+    /// conflict.
     /// </summary>
-    private static List<ProviderValue>
-        GetProviderValues(
-            IReadOnlyList<MetadataEvidenceAnalysisResult> candidates,
-            Func<MetadataEvidenceAnalysisResult, string?> selector,
-            Func<string, string> normalise)
+    private static MetadataConsensusResult AnalyseArtistField(
+        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
     {
-        var result =
-            new List<ProviderValue>();
+        var providerValues =
+            GetProviderTextValues(
+                candidates,
+                candidate =>
+                    candidate.Evidence.Artist);
 
-        var providerGroups =
-            candidates
-                .Where(
-                    x =>
-                        !string.IsNullOrWhiteSpace(
-                            x.Evidence.Source))
-                .GroupBy(
-                    x => x.Evidence.Source,
-                    StringComparer.OrdinalIgnoreCase);
-
-        foreach (var providerGroup in providerGroups)
+        if (providerValues.Count == 0)
         {
-            var values =
-                providerGroup
+            return CreateNoDataResult(
+                "Artist");
+        }
+
+        var clusters =
+            BuildArtistClusters(
+                providerValues);
+
+        if (clusters.Count == 0)
+        {
+            return CreateNoDataResult(
+                "Artist");
+        }
+
+        var largestClusterSize =
+            clusters.Max(
+                cluster =>
+                    cluster.Values.Count);
+
+        var winningClusters =
+            clusters
+                .Where(
+                    cluster =>
+                        cluster.Values.Count ==
+                        largestClusterSize)
+                .ToList();
+
+        // --------------------------------------------------------
+        // If equally supported artist identities are genuinely
+        // incompatible, this remains a conflict.
+        // --------------------------------------------------------
+
+        if (winningClusters.Count > 1)
+        {
+            return CreateConflictResult(
+                "Artist",
+                providerValues
                     .Select(
-                        candidate =>
-                            new
+                        value =>
+                            new ProviderValue
                             {
-                                Candidate =
-                                    candidate,
+                                Provider =
+                                    value.Provider,
 
-                                Value =
-                                    selector(candidate)
+                                OriginalValue =
+                                    value.OriginalValue,
+
+                                NormalisedValue =
+                                    value.NormalisedValue
                             })
-                    .Where(
-                        x =>
-                            !string.IsNullOrWhiteSpace(
-                                x.Value))
-                    .ToList();
-
-            if (values.Count == 0)
-            {
-                continue;
-            }
-
-            var highestScore =
-                values
-                    .Max(
-                        x => x.Candidate.Match.Score);
-
-            var strongest =
-                values
-                    .Where(
-                        x =>
-                            x.Candidate.Match.Score ==
-                            highestScore)
-                    .ToList();
-
-            var distinctValues =
-                strongest
-                    .Select(
-                        x =>
-                            normalise(
-                                x.Value!))
-                    .Distinct(
-                        StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-
-            // ----------------------------------------------------
-            // Provider cannot give a deterministic vote when its
-            // strongest candidates disagree.
-            // ----------------------------------------------------
-
-            if (distinctValues.Count > 1)
-            {
-                continue;
-            }
-
-            var selected =
-                strongest
-                    .OrderBy(
-                        x => x.Value,
-                        StringComparer.OrdinalIgnoreCase)
-                    .First();
-
-            result.Add(
-                new ProviderValue
-                {
-                    Provider =
-                        providerGroup.Key,
-
-                    OriginalValue =
-                        selected.Value!,
-
-                    NormalisedValue =
-                        normalise(
-                            selected.Value!)
-                });
+                    .ToList());
         }
 
-        return result
-            .OrderBy(
-                x => x.Provider,
-                StringComparer.OrdinalIgnoreCase)
-            .ToList();
-    }
+        var winningCluster =
+            winningClusters[0];
 
-    private static List<NumericProviderValue>
-        GetNumericProviderValues(
-            IReadOnlyList<MetadataEvidenceAnalysisResult> candidates,
-            Func<MetadataEvidenceAnalysisResult, double?> selector)
-    {
-        var result =
-            new List<NumericProviderValue>();
+        var supportingProviders =
+            winningCluster.Values
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                    StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-        var providerGroups =
-            candidates
+        var conflictingProviders =
+            providerValues
                 .Where(
-                    x =>
-                        !string.IsNullOrWhiteSpace(
-                            x.Evidence.Source))
-                .GroupBy(
-                    x => x.Evidence.Source,
-                    StringComparer.OrdinalIgnoreCase);
+                    value =>
+                        !winningCluster.Values.Contains(
+                            value))
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                    StringComparer.OrdinalIgnoreCase)
+                .ToList();
 
-        foreach (var providerGroup in providerGroups)
+        var agreement =
+            CalculateAgreement(
+                supportingProviders.Count,
+                providerValues.Count);
+
+        // --------------------------------------------------------
+        // Select the most complete identity in the winning cluster.
+        //
+        // Do this explicitly rather than using chained LINQ
+        // ordering so that the compiler does not have to infer
+        // multiple delegate types.
+        // --------------------------------------------------------
+
+        var selectedValue =
+            winningCluster
+                .Values[0]
+                .OriginalValue;
+
+        foreach (var candidate in winningCluster.Values)
         {
-            var values =
-                providerGroup
-                    .Select(
-                        candidate =>
-                            new
-                            {
-                                Candidate =
-                                    candidate,
+            var selectedComponentCount =
+                GetArtistComponentCount(
+                    selectedValue);
 
-                                Value =
-                                    selector(candidate)
-                            })
-                    .Where(
-                        x =>
-                            x.Value.HasValue &&
-                            x.Value.Value > 0)
-                    .ToList();
+            var candidateComponentCount =
+                GetArtistComponentCount(
+                    candidate.OriginalValue);
 
-            if (values.Count == 0)
+            if (candidateComponentCount >
+                selectedComponentCount)
             {
+                selectedValue =
+                    candidate.OriginalValue;
+
                 continue;
             }
 
-            var highestScore =
-                values
-                    .Max(
-                        x => x.Candidate.Match.Score);
-
-            var strongest =
-                values
-                    .Where(
-                        x =>
-                            x.Candidate.Match.Score ==
-                            highestScore)
-                    .Select(
-                        x => x.Value!.Value)
-                    .Distinct()
-                    .ToList();
-
-            if (strongest.Count != 1)
+            if (candidateComponentCount ==
+                selectedComponentCount &&
+                candidate.OriginalValue.Length >
+                selectedValue.Length)
             {
-                continue;
+                selectedValue =
+                    candidate.OriginalValue;
             }
-
-            result.Add(
-                new NumericProviderValue
-                {
-                    Provider =
-                        providerGroup.Key,
-
-                    Value =
-                        strongest[0]
-                });
         }
 
-        return result
-            .OrderBy(
-                x => x.Provider,
-                StringComparer.OrdinalIgnoreCase)
-            .ToList();
+        return CreateConsensusResult(
+            "Artist",
+            selectedValue,
+            supportingProviders,
+            conflictingProviders,
+            agreement);
     }
 
-    private static List<DurationProviderValue>
-        GetDurationProviderValues(
-            IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
-    {
-        var result =
-            new List<DurationProviderValue>();
-
-        var providerGroups =
-            candidates
-                .Where(
-                    x =>
-                        !string.IsNullOrWhiteSpace(
-                            x.Evidence.Source))
-                .GroupBy(
-                    x => x.Evidence.Source,
-                    StringComparer.OrdinalIgnoreCase);
-
-        foreach (var providerGroup in providerGroups)
-        {
-            var values =
-                providerGroup
-                    .Where(
-                        x =>
-                            x.Evidence.Duration.HasValue &&
-                            x.Evidence.Duration.Value
-                                .TotalSeconds > 0)
-                    .ToList();
-
-            if (values.Count == 0)
-            {
-                continue;
-            }
-
-            var highestScore =
-                values
-                    .Max(
-                        x => x.Match.Score);
-
-            var strongest =
-                values
-                    .Where(
-                        x =>
-                            x.Match.Score ==
-                            highestScore)
-                    .Select(
-                        x => x.Evidence.Duration!.Value)
-                    .Distinct()
-                    .ToList();
-
-            if (strongest.Count != 1)
-            {
-                continue;
-            }
-
-            result.Add(
-                new DurationProviderValue
-                {
-                    Provider =
-                        providerGroup.Key,
-
-                    Value =
-                        strongest[0]
-                });
-        }
-
-        return result
-            .OrderBy(
-                x => x.Provider,
-                StringComparer.OrdinalIgnoreCase)
-            .ToList();
-    }
-
-    // ============================================================
-    // BPM Clustering
-    // ============================================================
-
-    private static List<BPMCluster>
-        BuildBPMClusters(
-            IReadOnlyList<NumericProviderValue> values)
+    /// <summary>
+    /// Groups provider Artist values into compatible identities.
+    ///
+    /// Artist identities are compatible when one identity contains
+    /// all of the artist components of the other identity.
+    ///
+    /// This allows:
+    ///
+    ///     Luude
+    ///
+    /// and:
+    ///
+    ///     Luude, Colin Hay
+    ///
+    /// to represent the same artist identity while still treating
+    /// genuinely unrelated artists as conflicting evidence.
+    /// </summary>
+    private static List<ArtistCluster>
+        BuildArtistClusters(
+            IReadOnlyList<ProviderTextValue> values)
     {
         var clusters =
-            new List<BPMCluster>();
+            new List<ArtistCluster>();
 
         foreach (var value in values)
         {
@@ -891,15 +319,15 @@ public sealed class MetadataConsensusService
                         cluster =>
                             cluster.Values.Any(
                                 existing =>
-                                    BPMValuesEquivalent(
-                                        existing.Value,
-                                        value.Value)))
+                                    AreArtistIdentitiesCompatible(
+                                        existing.OriginalValue,
+                                        value.OriginalValue)))
                     .ToList();
 
             if (matchingClusters.Count == 0)
             {
                 clusters.Add(
-                    new BPMCluster
+                    new ArtistCluster
                     {
                         Values =
                         {
@@ -916,31 +344,1058 @@ public sealed class MetadataConsensusService
             target.Values.Add(
                 value);
 
-            foreach (var additional in
-                     matchingClusters.Skip(1).ToList())
+            foreach (
+                var additionalCluster
+                in matchingClusters.Skip(1).ToList())
             {
-                foreach (var item in additional.Values)
+                foreach (
+                    var item
+                    in additionalCluster.Values)
                 {
-                    target.Values.Add(item);
+                    target.Values.Add(
+                        item);
                 }
 
                 clusters.Remove(
-                    additional);
+                    additionalCluster);
             }
         }
 
         return clusters
             .Select(
                 cluster =>
-                    new BPMCluster
+                    new ArtistCluster
                     {
                         Values =
                             cluster.Values
                                 .GroupBy(
-                                    x => x.Provider,
+                                    value =>
+                                        value.Provider,
                                     StringComparer.OrdinalIgnoreCase)
                                 .Select(
-                                    x => x.First())
+                                    group =>
+                                        group.First())
+                                .ToList()
+                    })
+            .ToList();
+    }
+
+    /// <summary>
+    /// Determines whether two Artist identities are compatible.
+    ///
+    /// The comparison is token based rather than substring based,
+    /// preventing values such as "Luude" and "Luudex" from being
+    /// incorrectly treated as the same artist.
+    /// </summary>
+    private static bool AreArtistIdentitiesCompatible(
+        string left,
+        string right)
+    {
+        var leftComponents =
+            GetArtistComponents(
+                left);
+
+        var rightComponents =
+            GetArtistComponents(
+                right);
+
+        if (leftComponents.Count == 0 ||
+            rightComponents.Count == 0)
+        {
+            return false;
+        }
+
+        return
+            leftComponents.IsSubsetOf(
+                rightComponents) ||
+            rightComponents.IsSubsetOf(
+                leftComponents);
+    }
+
+    /// <summary>
+    /// Breaks an Artist identity into normalised artist components.
+    ///
+    /// Common provider separators are treated as component
+    /// boundaries.
+    /// </summary>
+    private static HashSet<string> GetArtistComponents(
+        string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        var normalised =
+            value
+                .Trim()
+                .ToUpperInvariant();
+
+        var separators =
+            new[]
+            {
+                ",",
+                " & ",
+                " AND ",
+                " FEAT. ",
+                " FEAT ",
+                " FT. ",
+                " FT ",
+                " WITH ",
+                " VS. ",
+                " VS "
+            };
+
+        foreach (var separator in separators)
+        {
+            normalised =
+                normalised.Replace(
+                    separator,
+                    "|",
+                    StringComparison.OrdinalIgnoreCase);
+        }
+
+        return
+            normalised
+                .Split(
+                    '|',
+                    StringSplitOptions.RemoveEmptyEntries |
+                    StringSplitOptions.TrimEntries)
+                .Select(
+                    component =>
+                        NormaliseText(
+                            component))
+                .Where(
+                    component =>
+                        !string.IsNullOrWhiteSpace(
+                            component))
+                .ToHashSet(
+                    StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static int GetArtistComponentCount(
+        string value)
+    {
+        return GetArtistComponents(value).Count;
+    }
+
+    // ============================================================
+    // Text Fields
+    // ============================================================
+
+    private static MetadataConsensusResult AnalyseTextField(
+        string field,
+        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates,
+        Func<MetadataEvidenceAnalysisResult, string?> selector)
+    {
+        var providerValues =
+            GetProviderTextValues(
+                candidates,
+                selector);
+
+        if (providerValues.Count == 0)
+        {
+            return CreateNoDataResult(
+                field);
+        }
+
+        var groups =
+            providerValues
+                .GroupBy(
+                    value =>
+                        value.NormalisedValue,
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderByDescending(
+                    group =>
+                        group.Count())
+                .ThenBy(
+                    group =>
+                        group.Key,
+                    StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var highestCount =
+            groups[0].Count();
+
+        var winningGroups =
+            groups
+                .Where(
+                    group =>
+                        group.Count() ==
+                        highestCount)
+                .ToList();
+
+        if (winningGroups.Count > 1)
+        {
+            return CreateConflictResult(
+                field,
+                providerValues
+                    .Select(
+                        value =>
+                            new ProviderValue
+                            {
+                                Provider =
+                                    value.Provider,
+
+                                OriginalValue =
+                                    value.OriginalValue,
+
+                                NormalisedValue =
+                                    value.NormalisedValue
+                            })
+                    .ToList());
+        }
+
+        var winningGroup =
+            winningGroups[0];
+
+        var supportingProviders =
+            winningGroup
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                    StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var conflictingProviders =
+            providerValues
+                .Where(
+                    value =>
+                        !string.Equals(
+                            value.NormalisedValue,
+                            winningGroup.Key,
+                            StringComparison.OrdinalIgnoreCase))
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                        StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var agreement =
+            CalculateAgreement(
+                supportingProviders.Count,
+                providerValues.Count);
+
+        var selectedValue =
+            winningGroup
+                .OrderBy(
+                    value =>
+                        value.OriginalValue,
+                    StringComparer.OrdinalIgnoreCase)
+                .First()
+                .OriginalValue;
+
+        return CreateConsensusResult(
+            field,
+            selectedValue,
+            supportingProviders,
+            conflictingProviders,
+            agreement);
+    }
+
+    // ============================================================
+    // Year
+    // ============================================================
+
+    private static MetadataConsensusResult AnalyseYearField(
+        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
+    {
+        var providerValues =
+            GetProviderYearValues(
+                candidates);
+
+        if (providerValues.Count == 0)
+        {
+            return CreateNoDataResult(
+                "Year");
+        }
+
+        var yearGroups =
+            providerValues
+                .GroupBy(
+                    value =>
+                        value.Year)
+                .OrderByDescending(
+                    group =>
+                        group.Count())
+                .ThenBy(
+                    group =>
+                        group.Key)
+                .ToList();
+
+        var highestCount =
+            yearGroups[0].Count();
+
+        var winningGroups =
+            yearGroups
+                .Where(
+                    group =>
+                        group.Count() ==
+                        highestCount)
+                .ToList();
+
+        if (winningGroups.Count > 1)
+        {
+            return CreateConflictResult(
+                "Year",
+                providerValues
+                    .Select(
+                        value =>
+                            new ProviderValue
+                            {
+                                Provider =
+                                    value.Provider,
+
+                                OriginalValue =
+                                    value.Year.ToString(),
+
+                                NormalisedValue =
+                                    value.Year.ToString()
+                            })
+                    .ToList());
+        }
+
+        var winningGroup =
+            winningGroups[0];
+
+        var selectedYear =
+            winningGroup.Key;
+
+        var supportingProviders =
+            winningGroup
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                        StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var conflictingProviders =
+            providerValues
+                .Where(
+                    value =>
+                        value.Year !=
+                        selectedYear)
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                        StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var agreement =
+            CalculateAgreement(
+                supportingProviders.Count,
+                providerValues.Count);
+
+        return CreateConsensusResult(
+            "Year",
+            selectedYear.ToString(),
+            supportingProviders,
+            conflictingProviders,
+            agreement);
+    }
+
+    // ============================================================
+    // Provider Year Values
+    // ============================================================
+
+    private static List<ProviderYearValue>
+        GetProviderYearValues(
+            IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
+    {
+        var result =
+            new List<ProviderYearValue>();
+
+        var providerGroups =
+            candidates
+                .Where(
+                    candidate =>
+                        !string.IsNullOrWhiteSpace(
+                            candidate.Evidence.Source))
+                .GroupBy(
+                    candidate =>
+                        candidate.Evidence.Source,
+                    StringComparer.OrdinalIgnoreCase);
+
+        foreach (var providerGroup in providerGroups)
+        {
+            var values =
+                providerGroup
+                    .Where(
+                        candidate =>
+                            candidate.Evidence.Year.HasValue &&
+                            candidate.Evidence.Year.Value > 0)
+                    .ToList();
+
+            if (values.Count == 0)
+            {
+                continue;
+            }
+
+            var highestScore =
+                values.Max(
+                    candidate =>
+                        candidate.Match.Score);
+
+            var strongest =
+                values
+                    .Where(
+                        candidate =>
+                            candidate.Match.Score ==
+                            highestScore)
+                    .Select(
+                        candidate =>
+                            candidate.Evidence.Year!.Value)
+                    .Distinct()
+                    .OrderBy(
+                        year =>
+                            year)
+                    .ToList();
+
+            if (strongest.Count == 0)
+            {
+                continue;
+            }
+
+            result.Add(
+                new ProviderYearValue
+                {
+                    Provider =
+                        providerGroup.Key,
+
+                    Year =
+                        strongest[0]
+                });
+        }
+
+        return result
+            .OrderBy(
+                value =>
+                    value.Provider,
+                StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    // ============================================================
+    // Key
+    // ============================================================
+
+    private static MetadataConsensusResult AnalyseKeyField(
+        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
+    {
+        return AnalyseTextField(
+            "Key",
+            candidates,
+            candidate =>
+                candidate.Evidence.Key);
+    }
+
+    // ============================================================
+    // BPM
+    // ============================================================
+
+    private static MetadataConsensusResult AnalyseBpmField(
+        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
+    {
+        var providerValues =
+            GetProviderNumericValues(
+                candidates,
+                candidate =>
+                    candidate.Evidence.BPM);
+
+        if (providerValues.Count == 0)
+        {
+            return CreateNoDataResult(
+                "BPM");
+        }
+
+        var clusters =
+            BuildBpmClusters(
+                providerValues);
+
+        var largestClusterSize =
+            clusters.Max(
+                cluster =>
+                    cluster.Count);
+
+        var winningClusters =
+            clusters
+                .Where(
+                    cluster =>
+                        cluster.Count ==
+                        largestClusterSize)
+                .ToList();
+
+        if (winningClusters.Count > 1)
+        {
+            return CreateConflictResult(
+                "BPM",
+                providerValues
+                    .Select(
+                        value =>
+                            new ProviderValue
+                            {
+                                Provider =
+                                    value.Provider,
+
+                                OriginalValue =
+                                    value.Value.ToString(
+                                        "0.###"),
+
+                                NormalisedValue =
+                                    value.Value.ToString(
+                                        "0.###")
+                            })
+                    .ToList());
+        }
+
+        var winningCluster =
+            winningClusters[0];
+
+        var supportingProviders =
+            winningCluster.Values
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                        StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var conflictingProviders =
+            providerValues
+                .Where(
+                    value =>
+                        !winningCluster.Values.Any(
+                            winning =>
+                                string.Equals(
+                                    winning.Provider,
+                                    value.Provider,
+                                    StringComparison.OrdinalIgnoreCase)))
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                        StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var agreement =
+            CalculateAgreement(
+                supportingProviders.Count,
+                providerValues.Count);
+
+        var consensusValue =
+            winningCluster.Values
+                .Average(
+                    value =>
+                        value.Value);
+
+        return CreateConsensusResult(
+            "BPM",
+            Math.Round(
+                    consensusValue,
+                    3)
+                .ToString(
+                    "0.###"),
+            supportingProviders,
+            conflictingProviders,
+            agreement);
+    }
+
+    // ============================================================
+    // Duration
+    // ============================================================
+
+    private static MetadataConsensusResult AnalyseDurationField(
+        IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
+    {
+        var providerValues =
+            GetProviderDurationValues(
+                candidates);
+
+        if (providerValues.Count == 0)
+        {
+            return CreateNoDataResult(
+                "Duration");
+        }
+
+        var clusters =
+            BuildDurationClusters(
+                providerValues);
+
+        var largestClusterSize =
+            clusters.Max(
+                cluster =>
+                    cluster.Count);
+
+        var winningClusters =
+            clusters
+                .Where(
+                    cluster =>
+                        cluster.Count ==
+                        largestClusterSize)
+                .ToList();
+
+        if (winningClusters.Count > 1)
+        {
+            return CreateConflictResult(
+                "Duration",
+                providerValues
+                    .Select(
+                        value =>
+                            new ProviderValue
+                            {
+                                Provider =
+                                    value.Provider,
+
+                                OriginalValue =
+                                    value.Value.ToString(
+                                        @"mm\:ss"),
+
+                                NormalisedValue =
+                                    value.Value.TotalSeconds
+                                        .ToString(
+                                            "0.###")
+                            })
+                    .ToList());
+        }
+
+        var winningCluster =
+            winningClusters[0];
+
+        var supportingProviders =
+            winningCluster.Values
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                        StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var conflictingProviders =
+            providerValues
+                .Where(
+                    value =>
+                        !winningCluster.Values.Any(
+                            winning =>
+                                string.Equals(
+                                    winning.Provider,
+                                    value.Provider,
+                                    StringComparison.OrdinalIgnoreCase)))
+                .Select(
+                    value =>
+                        value.Provider)
+                .Distinct(
+                    StringComparer.OrdinalIgnoreCase)
+                .OrderBy(
+                    provider =>
+                        provider,
+                        StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+        var agreement =
+            CalculateAgreement(
+                supportingProviders.Count,
+                providerValues.Count);
+
+        var consensusMilliseconds =
+            winningCluster.Values
+                .Average(
+                    value =>
+                        value.Value.TotalMilliseconds);
+
+        var consensusDuration =
+            TimeSpan.FromMilliseconds(
+                consensusMilliseconds);
+
+        return CreateConsensusResult(
+            "Duration",
+            consensusDuration.ToString(
+                @"mm\:ss"),
+            supportingProviders,
+            conflictingProviders,
+            agreement);
+    }
+
+    // ============================================================
+    // Provider Text Values
+    // ============================================================
+
+    private static List<ProviderTextValue>
+        GetProviderTextValues(
+            IReadOnlyList<MetadataEvidenceAnalysisResult> candidates,
+            Func<MetadataEvidenceAnalysisResult, string?> selector)
+    {
+        var result =
+            new List<ProviderTextValue>();
+
+        var providerGroups =
+            candidates
+                .Where(
+                    candidate =>
+                        !string.IsNullOrWhiteSpace(
+                            candidate.Evidence.Source))
+                .GroupBy(
+                    candidate =>
+                        candidate.Evidence.Source,
+                    StringComparer.OrdinalIgnoreCase);
+
+        foreach (var providerGroup in providerGroups)
+        {
+            var values =
+                providerGroup
+                    .Select(
+                        candidate =>
+                            new
+                            {
+                                Candidate =
+                                    candidate,
+
+                                Value =
+                                    selector(candidate)
+                            })
+                    .Where(
+                        item =>
+                            !string.IsNullOrWhiteSpace(
+                                item.Value))
+                    .ToList();
+
+            if (values.Count == 0)
+            {
+                continue;
+            }
+
+            var highestScore =
+                values.Max(
+                    item =>
+                        item.Candidate.Match.Score);
+
+            var strongest =
+                values
+                    .Where(
+                        item =>
+                            item.Candidate.Match.Score ==
+                            highestScore)
+                    .ToList();
+
+            var distinctValues =
+                strongest
+                    .Select(
+                        item =>
+                            NormaliseText(
+                                item.Value!))
+                    .Distinct(
+                        StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+            if (distinctValues.Count > 1)
+            {
+                continue;
+            }
+
+            var selected =
+                strongest
+                    .OrderBy(
+                        item =>
+                            item.Value,
+                        StringComparer.OrdinalIgnoreCase)
+                    .First();
+
+            result.Add(
+                new ProviderTextValue
+                {
+                    Provider =
+                        providerGroup.Key,
+
+                    OriginalValue =
+                        selected.Value!,
+
+                    NormalisedValue =
+                        NormaliseText(
+                            selected.Value!)
+                });
+        }
+
+        return result
+            .OrderBy(
+                value =>
+                    value.Provider,
+                StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    // ============================================================
+    // Provider Numeric Values
+    // ============================================================
+
+    private static List<ProviderNumericValue>
+        GetProviderNumericValues(
+            IReadOnlyList<MetadataEvidenceAnalysisResult> candidates,
+            Func<MetadataEvidenceAnalysisResult, double?> selector)
+    {
+        var result =
+            new List<ProviderNumericValue>();
+
+        var providerGroups =
+            candidates
+                .Where(
+                    candidate =>
+                        !string.IsNullOrWhiteSpace(
+                            candidate.Evidence.Source))
+                .GroupBy(
+                    candidate =>
+                        candidate.Evidence.Source,
+                    StringComparer.OrdinalIgnoreCase);
+
+        foreach (var providerGroup in providerGroups)
+        {
+            var values =
+                providerGroup
+                    .Select(
+                        candidate =>
+                            new
+                            {
+                                Candidate =
+                                    candidate,
+
+                                Value =
+                                    selector(candidate)
+                            })
+                    .Where(
+                        item =>
+                            item.Value.HasValue &&
+                            item.Value.Value > 0)
+                    .ToList();
+
+            if (values.Count == 0)
+            {
+                continue;
+            }
+
+            var highestScore =
+                values.Max(
+                    item =>
+                        item.Candidate.Match.Score);
+
+            var strongest =
+                values
+                    .Where(
+                        item =>
+                            item.Candidate.Match.Score ==
+                            highestScore)
+                    .Select(
+                        item =>
+                            item.Value!.Value)
+                    .Distinct()
+                    .ToList();
+
+            if (strongest.Count != 1)
+            {
+                continue;
+            }
+
+            result.Add(
+                new ProviderNumericValue
+                {
+                    Provider =
+                        providerGroup.Key,
+
+                    Value =
+                        strongest[0]
+                });
+        }
+
+        return result
+            .OrderBy(
+                value =>
+                    value.Provider,
+                StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    // ============================================================
+    // Provider Duration Values
+    // ============================================================
+
+    private static List<ProviderDurationValue>
+        GetProviderDurationValues(
+            IReadOnlyList<MetadataEvidenceAnalysisResult> candidates)
+    {
+        var result =
+            new List<ProviderDurationValue>();
+
+        var providerGroups =
+            candidates
+                .Where(
+                    candidate =>
+                        !string.IsNullOrWhiteSpace(
+                            candidate.Evidence.Source))
+                .GroupBy(
+                    candidate =>
+                        candidate.Evidence.Source,
+                    StringComparer.OrdinalIgnoreCase);
+
+        foreach (var providerGroup in providerGroups)
+        {
+            var values =
+                providerGroup
+                    .Where(
+                        candidate =>
+                            candidate.Evidence.Duration.HasValue &&
+                            candidate.Evidence.Duration.Value
+                                .TotalSeconds > 0)
+                    .ToList();
+
+            if (values.Count == 0)
+            {
+                continue;
+            }
+
+            var highestScore =
+                values.Max(
+                    candidate =>
+                        candidate.Match.Score);
+
+            var strongest =
+                values
+                    .Where(
+                        candidate =>
+                            candidate.Match.Score ==
+                            highestScore)
+                    .Select(
+                        candidate =>
+                            candidate.Evidence.Duration!.Value)
+                    .Distinct()
+                    .ToList();
+
+            if (strongest.Count != 1)
+            {
+                continue;
+            }
+
+            result.Add(
+                new ProviderDurationValue
+                {
+                    Provider =
+                        providerGroup.Key,
+
+                    Value =
+                        strongest[0]
+                });
+        }
+
+        return result
+            .OrderBy(
+                value =>
+                    value.Provider,
+                StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+
+    // ============================================================
+    // BPM Clustering
+    // ============================================================
+
+    private static List<BpmCluster>
+        BuildBpmClusters(
+            IReadOnlyList<ProviderNumericValue> values)
+    {
+        var clusters =
+            new List<BpmCluster>();
+
+        foreach (var value in values)
+        {
+            var matchingClusters =
+                clusters
+                    .Where(
+                        cluster =>
+                            cluster.Values.Any(
+                                existing =>
+                                    BpmValuesEquivalent(
+                                        existing.Value,
+                                        value.Value)))
+                    .ToList();
+
+            if (matchingClusters.Count == 0)
+            {
+                clusters.Add(
+                    new BpmCluster
+                    {
+                        Values =
+                        {
+                            value
+                        }
+                    });
+
+                continue;
+            }
+
+            var target =
+                matchingClusters[0];
+
+            target.Values.Add(
+                value);
+
+            foreach (var additionalCluster in
+                     matchingClusters.Skip(1).ToList())
+            {
+                foreach (var item in
+                         additionalCluster.Values)
+                {
+                    target.Values.Add(
+                        item);
+                }
+
+                clusters.Remove(
+                    additionalCluster);
+            }
+        }
+
+        return clusters
+            .Select(
+                cluster =>
+                    new BpmCluster
+                    {
+                        Values =
+                            cluster.Values
+                                .GroupBy(
+                                    value =>
+                                        value.Provider,
+                                    StringComparer.OrdinalIgnoreCase)
+                                .Select(
+                                    group =>
+                                        group.First())
                                 .ToList()
                     })
             .ToList();
@@ -952,7 +1407,7 @@ public sealed class MetadataConsensusService
 
     private static List<DurationCluster>
         BuildDurationClusters(
-            IReadOnlyList<DurationProviderValue> values)
+            IReadOnlyList<ProviderDurationValue> values)
     {
         var clusters =
             new List<DurationCluster>();
@@ -990,16 +1445,18 @@ public sealed class MetadataConsensusService
             target.Values.Add(
                 value);
 
-            foreach (var additional in
+            foreach (var additionalCluster in
                      matchingClusters.Skip(1).ToList())
             {
-                foreach (var item in additional.Values)
+                foreach (var item in
+                         additionalCluster.Values)
                 {
-                    target.Values.Add(item);
+                    target.Values.Add(
+                        item);
                 }
 
                 clusters.Remove(
-                    additional);
+                    additionalCluster);
             }
         }
 
@@ -1011,18 +1468,62 @@ public sealed class MetadataConsensusService
                         Values =
                             cluster.Values
                                 .GroupBy(
-                                    x => x.Provider,
+                                    value =>
+                                        value.Provider,
                                     StringComparer.OrdinalIgnoreCase)
                                 .Select(
-                                    x => x.First())
+                                    group =>
+                                        group.First())
                                 .ToList()
                     })
             .ToList();
     }
 
     // ============================================================
-    // Conflict
+    // Consensus Result
     // ============================================================
+
+    private static MetadataConsensusResult CreateConsensusResult(
+        string field,
+        string value,
+        IReadOnlyList<string> supportingProviders,
+        IReadOnlyList<string> conflictingProviders,
+        double agreementPercentage)
+    {
+        return new MetadataConsensusResult
+        {
+            Field =
+                field,
+
+            Value =
+                value,
+
+            SupportingProviders =
+                supportingProviders.Count,
+
+            ProvidersWithValue =
+                supportingProviders.Count +
+                conflictingProviders.Count,
+
+            AgreementPercentage =
+                Math.Round(
+                    agreementPercentage,
+                    1),
+
+            Strength =
+                DetermineStrength(
+                    supportingProviders.Count,
+                    supportingProviders.Count +
+                    conflictingProviders.Count,
+                    agreementPercentage),
+
+            SupportingSources =
+                supportingProviders,
+
+            ConflictingSources =
+                conflictingProviders
+        };
+    }
 
     private static MetadataConsensusResult CreateConflictResult(
         string field,
@@ -1031,12 +1532,14 @@ public sealed class MetadataConsensusService
         var sources =
             values
                 .Select(
-                    x => x.Provider)
+                    value =>
+                        value.Provider)
                 .Distinct(
                     StringComparer.OrdinalIgnoreCase)
                 .OrderBy(
-                    x => x,
-                    StringComparer.OrdinalIgnoreCase)
+                    provider =>
+                        provider,
+                        StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
         return new MetadataConsensusResult
@@ -1051,7 +1554,7 @@ public sealed class MetadataConsensusService
                 0,
 
             ProvidersWithValue =
-                values.Count,
+                sources.Count,
 
             AgreementPercentage =
                 0,
@@ -1065,6 +1568,56 @@ public sealed class MetadataConsensusService
             ConflictingSources =
                 sources
         };
+    }
+
+    private static MetadataConsensusResult CreateNoDataResult(
+        string field)
+    {
+        return new MetadataConsensusResult
+        {
+            Field =
+                field,
+
+            Value =
+                string.Empty,
+
+            SupportingProviders =
+                0,
+
+            ProvidersWithValue =
+                0,
+
+            AgreementPercentage =
+                0,
+
+            Strength =
+                MetadataConsensusStrength.NoData,
+
+            SupportingSources =
+                Array.Empty<string>(),
+
+            ConflictingSources =
+                Array.Empty<string>()
+        };
+    }
+
+    // ============================================================
+    // Agreement
+    // ============================================================
+
+    private static double CalculateAgreement(
+        int supportingProviders,
+        int providersWithValue)
+    {
+        if (providersWithValue <= 0)
+        {
+            return 0;
+        }
+
+        return
+            (double)supportingProviders /
+            providersWithValue *
+            100;
     }
 
     // ============================================================
@@ -1105,81 +1658,46 @@ public sealed class MetadataConsensusService
     }
 
     // ============================================================
-    // No Data
+    // BPM Comparison
     // ============================================================
 
-    private static MetadataConsensusResult CreateNoDataResult(
-        string field)
-    {
-        return new MetadataConsensusResult
-        {
-            Field =
-                field,
-
-            Value =
-                string.Empty,
-
-            SupportingProviders =
-                0,
-
-            ProvidersWithValue =
-                0,
-
-            AgreementPercentage =
-                0,
-
-            Strength =
-                MetadataConsensusStrength.NoData,
-
-            SupportingSources =
-                Array.Empty<string>(),
-
-            ConflictingSources =
-                Array.Empty<string>()
-        };
-    }
-
-    // ============================================================
-    // Comparison
-    // ============================================================
-
-    private static bool BPMValuesEquivalent(
+    private static bool BpmValuesEquivalent(
         double left,
         double right)
     {
-        var direct =
-            Math.Abs(
-                left -
-                right);
-
-        if (direct <= 1)
+        if (Math.Abs(left - right) <= BpmTolerance)
         {
             return true;
         }
 
-        var half =
-            right / 2.0;
+        if (Math.Abs(left - (right / 2.0)) <= BpmTolerance)
+        {
+            return true;
+        }
 
-        var doubled =
-            right * 2.0;
+        if (Math.Abs(left - (right * 2.0)) <= BpmTolerance)
+        {
+            return true;
+        }
 
-        return
-            Math.Abs(left - half) <= 1 ||
-            Math.Abs(left - doubled) <= 1;
+        return false;
     }
+
+    // ============================================================
+    // Duration Comparison
+    // ============================================================
 
     private static bool DurationsEquivalent(
         TimeSpan left,
         TimeSpan right)
     {
-        var difference =
+        return
             Math.Abs(
                 (
                     left -
                     right)
-                .TotalSeconds);
-
-        return difference <= 3;
+                .TotalSeconds)
+            <= DurationToleranceSeconds;
     }
 
     // ============================================================
@@ -1208,6 +1726,36 @@ public sealed class MetadataConsensusService
     // Internal Models
     // ============================================================
 
+    private sealed class ProviderTextValue
+    {
+        public string Provider { get; init; } = string.Empty;
+
+        public string OriginalValue { get; init; } = string.Empty;
+
+        public string NormalisedValue { get; init; } = string.Empty;
+    }
+
+    private sealed class ProviderNumericValue
+    {
+        public string Provider { get; init; } = string.Empty;
+
+        public double Value { get; init; }
+    }
+
+    private sealed class ProviderYearValue
+    {
+        public string Provider { get; init; } = string.Empty;
+
+        public int Year { get; init; }
+    }
+
+    private sealed class ProviderDurationValue
+    {
+        public string Provider { get; init; } = string.Empty;
+
+        public TimeSpan Value { get; init; }
+    }
+
     private sealed class ProviderValue
     {
         public string Provider { get; init; } = string.Empty;
@@ -1217,29 +1765,24 @@ public sealed class MetadataConsensusService
         public string NormalisedValue { get; init; } = string.Empty;
     }
 
-    private sealed class NumericProviderValue
+    private sealed class ArtistCluster
     {
-        public string Provider { get; init; } = string.Empty;
-
-        public double Value { get; init; }
+        public List<ProviderTextValue> Values { get; init; } = [];
     }
 
-    private sealed class DurationProviderValue
+    private sealed class BpmCluster
     {
-        public string Provider { get; init; } = string.Empty;
+        public List<ProviderNumericValue> Values { get; init; } = [];
 
-        public TimeSpan Value { get; init; }
-    }
-
-    private sealed class BPMCluster
-    {
-        public List<NumericProviderValue> Values { get; init; } = [];
-        public int Count => Values.Count;
+        public int Count =>
+            Values.Count;
     }
 
     private sealed class DurationCluster
     {
-        public List<DurationProviderValue> Values { get; init; } = [];
-        public int Count => Values.Count;
+        public List<ProviderDurationValue> Values { get; init; } = [];
+
+        public int Count =>
+            Values.Count;
     }
 }
