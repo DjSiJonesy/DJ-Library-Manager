@@ -68,26 +68,111 @@
 
                 <Border Grid.Row="0" Classes="card-secondary" Padding="12">
                     <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="3">
-                            <TextBlock Classes="subheading" Text="{Binding SelectedCategory.Name, TargetNullValue=Search}"/>
-                            <TextBlock Classes="caption" Text="{Binding SelectedCategory.Description, TargetNullValue=Select a Search category.}" TextWrapping="Wrap"/>
-                            <TextBlock Margin="0,6,0,0" Classes="caption" Text="{Binding SearchStatus}"/>
+
+                        <StackPanel Spacing="5">
+
+                            <TextBlock
+                                Classes="subheading"
+                                Text="{Binding SelectedCategory.Name, TargetNullValue=Search}"/>
+
+                            <TextBlock
+                                Classes="caption"
+                                Text="{Binding SelectedCategory.Description, TargetNullValue=Select a Search category.}"
+                                TextWrapping="Wrap"/>
+
+                            <TextBlock
+                                Margin="0,6,0,0"
+                                Classes="caption"
+                                Text="{Binding SearchStatus}"/>
+
+                            <!-- Duplicates Search All Progress -->
+                            <StackPanel
+                                Spacing="5"
+                                IsVisible="{Binding IsDuplicateCategory}">
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        Text="Progress"/>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        FontSize="12"
+                                        Text="{Binding DuplicateSearchProgress, StringFormat={}{0:F0}%}"/>
+                                </Grid>
+
+                                <ProgressBar
+                                    Minimum="0"
+                                    Maximum="100"
+                                    Value="{Binding DuplicateSearchProgress}"
+                                    Foreground="{StaticResource Brush.Brand.Gradient}"/>
+
+                                <TextBlock
+                                    FontSize="11"
+                                    Classes="caption"
+                                    Text="{Binding DuplicateSearchProgressText}"
+                                    TextTrimming="CharacterEllipsis"
+                                    IsVisible="{Binding ShowDuplicateSearchProgress}"/>
+
+                            </StackPanel>
+
+                            <!-- Metadata Search All Progress -->
+                            <StackPanel
+                                Spacing="5"
+                                IsVisible="{Binding IsMetadataCategory}">
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        Text="Progress"/>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        FontSize="12"
+                                        Text="{Binding MetadataSearchProgress, StringFormat={}{0:F0}%}"/>
+                                </Grid>
+
+                                <ProgressBar
+                                    Minimum="0"
+                                    Maximum="100"
+                                    Value="{Binding MetadataSearchProgress}"
+                                    Foreground="{StaticResource Brush.Brand.Gradient}"/>
+
+                                <TextBlock
+                                    FontSize="11"
+                                    Classes="caption"
+                                    Text="{Binding MetadataSearchProgressText}"
+                                    TextTrimming="CharacterEllipsis"
+                                    IsVisible="{Binding ShowMetadataSearchProgress}"/>
+
+                            </StackPanel>
+
                         </StackPanel>
 
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <StackPanel
+                            Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="8"
+                            VerticalAlignment="Center">
+
                             <Button
                                 Theme="{StaticResource DJLM.PrimaryButton}"
                                 Content="Search"
                                 Command="{Binding SearchIssueCommand}"
                                 CommandParameter="{Binding SelectedIssue}"
                                 IsEnabled="{Binding !IsSearching}"/>
+
                             <Button
                                 Theme="{StaticResource DJLM.PrimaryButton}"
                                 Content="Search All"
                                 Command="{Binding SearchAllCommand}"
                                 CommandParameter="{Binding SelectedCategory}"
                                 IsEnabled="{Binding SelectedCategory.IsSearchEnabled}"/>
+
                         </StackPanel>
+
                     </Grid>
                 </Border>
 
@@ -97,6 +182,7 @@
                         <Grid RowDefinitions="Auto,8,Auto,12,*">
 
                             <Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+
                                 <TextBlock Grid.Column="0" Classes="subheading">
                                     <Run Text="Issues — "/>
                                     <Run Text="{Binding SelectedCategory.Name, TargetNullValue=Search}"/>
@@ -131,6 +217,7 @@
                                         <TextBlock FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Text="Select All Recommended"/>
                                     </StackPanel>
                                 </Button>
+
                             </Grid>
 
                             <TextBox
@@ -140,18 +227,45 @@
                                 Padding="8,6"
                                 HorizontalContentAlignment="Stretch"/>
 
-                            <ListBox Grid.Row="4" ItemsSource="{Binding FilteredIssues}" SelectedItem="{Binding SelectedIssue}">
+                            <ListBox
+                                Grid.Row="4"
+                                ItemsSource="{Binding FilteredIssues}"
+                                SelectedItem="{Binding SelectedIssue}">
+
                                 <ListBox.ItemTemplate>
                                     <DataTemplate x:DataType="models:SearchIssue">
                                         <Border Padding="4" Margin="0" CornerRadius="5">
                                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
-                                                <TextBlock Grid.Row="0" Grid.Column="0" FontSize="12" FontWeight="SemiBold" Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Grid.Row="0" Grid.Column="1" FontSize="11" Margin="8,0,0,0" HorizontalAlignment="Right" Text="✓" IsVisible="{Binding IsSearched}"/>
-                                                <TextBlock Grid.Row="1" Grid.Column="0" Classes="caption" Text="{Binding CopyCount, StringFormat={}{0:N0} copies found}" IsVisible="{Binding Type, Converter={StaticResource StringEqualsConverter}, ConverterParameter=DuplicateTrack}"/>
+
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    Grid.Column="0"
+                                                    FontSize="12"
+                                                    FontWeight="SemiBold"
+                                                    Text="{Binding DisplayName}"
+                                                    TextTrimming="CharacterEllipsis"/>
+
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    Grid.Column="1"
+                                                    FontSize="11"
+                                                    Margin="8,0,0,0"
+                                                    HorizontalAlignment="Right"
+                                                    Text="✓"
+                                                    IsVisible="{Binding IsSearched}"/>
+
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Grid.Column="0"
+                                                    Classes="caption"
+                                                    Text="{Binding CopyCount, StringFormat={}{0:N0} copies found}"
+                                                    IsVisible="{Binding Type, Converter={StaticResource StringEqualsConverter}, ConverterParameter=DuplicateTrack}"/>
+
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
+
                             </ListBox>
 
                         </Grid>

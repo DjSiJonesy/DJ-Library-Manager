@@ -78,6 +78,36 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     private string searchStatus = "Ready";
 
     // ============================================================
+    // Search Progress
+    // ============================================================
+
+    /// <summary>
+    /// Search All progress for the Duplicates category.
+    /// This state is independent from Metadata progress.
+    /// </summary>
+    [ObservableProperty]
+    private double duplicateSearchProgress;
+
+    [ObservableProperty]
+    private bool showDuplicateSearchProgress;
+
+    [ObservableProperty]
+    private string duplicateSearchProgressText = string.Empty;
+
+    /// <summary>
+    /// Search All progress for the Metadata category.
+    /// This state is independent from Duplicates progress.
+    /// </summary>
+    [ObservableProperty]
+    private double metadataSearchProgress;
+
+    [ObservableProperty]
+    private bool showMetadataSearchProgress;
+
+    [ObservableProperty]
+    private string metadataSearchProgressText = string.Empty;
+
+    // ============================================================
     // Category State
     // ============================================================
 
@@ -255,7 +285,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 Name = "Metadata",
                 Icon = "📋",
                 Description =
-                    "Find missing or incomplete track metadata."
+                    "Find missing or incomplete track metadata. Searching large libraries may take some time."
             });
 
         SelectedCategory =
@@ -1018,6 +1048,10 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         IsSearching =
             true;
 
+        SetSearchProgressStart(
+            category.Name,
+            categoryIssues.Count);
+
         try
         {
             var run =
@@ -1479,7 +1513,88 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         IsSearching =
             App.Services.Search.IsSearching;
 
+        UpdateSearchProgress(run);
+
         UpdateSearchRunStatus();
+    }
+
+    private void SetSearchProgressStart(
+        string categoryName,
+        int totalIssues)
+    {
+        var text =
+            $"0 of {totalIssues:N0} {categoryName.ToLowerInvariant()} searched";
+
+        if (string.Equals(
+            categoryName,
+            "Duplicates",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            DuplicateSearchProgress = 0;
+            DuplicateSearchProgressText = text;
+            ShowDuplicateSearchProgress = true;
+            return;
+        }
+
+        if (string.Equals(
+            categoryName,
+            "Metadata",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            MetadataSearchProgress = 0;
+            MetadataSearchProgressText = text;
+            ShowMetadataSearchProgress = true;
+        }
+    }
+
+    private void UpdateSearchProgress(
+        SearchRun run)
+    {
+        var total =
+            Math.Max(
+                run.TotalIssues,
+                0);
+
+        var searched =
+            Math.Clamp(
+                run.IssuesSearched,
+                0,
+                total);
+
+        var progress =
+            total == 0
+                ? 0
+                : searched * 100d / total;
+
+        var text =
+            total == 0
+                ? string.Empty
+                : $"{searched:N0} of {total:N0} {run.Category.ToLowerInvariant()} searched";
+
+        if (string.Equals(
+            run.Category,
+            "Duplicates",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            DuplicateSearchProgress = progress;
+            DuplicateSearchProgressText = text;
+            ShowDuplicateSearchProgress =
+                run.Status == "Running" ||
+                run.Status == "Completed";
+            return;
+        }
+
+        if (string.Equals(
+            run.Category,
+            "Metadata",
+            StringComparison.OrdinalIgnoreCase))
+        {
+            MetadataSearchProgress = progress;
+            MetadataSearchProgressText = text;
+            ShowMetadataSearchProgress =
+                run.Status == "Running" ||
+                run.Status == "Completed";
+        }
     }
 
     private void UpdateSearchRunStatus()
@@ -1597,6 +1712,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         IsSearching =
             App.Services.Search.IsSearching;
+
+        UpdateSearchProgress(run);
 
         if (run.Status == "Running")
         {
