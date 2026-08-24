@@ -40,6 +40,17 @@ public partial class WorkflowSearchResults :
         ConfirmRecommendedMetadataChangesCommand =
             new DelegateCommand(
                 SelectRecommendedMetadataChanges);
+
+        // ========================================================
+        // Establish the initial presentation state.
+        //
+        // ResultType can be supplied through a binding after the
+        // control has been constructed, so OnPropertyChanged()
+        // will also update this state when that happens.
+        // ========================================================
+
+        UpdateResultTypeVisibility(
+            ResultType);
     }
 
     // ============================================================
@@ -68,7 +79,9 @@ public partial class WorkflowSearchResults :
     public object? Results
     {
         get => GetValue(ResultsProperty);
-        set => SetValue(ResultsProperty, value);
+        set => SetValue(
+            ResultsProperty,
+            value);
     }
 
     // ============================================================
@@ -83,7 +96,9 @@ public partial class WorkflowSearchResults :
     public string Heading
     {
         get => GetValue(HeadingProperty);
-        set => SetValue(HeadingProperty, value);
+        set => SetValue(
+            HeadingProperty,
+            value);
     }
 
     // ============================================================
@@ -98,7 +113,9 @@ public partial class WorkflowSearchResults :
     public string ResultType
     {
         get => GetValue(ResultTypeProperty);
-        set => SetValue(ResultTypeProperty, value);
+        set => SetValue(
+            ResultTypeProperty,
+            value);
     }
 
     public static readonly StyledProperty<bool>
@@ -233,14 +250,21 @@ public partial class WorkflowSearchResults :
         Issue?.MetadataRecommendations
         ?? Enumerable.Empty<MetadataChangeRecommendation>();
 
+    /// <summary>
+    /// Indicates whether there is at least one metadata
+    /// recommendation that can be selected.
+    ///
+    /// The recommendation service is responsible for deciding
+    /// whether a recommendation is valid. The UI does not impose
+    /// an additional percentage threshold.
+    /// </summary>
     public bool HasConfirmableMetadataChanges =>
         Issue?
             .MetadataRecommendations
             .Any(
                 recommendation =>
                     recommendation.IsRecommended &&
-                    recommendation.IsChange &&
-                    recommendation.AgreementPercentage >= 90.0)
+                    recommendation.IsChange)
         ?? false;
 
     public int ConfirmableMetadataChangeCount =>
@@ -249,8 +273,7 @@ public partial class WorkflowSearchResults :
             .Count(
                 recommendation =>
                     recommendation.IsRecommended &&
-                    recommendation.IsChange &&
-                    recommendation.AgreementPercentage >= 90.0)
+                    recommendation.IsChange)
         ?? 0;
 
     // ============================================================
@@ -262,6 +285,16 @@ public partial class WorkflowSearchResults :
         get;
     }
 
+    /// <summary>
+    /// Selects every metadata recommendation that the
+    /// MetadataRecommendationService has marked as recommended.
+    ///
+    /// This is retained only for compatibility with the existing
+    /// presentation while the bulk action is moved to the Search
+    /// workspace header.
+    ///
+    /// User-modified recommendations are never overwritten.
+    /// </summary>
     private void SelectRecommendedMetadataChanges()
     {
         if (Issue is null)
@@ -276,10 +309,11 @@ public partial class WorkflowSearchResults :
             if (!recommendation.IsChange)
                 continue;
 
-            if (recommendation.AgreementPercentage < 90.0)
+            if (recommendation.IsUserModified)
                 continue;
 
-            recommendation.IsSelected = true;
+            recommendation.SetRecommendedSelection(
+                true);
         }
 
         RaiseMetadataPropertiesChanged();
@@ -339,8 +373,11 @@ public partial class WorkflowSearchResults :
             return;
         }
 
-        recommendation.IsSelected =
-            checkBox.IsChecked == true;
+        // A checkbox click is an explicit user decision.
+        // Record it as such so future bulk recommendation
+        // operations cannot overwrite the user's choice.
+        recommendation.SetUserSelection(
+            checkBox.IsChecked == true);
 
         MetadataRecommendationSelected?.Invoke(
             this,
@@ -360,8 +397,12 @@ public partial class WorkflowSearchResults :
 
         if (change.Property == ResultTypeProperty)
         {
+            var resultType =
+                change.GetNewValue<string>()
+                ?? string.Empty;
+
             UpdateResultTypeVisibility(
-                change.GetNewValue<string>());
+                resultType);
         }
 
         if (change.Property == IssueProperty)
@@ -380,8 +421,10 @@ public partial class WorkflowSearchResults :
     }
 
     private void UpdateResultTypeVisibility(
-        string resultType)
+        string? resultType)
     {
+        resultType ??= string.Empty;
+
         var isMetadata =
             string.Equals(
                 resultType,

@@ -42,7 +42,6 @@
                 </ListBox.ItemsPanel>
 
                 <ListBox.ItemTemplate>
-
                     <DataTemplate
                         x:DataType="models:SearchResult">
 
@@ -258,6 +257,35 @@
 
                 <StackPanel
                     Spacing="16">
+
+                    <!-- ========================================= -->
+                    <!-- File Identity -->
+                    <!-- ========================================= -->
+
+                    <Border
+                        Padding="12"
+                        BorderBrush="{DynamicResource Brush.Border}"
+                        BorderThickness="1"
+                        CornerRadius="6">
+
+                        <StackPanel
+                            Spacing="4">
+
+                            <TextBlock
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                Text="{Binding MetadataDisplayName,
+                                               ElementName=Root}" />
+
+                            <TextBlock
+                                Classes="caption"
+                                Text="{Binding MetadataFilePath,
+                                               ElementName=Root}"
+                                TextWrapping="Wrap" />
+
+                        </StackPanel>
+
+                    </Border>
 
                     <!-- ========================================= -->
                     <!-- Existing Metadata -->
@@ -506,24 +534,6 @@
                                 </ItemsControl.ItemTemplate>
 
                             </ItemsControl>
-
-                            <!-- ================================= -->
-                            <!-- Bulk Recommendation Selection -->
-                            <!-- ================================= -->
-
-                            <Button
-                                HorizontalAlignment="Left"
-                                Margin="0,4,0,0"
-                                Command="{Binding ConfirmRecommendedMetadataChangesCommand,
-                                                  ElementName=Root}"
-                                IsVisible="{Binding HasConfirmableMetadataChanges,
-                                                    ElementName=Root}">
-
-                                <TextBlock
-                                    FontWeight="SemiBold"
-                                    Text="SELECT ALL RECOMMENDED" />
-
-                            </Button>
 
                         </StackPanel>
 
