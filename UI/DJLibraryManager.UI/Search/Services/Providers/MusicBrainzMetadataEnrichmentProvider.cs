@@ -89,68 +89,49 @@ public sealed class MusicBrainzMetadataEnrichmentProvider
          * source rather than another identity resolver.
          */
 
-        var recordings =
-            await SearchRecordingsAsync(
+        // ------------------------------------------------------------
+        // Enrichment must use the recording identity established by
+        // the PRIMARY MusicBrainz search.
+        //
+        // Do not perform another Artist/Title recording search here.
+        // The primary search has already identified the recording and
+        // supplied its MusicBrainz recording ID in ProviderIdentities.
+        //
+        // Artist and Title on the request are the confirmed identity
+        // and are preserved in the enrichment result, but they are not
+        // used to reopen recording discovery.
+        // ------------------------------------------------------------
+
+        var identity =
+            request.ProviderIdentities
+                .FirstOrDefault(
+                    providerIdentity =>
+                        string.Equals(
+                            providerIdentity.Provider,
+                            Name,
+                            StringComparison.OrdinalIgnoreCase) &&
+                        !string.IsNullOrWhiteSpace(
+                            providerIdentity.ExternalId));
+
+        if (identity is null)
+        {
+            // There is no established MusicBrainz recording identity
+            // to enrich. Do not fall back to a new Artist/Title search.
+            return [];
+        }
+
+        var result =
+            await LookupRecordingAsync(
+                identity.ExternalId,
                 request,
                 cancellationToken);
 
-        if (recordings.Count == 0)
+        if (result is null)
         {
             return [];
         }
 
-        var candidates =
-            recordings
-                .Select(
-                    recording =>
-                        CreateCandidate(
-                            recording,
-                            request))
-                .Where(
-                    candidate =>
-                        candidate is not null)
-                .Select(
-                    candidate =>
-                        candidate!)
-                .Where(
-                    candidate =>
-                        candidate.Score >=
-                        MinimumCandidateScore)
-                .OrderByDescending(
-                    candidate =>
-                        candidate.Score)
-                .ThenByDescending(
-                    candidate =>
-                        candidate.DurationMatch)
-                .Take(
-                    CandidateLookupLimit)
-                .ToList();
-
-        if (candidates.Count == 0)
-        {
-            return [];
-        }
-
-        var results =
-            new List<MetadataSearchProviderResult>();
-
-        foreach (var candidate in candidates)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var result =
-                await LookupRecordingAsync(
-                    candidate.RecordingId,
-                    request,
-                    cancellationToken);
-
-            if (result is not null)
-            {
-                results.Add(result);
-            }
-        }
-
-        return results;
+        return [result];
     }
 
     // ============================================================

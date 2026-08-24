@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace DJLibraryManager.UI.Search.Models;
 
@@ -9,7 +11,7 @@ namespace DJLibraryManager.UI.Search.Models;
 /// This model represents a proposed change only. It does not modify
 /// the DIASISS library and does not represent a provider search result.
 /// </summary>
-public sealed class MetadataChangeRecommendation
+public sealed class MetadataChangeRecommendation : INotifyPropertyChanged
 {
     public string Field { get; init; } = string.Empty;
 
@@ -31,13 +33,28 @@ public sealed class MetadataChangeRecommendation
     /// </summary>
     public bool IsRecommended { get; init; }
 
+    private bool _isSelected;
+
     /// <summary>
     /// Indicates whether this recommendation is currently selected.
     ///
-    /// This remains publicly settable because existing Search
-    /// services and controls use this property directly.
+    /// Property-change notification is raised so that automatic
+    /// recommendation selection is immediately reflected by the UI.
     /// </summary>
-    public bool IsSelected { get; set; }
+    public bool IsSelected
+    {
+        get => _isSelected;
+
+        set
+        {
+            if (_isSelected == value)
+                return;
+
+            _isSelected = value;
+
+            OnPropertyChanged();
+        }
+    }
 
     /// <summary>
     /// Indicates that the user has explicitly changed this
@@ -109,4 +126,14 @@ public sealed class MetadataChangeRecommendation
             CurrentValue?.Trim(),
             RecommendedValue?.Trim(),
             StringComparison.OrdinalIgnoreCase);
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged(
+        [CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(
+            this,
+            new PropertyChangedEventArgs(propertyName));
+    }
 }

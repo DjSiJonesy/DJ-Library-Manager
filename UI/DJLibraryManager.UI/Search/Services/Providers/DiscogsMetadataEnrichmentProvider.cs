@@ -83,22 +83,8 @@ public sealed class DiscogsMetadataEnrichmentProvider
                         "Year",
                         StringComparison.OrdinalIgnoreCase));
 
-        //
-        // Discogs cannot safely turn release.year into the
-        // recording Year field.
-        //
-        // We can still perform the search when Year is requested,
-        // because the result may contain Genre and ReleaseYear.
-        //
-
         if (!wantsGenre &&
             !wantsYear)
-        {
-            return [];
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Artist) &&
-            string.IsNullOrWhiteSpace(request.Title))
         {
             return [];
         }
@@ -112,87 +98,80 @@ public sealed class DiscogsMetadataEnrichmentProvider
             return [];
         }
 
-        var searchResults =
-            await SearchReleasesAsync(
-                request,
+        // --------------------------------------------------------
+        // IMPORTANT:
+        //
+        // Enrichment must use the Discogs identity established by
+        // the primary metadata search.
+        //
+        // We deliberately do NOT perform another Artist + Title
+        // search here. The primary search has already established
+        // the recording identity and supplied its Discogs ExternalId.
+        // --------------------------------------------------------
+
+        var providerIdentity =
+            request.ProviderIdentities?
+                .FirstOrDefault(
+                    identity =>
+                        identity is not null &&
+                        string.Equals(
+                            identity.Provider,
+                            Name,
+                            StringComparison.OrdinalIgnoreCase));
+
+        if (providerIdentity is null ||
+            string.IsNullOrWhiteSpace(
+                providerIdentity.ExternalId))
+        {
+            // No established Discogs identity means there is no
+            // safely identified release to enrich. Do not fall back
+            // to Artist + Title candidate discovery.
+            return [];
+        }
+
+        var releaseId =
+            providerIdentity.ExternalId.Trim();
+
+        var release =
+            await GetReleaseAsync(
+                releaseId,
                 token,
                 cancellationToken);
 
-        if (searchResults.Count == 0)
+        if (!release.HasValue)
         {
             return [];
         }
 
-        var results =
-            new List<MetadataSearchProviderResult>();
+        var releaseValue =
+            release.Value;
 
-        var inspected =
-            0;
+        var matchingTrack =
+            FindMatchingTrack(
+                releaseValue,
+                request);
 
-        foreach (var searchResult in searchResults)
+        if (!matchingTrack.HasValue)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (inspected >= MaximumCandidatesToInspect)
-            {
-                break;
-            }
-
-            var releaseId =
-                GetString(
-                    searchResult,
-                    "id");
-
-            if (string.IsNullOrWhiteSpace(releaseId))
-            {
-                continue;
-            }
-
-            inspected++;
-
-            var release =
-                await GetReleaseAsync(
-                    releaseId,
-                    token,
-                    cancellationToken);
-
-            if (!release.HasValue)
-            {
-                continue;
-            }
-
-            var releaseValue =
-                release.Value;
-
-            var matchingTrack =
-                FindMatchingTrack(
-                    releaseValue,
-                    request);
-
-            if (!matchingTrack.HasValue)
-            {
-                continue;
-            }
-
-            var result =
-                CreateEnrichmentResult(
-                    releaseValue,
-                    matchingTrack.Value,
-                    request);
-
-            if (result is not null)
-            {
-                results.Add(
-                    result);
-            }
+            return [];
         }
 
-        return results
-            .OrderByDescending(
-                result =>
-                    result.Confidence)
-            .Take(SearchResultLimit)
-            .ToList();
+        var result =
+            CreateEnrichmentResult(
+                releaseValue,
+                matchingTrack.Value,
+                request);
+
+        if (result is null)
+        {
+            return [];
+        }
+
+        return
+            new[]
+            {
+                result
+            };
     }
 
     // ============================================================

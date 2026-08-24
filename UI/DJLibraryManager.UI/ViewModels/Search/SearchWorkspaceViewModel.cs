@@ -636,6 +636,12 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 TrackTitle =
                     issue.TrackTitle,
 
+                MissingFields =
+                    issue.MissingFields,
+
+                FilenameSearchHint =
+                    issue.FilenameSearchHint,
+
                 FilePath =
                     issue.FilePath,
 
@@ -1301,6 +1307,31 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         SaveSearchState();
 
         NotifyMetadataRecommendationProperties();
+    }
+
+    // ============================================================
+    // Metadata Select All Recommended Command
+    // ============================================================
+
+    /// <summary>
+    /// Selects all recommended Metadata changes without invoking
+    /// the Duplicates bulk-selection command.
+    ///
+    /// User-modified Metadata recommendations remain untouched.
+    /// </summary>
+    [RelayCommand]
+    private void SelectAllRecommendedMetadataOnly()
+    {
+        if (IsSearching ||
+            App.Services.Search.IsSearching)
+        {
+            return;
+        }
+
+        if (!IsMetadataCategory)
+            return;
+
+        SelectAllRecommendedMetadata();
     }
 
     // ============================================================
