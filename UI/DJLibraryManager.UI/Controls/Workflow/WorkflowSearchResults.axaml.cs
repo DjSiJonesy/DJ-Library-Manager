@@ -41,6 +41,10 @@ public partial class WorkflowSearchResults :
             new DelegateCommand(
                 SelectRecommendedMetadataChanges);
 
+        SwapArtistTitleCommand =
+            new DelegateCommand(
+                SwapArtistTitle);
+
         // ========================================================
         // Establish the initial presentation state.
         //
@@ -286,6 +290,18 @@ public partial class WorkflowSearchResults :
     }
 
     /// <summary>
+    /// Swaps the recommended Artist and Title values for the
+    /// currently selected Metadata issue.
+    ///
+    /// The operation is a user decision only. It does not modify
+    /// the physical library file.
+    /// </summary>
+    public ICommand SwapArtistTitleCommand
+    {
+        get;
+    }
+
+    /// <summary>
     /// Selects every metadata recommendation that the
     /// MetadataRecommendationService has marked as recommended.
     ///
@@ -317,6 +333,75 @@ public partial class WorkflowSearchResults :
         }
 
         RaiseMetadataPropertiesChanged();
+    }
+
+    // ============================================================
+    // Metadata Artist / Title Swap
+    // ============================================================
+
+    /// <summary>
+    /// Swaps the recommended Artist and Title values for the
+    /// current Metadata issue.
+    ///
+    /// Both recommendations are marked as user modified by the
+    /// recommendation model. Existing selection state is preserved.
+    /// </summary>
+    private void SwapArtistTitle()
+    {
+        if (!IsMetadataResults)
+            return;
+
+        if (Issue?.MetadataRecommendations is null)
+            return;
+
+        var recommendations =
+            Issue.MetadataRecommendations;
+
+        var artistRecommendation =
+            recommendations.FirstOrDefault(
+                recommendation =>
+                    string.Equals(
+                        recommendation.Field,
+                        "Artist",
+                        StringComparison.OrdinalIgnoreCase));
+
+        var titleRecommendation =
+            recommendations.FirstOrDefault(
+                recommendation =>
+                    string.Equals(
+                        recommendation.Field,
+                        "Title",
+                        StringComparison.OrdinalIgnoreCase));
+
+        if (artistRecommendation is null ||
+            titleRecommendation is null)
+        {
+            return;
+        }
+
+        artistRecommendation.SwapRecommendedValueWith(
+            titleRecommendation);
+
+        RaiseMetadataPropertiesChanged();
+    }
+
+    // ============================================================
+    // Metadata Artist / Title Swap Click
+    // ============================================================
+
+    /// <summary>
+    /// Handles the Artist / Title Swap button directly.
+    ///
+    /// The Search result control already uses explicit Click
+    /// handlers for its interactive metadata controls. Using the
+    /// same mechanism here ensures the swap is executed against
+    /// the current SearchIssue instance.
+    /// </summary>
+    private void SwapArtistTitle_Click(
+        object? sender,
+        RoutedEventArgs e)
+    {
+        SwapArtistTitle();
     }
 
     // ============================================================

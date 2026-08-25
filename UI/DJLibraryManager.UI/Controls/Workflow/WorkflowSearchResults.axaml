@@ -433,9 +433,27 @@
                         <StackPanel
                             Spacing="10">
 
-                            <TextBlock
-                                Classes="subheading"
-                                Text="Recommended Changes" />
+                            <Grid
+                                ColumnDefinitions="*,Auto"
+                                ColumnSpacing="12">
+
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Classes="subheading"
+                                    Text="Recommended Changes" />
+
+                                <Button
+                                    Grid.Column="1"
+                                    Theme="{StaticResource DJLM.SecondaryButton}"
+                                    Padding="8,4"
+                                    Content="↔ Swap Artist / Title"
+                                    Click="SwapArtistTitle_Click"
+                                    IsVisible="{Binding IsMetadataResults,
+                                                        ElementName=Root}"
+                                    IsEnabled="{Binding HasConfirmableMetadataChanges,
+                                                        ElementName=Root}" />
+
+                            </Grid>
 
                             <TextBlock
                                 Classes="caption"

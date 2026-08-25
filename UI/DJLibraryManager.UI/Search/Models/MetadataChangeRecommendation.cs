@@ -13,11 +13,33 @@ namespace DJLibraryManager.UI.Search.Models;
 /// </summary>
 public sealed class MetadataChangeRecommendation : INotifyPropertyChanged
 {
+    private string _recommendedValue = string.Empty;
+
     public string Field { get; init; } = string.Empty;
 
     public string CurrentValue { get; init; } = string.Empty;
 
-    public string RecommendedValue { get; init; } = string.Empty;
+    /// <summary>
+    /// The value currently proposed by DIASISS.
+    ///
+    /// The init accessor deliberately remains available so existing
+    /// recommendation creation code can continue to initialise this
+    /// property through object initialisers.
+    ///
+    /// User-driven changes are made through the explicit methods on
+    /// this model so that property-change notification and
+    /// IsUserModified are kept together.
+    /// </summary>
+    public string RecommendedValue
+    {
+        get => _recommendedValue;
+
+        init
+        {
+            _recommendedValue =
+                value ?? string.Empty;
+        }
+    }
 
     public double AgreementPercentage { get; init; }
 
@@ -81,6 +103,41 @@ public sealed class MetadataChangeRecommendation : INotifyPropertyChanged
     }
 
     /// <summary>
+    /// Records an explicit user change to the recommended value.
+    ///
+    /// This is used for user-driven metadata corrections such as
+    /// swapping Artist and Title.
+    /// </summary>
+    public void SetUserRecommendedValue(
+        string value)
+    {
+        value ??= string.Empty;
+
+        if (string.Equals(
+                _recommendedValue,
+                value,
+                StringComparison.Ordinal))
+        {
+            IsUserModified =
+                true;
+
+            return;
+        }
+
+        _recommendedValue =
+            value;
+
+        IsUserModified =
+            true;
+
+        OnPropertyChanged(
+            nameof(RecommendedValue));
+
+        OnPropertyChanged(
+            nameof(IsChange));
+    }
+
+    /// <summary>
     /// Applies an automatic recommendation selection.
     ///
     /// User-modified recommendations are deliberately protected.
@@ -121,6 +178,34 @@ public sealed class MetadataChangeRecommendation : INotifyPropertyChanged
             false;
     }
 
+    /// <summary>
+    /// Swaps the proposed values between this recommendation and
+    /// another recommendation.
+    ///
+    /// Both recommendations are marked as user modified so that
+    /// subsequent automatic bulk selection cannot overwrite the
+    /// user's decision.
+    ///
+    /// Selection state is deliberately preserved.
+    /// </summary>
+    public void SwapRecommendedValueWith(
+        MetadataChangeRecommendation other)
+    {
+        ArgumentNullException.ThrowIfNull(other);
+
+        var thisValue =
+            RecommendedValue;
+
+        var otherValue =
+            other.RecommendedValue;
+
+        SetUserRecommendedValue(
+            otherValue);
+
+        other.SetUserRecommendedValue(
+            thisValue);
+    }
+
     public bool IsChange =>
         !string.Equals(
             CurrentValue?.Trim(),
@@ -134,6 +219,7 @@ public sealed class MetadataChangeRecommendation : INotifyPropertyChanged
     {
         PropertyChanged?.Invoke(
             this,
-            new PropertyChangedEventArgs(propertyName));
+            new PropertyChangedEventArgs(
+                propertyName));
     }
 }
