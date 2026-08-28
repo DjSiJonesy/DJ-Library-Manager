@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,7 +18,12 @@ namespace DJLibraryManager.UI.Services;
 /// <summary>
 /// Stores and retrieves the application's provider-independent media library.
 ///
-/// SQLite is the authoritative persistence store for media.
+/// SQLite is the authoritative persistence store for:
+///
+///     Media
+///     Providers
+///     MediaProviderIdentities
+///     ProviderImports
 ///
 /// Provider-specific relationships are stored through:
 ///
@@ -27,29 +31,19 @@ namespace DJLibraryManager.UI.Services;
 ///     Media
 ///     MediaProviderIdentities
 ///
-/// Provider import metadata remains JSON for the moment because it is
-/// separate from the core media library persistence.
+/// Provider import metadata is stored through:
+///
+///     ProviderImports
 /// </summary>
 public sealed class LibraryRepository
 {
     private readonly SqliteDatabase _database;
 
-    private readonly string _applicationFolder;
-    private readonly string _metadataFile;
-
     public LibraryRepository(
-    SqliteDatabase database)
+        SqliteDatabase database)
     {
         ArgumentNullException.ThrowIfNull(
             database);
-
-        ApplicationPaths.EnsureCreated();
-
-        _applicationFolder =
-            ApplicationPaths.Root;
-
-        _metadataFile =
-            ApplicationPaths.LibraryMetadata;
 
         _database =
             database;
@@ -586,10 +580,11 @@ public sealed class LibraryRepository
     // ============================================================
 
     /// <summary>
-    /// Saves provider import metadata.
+    /// Saves provider import metadata into SQLite.
     ///
-    /// This remains JSON temporarily because this data is not part
-    /// of the core Media persistence migration.
+    /// ProviderImports contains one record per provider.
+    /// An existing record is updated; otherwise a new record is
+    /// created.
     /// </summary>
     public async Task SaveProviderImportAsync(
         ProviderInfo provider,
@@ -601,35 +596,77 @@ public sealed class LibraryRepository
         ArgumentNullException.ThrowIfNull(
             result);
 
-        Directory.CreateDirectory(
-            _applicationFolder);
+        await Task.Run(() =>
+        {
+            using var connection =
+                _database.OpenConnection();
 
-        var metadata =
-            await LoadProviderMetadataAsync();
+            using var transaction =
+                connection.BeginTransaction();
 
-        metadata.RemoveAll(p =>
-            p.ProviderName.Equals(
-                provider.Name,
-                StringComparison.OrdinalIgnoreCase));
-
-        metadata.Add(
-            new ProviderLibraryMetadata
+            try
             {
-                ProviderName =
-                    provider.Name,
+                var providerId =
+                    GetOrCreateProvider(
+                        connection,
+                        transaction,
+                        provider.Name);
 
-                LastImported =
-                    result.ImportedAt,
+                using var command =
+                    connection.CreateCommand();
 
-                TrackCount =
-                    result.TrackCount,
+                command.Transaction =
+                    transaction;
 
-                PlaylistCount =
-                    result.PlaylistCount
-            });
+                command.CommandText =
+                    """
+                    INSERT INTO ProviderImports
+                    (
+                        ProviderId,
+                        LastImported,
+                        TrackCount,
+                        PlaylistCount
+                    )
+                    VALUES
+                    (
+                        $providerId,
+                        $lastImported,
+                        $trackCount,
+                        $playlistCount
+                    )
+                    ON CONFLICT(ProviderId)
+                    DO UPDATE SET
+                        LastImported = excluded.LastImported,
+                        TrackCount = excluded.TrackCount,
+                        PlaylistCount = excluded.PlaylistCount;
+                    """;
 
-        await SaveProviderMetadataAsync(
-            metadata);
+                command.Parameters.AddWithValue(
+                    "$providerId",
+                    providerId);
+
+                command.Parameters.AddWithValue(
+                    "$lastImported",
+                    result.ImportedAt);
+
+                command.Parameters.AddWithValue(
+                    "$trackCount",
+                    result.TrackCount);
+
+                command.Parameters.AddWithValue(
+                    "$playlistCount",
+                    result.PlaylistCount);
+
+                command.ExecuteNonQuery();
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        });
     }
 
     /// <summary>
@@ -642,13 +679,100 @@ public sealed class LibraryRepository
         ArgumentException.ThrowIfNullOrWhiteSpace(
             providerName);
 
-        var metadata =
-            await LoadProviderMetadataAsync();
+        return await Task.Run(() =>
+        {
+            using var connection =
+                _database.OpenConnection();
 
-        return metadata.FirstOrDefault(p =>
-            p.ProviderName.Equals(
-                providerName,
-                StringComparison.OrdinalIgnoreCase));
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText =
+                """
+            SELECT
+                p.Name AS ProviderName,
+                pi.LastImported,
+                pi.TrackCount,
+                pi.PlaylistCount
+
+            FROM ProviderImports pi
+
+            INNER JOIN Providers p
+                ON p.ProviderId = pi.ProviderId
+
+            WHERE p.Name = $providerName
+
+            LIMIT 1;
+            """;
+
+            command.Parameters.AddWithValue(
+                "$providerName",
+                providerName);
+
+            using var reader =
+                command.ExecuteReader();
+
+            if (!reader.Read())
+                return null;
+
+            var providerOrdinal =
+                reader.GetOrdinal(
+                    "ProviderName");
+
+            var lastImportedOrdinal =
+                reader.GetOrdinal(
+                    "LastImported");
+
+            var trackCountOrdinal =
+                reader.GetOrdinal(
+                    "TrackCount");
+
+            var playlistCountOrdinal =
+                reader.GetOrdinal(
+                    "PlaylistCount");
+
+            DateTime lastImported =
+                DateTime.MinValue;
+
+            if (!reader.IsDBNull(
+                    lastImportedOrdinal))
+            {
+                var value =
+                    reader.GetValue(
+                        lastImportedOrdinal);
+
+                if (value is DateTime dateTime)
+                {
+                    lastImported =
+                        dateTime;
+                }
+                else if (DateTime.TryParse(
+                             Convert.ToString(value),
+                             out var parsed))
+                {
+                    lastImported =
+                        parsed;
+                }
+            }
+
+            return new ProviderLibraryMetadata
+            {
+                ProviderName =
+                    reader.GetString(
+                        providerOrdinal),
+
+                LastImported =
+                    lastImported,
+
+                TrackCount =
+                    reader.GetInt32(
+                        trackCountOrdinal),
+
+                PlaylistCount =
+                    reader.GetInt32(
+                        playlistCountOrdinal)
+            };
+        });
     }
 
     // ============================================================
@@ -798,16 +922,34 @@ public sealed class LibraryRepository
     }
 
     /// <summary>
-    /// Returns the total number of playlists stored in the
-    /// provider import metadata.
+    /// Returns the total number of playlists stored in
+    /// ProviderImports.
+    ///
+    /// Each provider contributes the playlist count from its
+    /// most recent import.
     /// </summary>
     public async Task<int> GetPlaylistCountAsync()
     {
-        var metadata =
-            await LoadProviderMetadataAsync();
+        return await Task.Run(() =>
+        {
+            using var connection =
+                _database.OpenConnection();
 
-        return metadata.Sum(
-            x => x.PlaylistCount);
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText =
+                """
+                SELECT COALESCE(
+                    SUM(PlaylistCount),
+                    0
+                )
+                FROM ProviderImports;
+                """;
+
+            return Convert.ToInt32(
+                command.ExecuteScalar());
+        });
     }
 
     // ============================================================
@@ -817,7 +959,8 @@ public sealed class LibraryRepository
     /// <summary>
     /// Removes all media from the SQLite library.
     ///
-    /// Provider import metadata is also removed.
+    /// Provider identities, providers and provider import metadata
+    /// are also removed.
     /// </summary>
     public async Task ClearAsync()
     {
@@ -853,12 +996,6 @@ public sealed class LibraryRepository
                 throw;
             }
         });
-
-        if (File.Exists(_metadataFile))
-        {
-            File.Delete(
-                _metadataFile);
-        }
     }
 
     // ============================================================
@@ -872,6 +1009,8 @@ public sealed class LibraryRepository
     /// remain in the library.
     ///
     /// Orphaned Media records are removed.
+    ///
+    /// The provider's import metadata is also removed.
     /// </summary>
     public async Task ClearProviderLibraryAsync(
         string providerName)
@@ -920,13 +1059,40 @@ public sealed class LibraryRepository
 
                 command.CommandText =
                     """
+                    DELETE FROM ProviderImports
+                    WHERE ProviderId =
+                    (
+                        SELECT ProviderId
+                        FROM Providers
+                        WHERE Name = $providerName
+                    );
+                    """;
+
+                command.Parameters.AddWithValue(
+                    "$providerName",
+                    providerName);
+
+                command.ExecuteNonQuery();
+
+                command.Parameters.Clear();
+
+                command.CommandText =
+                    """
                     DELETE FROM Providers
                     WHERE Name = $providerName
                       AND NOT EXISTS
                       (
                           SELECT 1
                           FROM MediaProviderIdentities mpi
-                          WHERE mpi.ProviderId = Providers.ProviderId
+                          WHERE mpi.ProviderId =
+                                Providers.ProviderId
+                      )
+                      AND NOT EXISTS
+                      (
+                          SELECT 1
+                          FROM ProviderImports pi
+                          WHERE pi.ProviderId =
+                                Providers.ProviderId
                       );
                     """;
 
@@ -944,17 +1110,6 @@ public sealed class LibraryRepository
                 throw;
             }
         });
-
-        var metadata =
-            await LoadProviderMetadataAsync();
-
-        metadata.RemoveAll(p =>
-            p.ProviderName.Equals(
-                providerName,
-                StringComparison.OrdinalIgnoreCase));
-
-        await SaveProviderMetadataAsync(
-            metadata);
     }
 
     // ============================================================
@@ -1204,27 +1359,39 @@ public sealed class LibraryRepository
 
         command.Parameters.AddWithValue(
             "$year",
-            mediaItem.Year);
+            mediaItem.Year.HasValue
+                ? mediaItem.Year.Value
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
-            "$bpm",
-            mediaItem.BPM);
+           "$bpm",
+            mediaItem.BPM.HasValue
+                ? mediaItem.BPM.Value
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$musicalKey",
-            mediaItem.Key ?? string.Empty);
+            string.IsNullOrWhiteSpace(mediaItem.Key)
+                ? string.Empty
+                : mediaItem.Key);
 
         command.Parameters.AddWithValue(
             "$durationSeconds",
-            mediaItem.Duration?.TotalSeconds);
+            mediaItem.Duration.HasValue
+                ? mediaItem.Duration.Value.TotalSeconds
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$dateFirstSeen",
-            mediaItem.DateFirstSeen);
+            mediaItem.DateFirstSeen.HasValue
+                ? mediaItem.DateFirstSeen.Value
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$dateLastModified",
-            mediaItem.DateLastModified);
+            mediaItem.DateLastModified.HasValue
+                ? mediaItem.DateLastModified.Value
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$lastModifiedDate",
@@ -1234,11 +1401,11 @@ public sealed class LibraryRepository
     }
 
     private static void AddMediaParameters(
-        SqliteCommand command,
-        string mediaId,
-        DJLMMediaItem mediaItem,
-        string createdDate,
-        string lastModifiedDate)
+    SqliteCommand command,
+    string mediaId,
+    DJLMMediaItem mediaItem,
+    string createdDate,
+    string lastModifiedDate)
     {
         command.Parameters.AddWithValue(
             "$mediaId",
@@ -1274,27 +1441,39 @@ public sealed class LibraryRepository
 
         command.Parameters.AddWithValue(
             "$year",
-            mediaItem.Year);
+            mediaItem.Year.HasValue
+                ? mediaItem.Year.Value
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$bpm",
-            mediaItem.BPM);
+            mediaItem.BPM.HasValue
+                ? mediaItem.BPM.Value
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$musicalKey",
-            mediaItem.Key ?? string.Empty);
+            string.IsNullOrWhiteSpace(mediaItem.Key)
+                ? string.Empty
+                : mediaItem.Key);
 
         command.Parameters.AddWithValue(
             "$durationSeconds",
-            mediaItem.Duration?.TotalSeconds);
+            mediaItem.Duration.HasValue
+                ? mediaItem.Duration.Value.TotalSeconds
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$dateFirstSeen",
-            mediaItem.DateFirstSeen);
+            mediaItem.DateFirstSeen.HasValue
+                ? mediaItem.DateFirstSeen.Value
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$dateLastModified",
-            mediaItem.DateLastModified);
+            mediaItem.DateLastModified.HasValue
+                ? mediaItem.DateLastModified.Value
+                : DBNull.Value);
 
         command.Parameters.AddWithValue(
             "$createdDate",
@@ -1501,7 +1680,7 @@ public sealed class LibraryRepository
                     reader,
                     "DateFirstSeen"),
 
-            DateLastModified =
+                DateLastModified =
                 ReadDateTime(
                     reader,
                     "DateLastModified")
@@ -1520,62 +1699,18 @@ public sealed class LibraryRepository
             return null;
 
         var value =
-            reader.GetString(ordinal);
+            reader.GetValue(ordinal);
+
+        if (value is DateTime dateTime)
+            return dateTime;
 
         if (DateTime.TryParse(
-                value,
+                Convert.ToString(value),
                 out var result))
         {
             return result;
         }
 
         return null;
-    }
-
-    // ============================================================
-    // JSON Provider Metadata
-    // ============================================================
-
-    private async Task<List<ProviderLibraryMetadata>>
-        LoadProviderMetadataAsync()
-    {
-        if (!File.Exists(
-                _metadataFile))
-        {
-            return new List<ProviderLibraryMetadata>();
-        }
-
-        await using var stream =
-            File.OpenRead(
-                _metadataFile);
-
-        var metadata =
-            await System.Text.Json.JsonSerializer
-                .DeserializeAsync<
-                    List<ProviderLibraryMetadata>>(
-                    stream);
-
-        return metadata ??
-               new List<ProviderLibraryMetadata>();
-    }
-
-    private async Task SaveProviderMetadataAsync(
-        List<ProviderLibraryMetadata> metadata)
-    {
-        Directory.CreateDirectory(
-            _applicationFolder);
-
-        await using var stream =
-            File.Create(
-                _metadataFile);
-
-        await System.Text.Json.JsonSerializer
-            .SerializeAsync(
-                stream,
-                metadata,
-                new System.Text.Json.JsonSerializerOptions
-                {
-                    WriteIndented = true
-                });
     }
 }
