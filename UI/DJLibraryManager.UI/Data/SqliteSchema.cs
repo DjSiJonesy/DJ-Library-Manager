@@ -5,13 +5,10 @@ using Microsoft.Data.Sqlite;
 namespace DJLibraryManager.UI.Data;
 
 /// <summary>
-/// Creates and maintains the initial DIASISS SQLite schema.
+/// Creates and maintains the DIASISS SQLite schema.
 ///
-/// This class is deliberately independent of the existing JSON
-/// LibraryRepository. During the persistence migration SQLite is
-/// being built alongside the existing JSON library.
-///
-/// No existing library data is modified by this class.
+/// SQLite is the authoritative persistence store for the
+/// provider-independent library and provider import metadata.
 /// </summary>
 public sealed class SqliteSchema
 {
@@ -27,7 +24,7 @@ public sealed class SqliteSchema
     }
 
     /// <summary>
-    /// Creates the initial DIASISS SQLite schema if it does not
+    /// Creates the DIASISS SQLite schema if it does not
     /// already exist.
     /// </summary>
     public void EnsureCreated()
@@ -49,6 +46,10 @@ public sealed class SqliteSchema
                 transaction);
 
             CreateMediaProviderIdentitiesTable(
+                connection,
+                transaction);
+
+            CreateProviderImportsTable(
                 connection,
                 transaction);
 
@@ -212,6 +213,65 @@ public sealed class SqliteSchema
     }
 
     // ============================================================
+    // Provider Import Metadata
+    // ============================================================
+
+    /// <summary>
+    /// Stores the result of the most recent import for each
+    /// provider.
+    ///
+    /// This replaces the previous JSON-based provider import
+    /// metadata storage.
+    /// </summary>
+    private static void CreateProviderImportsTable(
+        SqliteConnection connection,
+        SqliteTransaction transaction)
+    {
+        using var command =
+            connection.CreateCommand();
+
+        command.Transaction =
+            transaction;
+
+        command.CommandText =
+            """
+            CREATE TABLE IF NOT EXISTS ProviderImports
+            (
+                ProviderImportId
+                    INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                ProviderId
+                    INTEGER NOT NULL,
+
+                LastImported
+                    TEXT NULL,
+
+                TrackCount
+                    INTEGER NOT NULL DEFAULT 0,
+
+                PlaylistCount
+                    INTEGER NOT NULL DEFAULT 0,
+
+                CONSTRAINT FK_ProviderImports_Provider
+                    FOREIGN KEY (ProviderId)
+                    REFERENCES Providers(ProviderId)
+                    ON DELETE CASCADE,
+
+                CONSTRAINT UX_ProviderImports_Provider
+                    UNIQUE (
+                        ProviderId
+                    )
+            );
+            """;
+
+        command.ExecuteNonQuery();
+
+        CreateProviderImportIndexes(
+            connection,
+            transaction);
+    }
+
+    // ============================================================
     // Media Indexes
     // ============================================================
 
@@ -272,6 +332,29 @@ public sealed class SqliteSchema
                 ON MediaProviderIdentities(
                     AudioFingerprint
                 );
+            """;
+
+        command.ExecuteNonQuery();
+    }
+
+    // ============================================================
+    // Provider Import Indexes
+    // ============================================================
+
+    private static void CreateProviderImportIndexes(
+        SqliteConnection connection,
+        SqliteTransaction transaction)
+    {
+        using var command =
+            connection.CreateCommand();
+
+        command.Transaction =
+            transaction;
+
+        command.CommandText =
+            """
+            CREATE INDEX IF NOT EXISTS IX_ProviderImports_Provider
+                ON ProviderImports(ProviderId);
             """;
 
         command.ExecuteNonQuery();
