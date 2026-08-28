@@ -3,11 +3,35 @@
 namespace DJLibraryManager.UI.Models.Media;
 
 /// <summary>
-/// Represents a provider-independent media item within DJ Library Manager.
+/// Represents a provider-independent media item within DIASISS.
 /// Every supported DJ platform is converted into this common model.
+///
+/// MediaId is the DIASISS identity of the physical/logical track record.
+/// TrackStatusId represents the current lifecycle state of the track:
+///
+/// 1  = Good
+/// 2  = Missing or Corrupt
+/// 99 = Removed
+///
+/// Provider-specific identity information is stored separately from
+/// this model in MediaProviderIdentities.
 /// </summary>
 public sealed class DJLMMediaItem
 {
+    /// <summary>
+    /// The DIASISS GUID identifying this media record.
+    /// </summary>
+    public string MediaId { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Current DIASISS track status.
+    ///
+    /// 1  = Good
+    /// 2  = Missing or Corrupt
+    /// 99 = Removed
+    /// </summary>
+    public int TrackStatusId { get; set; } = 1;
+
     /// <summary>
     /// The provider this media item originated from.
     /// </summary>
@@ -69,12 +93,22 @@ public sealed class DJLMMediaItem
     public TimeSpan? Duration { get; set; }
 
     /// <summary>
-    /// Date first seen by the provider.
+    /// Date the track was first seen by the provider.
     /// </summary>
     public DateTime? DateFirstSeen { get; set; }
 
     /// <summary>
-    /// Date last modified in the provider.
+    /// Date the track was last modified in the provider.
     /// </summary>
     public DateTime? DateLastModified { get; set; }
+
+    /// <summary>
+    /// Date the DIASISS media record was created.
+    /// </summary>
+    public DateTime CreatedDate { get; set; }
+
+    /// <summary>
+    /// Date the DIASISS media record was last modified.
+    /// </summary>
+    public DateTime LastModifiedDate { get; set; }
 }

@@ -87,18 +87,35 @@ public partial class DashboardViewModel : ViewModelBase
         {
             var provider = CreateProvider(discoveredProvider);
 
+            //
+            // Import metadata is still stored separately in JSON.
+            // This currently provides playlist count and last imported.
+            //
             var metadata =
-                await repository.GetProviderImportAsync(provider.Name);
+                await repository.GetProviderImportAsync(
+                    provider.Name);
 
-            if (provider.Installed && metadata is not null)
+            //
+            // Track count is authoritative from SQLite.
+            //
+            var trackCount =
+                await repository.GetProviderTrackCountAsync(
+                    provider.Name);
+
+            if (provider.Installed)
             {
-                provider.ImportState = ImportState.Imported;
-                provider.TrackCount = metadata.TrackCount;
-                provider.PlaylistCount = metadata.PlaylistCount;
-                provider.LastImported = metadata.LastImported;
+                provider.TrackCount = trackCount;
+
+                if (metadata is not null)
+                {
+                    provider.ImportState = ImportState.Imported;
+                    provider.PlaylistCount = metadata.PlaylistCount;
+                    provider.LastImported = metadata.LastImported;
+                }
             }
 
             InstalledProviders.Add(provider);
+
             DashboardWorkspace?.UpdateImportStatus();
         }
     }

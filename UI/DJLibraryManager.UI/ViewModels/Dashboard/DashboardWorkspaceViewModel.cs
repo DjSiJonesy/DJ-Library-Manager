@@ -18,9 +18,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
 
     public ObservableCollection<WorkflowCardViewModel> WorkflowCards { get; } = new();
 
-    /// <summary>
-    /// Contextual guidance displayed on the Dashboard.
-    /// </summary>
     public DashboardGuidanceViewModel Guidance { get; } = new();
 
     private readonly DashboardViewModel _dashboard;
@@ -100,22 +97,48 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                     x.Installed &&
                     x.ImportState == ImportState.Imported);
 
-        var statistics =
-            await App.Services
-                .LibraryStatisticsService
-                .GetStatisticsAsync();
+        var repository =
+            App.Services.LibraryRepository;
 
-        importCard.PrimaryStatisticTitle =
-            "Tracks Imported";
+        try
+        {
+            var trackCount =
+                await repository.GetTrackCountAsync();
 
-        importCard.PrimaryStatisticValue =
-            statistics.LibraryTrackCount.ToString("N0");
+            importCard.PrimaryStatisticTitle =
+                "Tracks Imported";
 
-        importCard.SecondaryStatisticTitle =
-            "Playlists";
+            importCard.PrimaryStatisticValue =
+                trackCount.ToString("N0");
+        }
+        catch (Exception exception)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to load SQLite track count: {exception}");
+        }
 
-        importCard.SecondaryStatisticValue =
-            statistics.LibraryPlaylistCount.ToString("N0");
+        try
+        {
+            var playlistCount =
+                await repository.GetPlaylistCountAsync();
+
+            importCard.SecondaryStatisticTitle =
+                "Playlists";
+
+            importCard.SecondaryStatisticValue =
+                playlistCount.ToString("N0");
+        }
+        catch (Exception exception)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"Unable to load playlist count: {exception}");
+
+            importCard.SecondaryStatisticTitle =
+                "Playlists";
+
+            importCard.SecondaryStatisticValue =
+                "0";
+        }
 
         if (importedProviders == 0)
         {
@@ -190,10 +213,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
     // Analysis
     // ============================================================
 
-    /// <summary>
-    /// Updates the Analysis workflow card from the
-    /// latest persisted analysis result.
-    /// </summary>
     public void UpdateAnalysisStatus()
     {
         if (WorkflowCards.Count < 3)
@@ -253,13 +272,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
     // Search
     // ============================================================
 
-    /// <summary>
-    /// Updates the Search workflow card from the latest
-    /// Analysis and persisted Search state.
-    ///
-    /// Search never changes the library. This card simply
-    /// reports the current Search investigation state.
-    /// </summary>
     public void UpdateSearchStatus()
     {
         if (WorkflowCards.Count < 4)
@@ -310,10 +322,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
         var currentRun =
             searchService.CurrentRun;
 
-        // ========================================================
-        // Search currently running
-        // ========================================================
-
         if (searchService.IsSearching &&
             currentRun is not null)
         {
@@ -339,10 +347,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             return;
         }
 
-        // ========================================================
-        // No Search state yet
-        // ========================================================
-
         if (searchState is null)
         {
             searchCard.Status =
@@ -366,10 +370,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             return;
         }
 
-        // ========================================================
-        // Persisted Search state
-        // ========================================================
-
         var searchedCount =
             searchState.Issues.Count(
                 x => x.IsSearched);
@@ -377,10 +377,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
         var issuesWithResults =
             searchState.Issues.Count(
                 x => x.HasResults);
-
-        // ========================================================
-        // Search complete
-        // ========================================================
 
         if (searchedCount >= totalIssues &&
             totalIssues > 0)
@@ -405,10 +401,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
 
             return;
         }
-
-        // ========================================================
-        // Search partially completed
-        // ========================================================
 
         searchCard.Status =
             "Search Available";
@@ -450,10 +442,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
         _dashboard =
             dashboard;
 
-        // ========================================================
-        // Discovery
-        // ========================================================
-
         WorkflowCards.Add(
             new WorkflowCardViewModel
             {
@@ -478,10 +466,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                 SecondaryStatisticValue =
                     string.Empty
             });
-
-        // ========================================================
-        // Import
-        // ========================================================
 
         WorkflowCards.Add(
             new WorkflowCardViewModel
@@ -514,10 +498,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                     "0"
             });
 
-        // ========================================================
-        // Analysis
-        // ========================================================
-
         WorkflowCards.Add(
             new WorkflowCardViewModel
             {
@@ -548,10 +528,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                 SecondaryStatisticValue =
                     "—"
             });
-
-        // ========================================================
-        // Search
-        // ========================================================
 
         WorkflowCards.Add(
             new WorkflowCardViewModel
@@ -584,10 +560,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                     "Not Started"
             });
 
-        // ========================================================
-        // Improve
-        // ========================================================
-
         WorkflowCards.Add(
             new WorkflowCardViewModel
             {
@@ -615,10 +587,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                 SecondaryStatisticValue =
                     "97"
             });
-
-        // ========================================================
-        // Structure
-        // ========================================================
 
         WorkflowCards.Add(
             new WorkflowCardViewModel
@@ -648,10 +616,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                     "0"
             });
 
-        // ========================================================
-        // Synchronise
-        // ========================================================
-
         WorkflowCards.Add(
             new WorkflowCardViewModel
             {
@@ -680,10 +644,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
                     "No"
             });
 
-        // ========================================================
-        // Initial Status
-        // ========================================================
-
         UpdateDiscoveryStatus();
 
         _ = UpdateImportStatus();
@@ -691,10 +651,6 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
         UpdateAnalysisStatus();
 
         UpdateSearchStatus();
-
-        // ========================================================
-        // Search Progress
-        // ========================================================
 
         App.Services.Search.ProgressChanged +=
             OnSearchProgressChanged;

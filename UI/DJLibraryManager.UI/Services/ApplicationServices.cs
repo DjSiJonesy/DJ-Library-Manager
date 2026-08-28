@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 
 using DJLibraryManager.Core.Services;
 using DJLibraryManager.Core.Services.Library;
 
+using DJLibraryManager.UI.Data;
 using DJLibraryManager.UI.Providers.VirtualDJ.Services;
 using DJLibraryManager.UI.Search.Interfaces;
 using DJLibraryManager.UI.Search.Services;
@@ -26,9 +28,25 @@ public sealed class ApplicationServices
     public ApplicationState ApplicationState { get; }
 
     /// <summary>
+    /// Provides access to the DIASISS SQLite database.
+    ///
+    /// SQLite is being introduced alongside the existing JSON
+    /// library during the persistence migration.
+    /// </summary>
+    public SqliteDatabase SqliteDatabase { get; }
+
+    /// <summary>
     /// Stores and retrieves the application's media library.
     /// </summary>
     public LibraryRepository LibraryRepository { get; }
+
+    /// <summary>
+    /// Migrates the existing JSON library into SQLite.
+    ///
+    /// The migration is available to the application but is not
+    /// executed automatically during application startup.
+    /// </summary>
+    public LibraryMigrationService LibraryMigrationService { get; }
 
     /// <summary>
     /// Provides consolidated statistics for the DIASISS Library.
@@ -100,11 +118,37 @@ public sealed class ApplicationServices
             new ApplicationState();
 
         // ========================================================
+        // SQLite
+        // ========================================================
+
+        var databasePath =
+            Path.Combine(
+                ApplicationPaths.Library,
+                "DIASISS.db");
+
+        SqliteDatabase =
+            new SqliteDatabase(
+                databasePath);
+
+        var sqliteSchema =
+            new SqliteSchema(
+                SqliteDatabase);
+
+        sqliteSchema.EnsureCreated();
+
+        // ========================================================
         // Library
         // ========================================================
 
         LibraryRepository =
-            new LibraryRepository();
+            new LibraryRepository(
+                SqliteDatabase);
+
+        LibraryMigrationService =
+            new LibraryMigrationService(
+                LibraryRepository,
+                SqliteDatabase,
+                sqliteSchema);
 
         MediaLocationRepository =
             new MediaLocationRepository();
@@ -183,18 +227,18 @@ public sealed class ApplicationServices
             };
 
         var metadataEnrichmentProviders =
-                new IMetadataEnrichmentProvider[]
-                {
-                    new MusicBrainzMetadataEnrichmentProvider(),
-                    new DiscogsMetadataEnrichmentProvider(),
-                    new ReccoBeatsMetadataEnrichmentProvider()
-                };
+            new IMetadataEnrichmentProvider[]
+            {
+                new MusicBrainzMetadataEnrichmentProvider(),
+                new DiscogsMetadataEnrichmentProvider(),
+                new ReccoBeatsMetadataEnrichmentProvider()
+            };
 
-                    var metadataSearchService =
-                        new MetadataSearchService(
-                            metadataProviders,
-                            enrichmentProviders:
-                                metadataEnrichmentProviders);
+        var metadataSearchService =
+            new MetadataSearchService(
+                metadataProviders,
+                enrichmentProviders:
+                    metadataEnrichmentProviders);
 
         // --------------------------------------------------------
         // Other Search Services
