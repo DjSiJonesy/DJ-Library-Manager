@@ -194,7 +194,8 @@ public sealed class ApplicationServices
         LibraryStatisticsService =
             new LibraryStatisticsService(
                 LibraryRepository,
-                MediaImportRepository);
+                MediaImportRepository,
+                DiscoveryRepository);
 
         Analysis =
             new AnalysisService(

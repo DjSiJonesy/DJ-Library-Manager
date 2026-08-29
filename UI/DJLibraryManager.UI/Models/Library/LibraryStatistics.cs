@@ -5,6 +5,11 @@
 ///
 /// This model acts as the single source of truth for all
 /// library-related statistics displayed throughout the application.
+///
+/// Current library statistics are based on the authoritative
+/// DIASISS SQLite library.
+///
+/// Import statistics represent media import activity.
 /// </summary>
 public sealed class LibraryStatistics
 {
@@ -21,6 +26,40 @@ public sealed class LibraryStatistics
     /// Total playlists imported into the DIASISS Library.
     /// </summary>
     public int LibraryPlaylistCount { get; init; }
+
+    // ============================================================
+    // Library Overview
+    // ============================================================
+
+    /// <summary>
+    /// Number of unique drives containing media files
+    /// currently stored in the DIASISS Library.
+    /// </summary>
+    public int DriveCount { get; init; }
+
+    /// <summary>
+    /// Number of unique folders containing media files
+    /// currently stored in the DIASISS Library.
+    /// </summary>
+    public int FolderCount { get; init; }
+
+    /// <summary>
+    /// Number of audio files currently stored in the
+    /// DIASISS Library.
+    /// </summary>
+    public int AudioFileCount { get; init; }
+
+    /// <summary>
+    /// Number of video files currently stored in the
+    /// DIASISS Library.
+    /// </summary>
+    public int VideoFileCount { get; init; }
+
+    /// <summary>
+    /// Total size in bytes of all media files currently
+    /// stored in the DIASISS Library.
+    /// </summary>
+    public long TotalSizeBytes { get; init; }
 
     // ============================================================
     // Provider Imports

@@ -14,11 +14,13 @@
         <!-- ===================================================== -->
 
         <Grid
-            ColumnDefinitions="*,16,*"
-            RowDefinitions="Auto,Auto,Auto,Auto"
+            ColumnDefinitions="*,12,*,12,*"
+            RowDefinitions="Auto,Auto,Auto"
             RowSpacing="4">
 
+            <!-- ================================================= -->
             <!-- Row 1 -->
+            <!-- ================================================= -->
 
             <common:PropertyRow
                 Grid.Row="0"
@@ -34,7 +36,17 @@
                 Label="Folders"
                 Value="{Binding FolderCountDisplay}" />
 
+            <common:PropertyRow
+                Grid.Row="0"
+                Grid.Column="4"
+                Icon="💾"
+                Label="Total Size"
+                Value="{Binding TotalSize}" />
+
+
+            <!-- ================================================= -->
             <!-- Row 2 -->
+            <!-- ================================================= -->
 
             <common:PropertyRow
                 Grid.Row="1"
@@ -50,7 +62,16 @@
                 Label="Video"
                 Value="{Binding VideoFileCountDisplay}" />
 
+            <common:PropertyRow
+                Grid.Row="1"
+                Grid.Column="4"
+                Icon="🎧"
+                Label="Total"
+                Value="{Binding TotalFileCountDisplay}" />
+
+            <!-- ================================================= -->
             <!-- Row 3 -->
+            <!-- ================================================= -->
 
             <common:PropertyRow
                 Grid.Row="2"
@@ -66,14 +87,12 @@
                 Label="Duplicates"
                 Value="{Binding DuplicateFileCountDisplay}" />
 
-            <!-- Row 4 -->
-
             <common:PropertyRow
-                Grid.Row="3"
-                Grid.ColumnSpan="3"
-                Icon="💾"
-                Label="Total Size"
-                Value="{Binding TotalSize}" />
+                Grid.Row="2"
+                Grid.Column="4"
+                Icon="📋"
+                Label="Meta Issues"
+                Value="{Binding MetadataIssueCountDisplay}" />
 
         </Grid>
 

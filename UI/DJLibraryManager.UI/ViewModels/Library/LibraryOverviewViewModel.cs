@@ -1,13 +1,26 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using DJLibraryManager.UI.Analysis.Models;
+using DJLibraryManager.UI.Models.Media;
+
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DJLibraryManager.UI.ViewModels;
 
 /// <summary>
 /// Provides a live overview of the entire DIASISS DJ library.
+///
 /// Displayed permanently within the left navigation panel.
+///
+/// Current library statistics are supplied by
+/// LibraryStatisticsService.
+///
+/// Analysis-specific values such as Health, Missing,
+/// Duplicates and Metadata issues are supplied by
+/// the AnalysisRepository.
 /// </summary>
 public partial class LibraryOverviewViewModel : ViewModelBase
 {
@@ -22,8 +35,12 @@ public partial class LibraryOverviewViewModel : ViewModelBase
         App.Services.ApplicationState.AnalysisCompleted +=
             ApplicationState_Changed;
 
-        Refresh();
+        _ = RefreshAsync();
     }
+
+    // ============================================================
+    // Library Statistics
+    // ============================================================
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DriveCountDisplay))]
@@ -32,6 +49,10 @@ public partial class LibraryOverviewViewModel : ViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FolderCountDisplay))]
     private int folderCount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalFileCountDisplay))]
+    private int totalFileCount;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AudioFileCountDisplay))]
@@ -50,6 +71,10 @@ public partial class LibraryOverviewViewModel : ViewModelBase
     private int duplicateFileCount;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MetadataIssueCountDisplay))]
+    private int metadataIssueCount;
+
+    [ObservableProperty]
     private string totalSize = "0 Bytes";
 
     [ObservableProperty]
@@ -65,6 +90,9 @@ public partial class LibraryOverviewViewModel : ViewModelBase
     public string FolderCountDisplay =>
         FolderCount.ToString("N0");
 
+    public string TotalFileCountDisplay =>
+        TotalFileCount.ToString("N0");
+
     public string AudioFileCountDisplay =>
         AudioFileCount.ToString("N0");
 
@@ -77,6 +105,9 @@ public partial class LibraryOverviewViewModel : ViewModelBase
     public string DuplicateFileCountDisplay =>
         DuplicateFileCount.ToString("N0");
 
+    public string MetadataIssueCountDisplay =>
+        MetadataIssueCount.ToString("N0");
+
     // ============================================================
     // Application State
     // ============================================================
@@ -85,7 +116,7 @@ public partial class LibraryOverviewViewModel : ViewModelBase
         object? sender,
         EventArgs e)
     {
-        Refresh();
+        _ = RefreshAsync();
     }
 
     // ============================================================
@@ -93,77 +124,122 @@ public partial class LibraryOverviewViewModel : ViewModelBase
     // ============================================================
 
     /// <summary>
-    /// Refreshes the library overview from the current
-    /// discovery and analysis data.
+    /// Refreshes the Library Overview from the current
+    /// DIASISS library statistics and analysis results.
     /// </summary>
     public void Refresh()
     {
-        RefreshDiscoveryData();
-        RefreshAnalysisData();
+        _ = RefreshAsync();
     }
 
-    // ============================================================
-    // Discovery Data
-    // ============================================================
-
-    private void RefreshDiscoveryData()
+    /// <summary>
+    /// Asynchronously refreshes the Library Overview.
+    ///
+    /// Library statistics come from LibraryStatisticsService,
+    /// which uses the authoritative DIASISS SQLite library.
+    ///
+    /// Analysis values come from the current analysis result.
+    /// </summary>
+    public async Task RefreshAsync()
     {
-        var repository =
-            App.Services.DiscoveryRepository;
+        try
+        {
+            // ----------------------------------------------------
+            // Get authoritative library statistics.
+            // ----------------------------------------------------
 
-        var sessions =
-            repository.DiscoverySessions;
+            var statistics =
+                await App.Services
+                    .LibraryStatisticsService
+                    .GetStatisticsAsync();
 
-        DriveCount =
-            sessions.Count;
+            // ----------------------------------------------------
+            // Get current analysis result.
+            // ----------------------------------------------------
 
-        FolderCount =
-            sessions.Sum(x => x.FolderCount);
+            var analysis =
+                App.Services
+                    .AnalysisRepository
+                    .CurrentAnalysis;
 
-        AudioFileCount =
-            sessions.Sum(x => x.AudioFileCount);
+            // ----------------------------------------------------
+            // Update the UI on the Avalonia UI thread.
+            // ----------------------------------------------------
 
-        VideoFileCount =
-            sessions.Sum(x => x.VideoFileCount);
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                // =================================================
+                // Library Statistics
+                // =================================================
 
-        TotalSize =
-            FormatSize(
-                sessions.Sum(x => x.TotalSizeBytes));
+                DriveCount =
+                    statistics.DriveCount;
+
+                FolderCount =
+                    statistics.FolderCount;
+
+                TotalFileCount =
+                    statistics.LibraryTrackCount;
+
+                AudioFileCount =
+                    statistics.AudioFileCount;
+
+                VideoFileCount =
+                    statistics.VideoFileCount;
+
+                TotalSize =
+                    FormatSize(
+                        statistics.TotalSizeBytes);
+
+                // =================================================
+                // Analysis Statistics
+                // =================================================
+
+                if (analysis is null)
+                {
+                    MissingFileCount = 0;
+                    DuplicateFileCount = 0;
+                    MetadataIssueCount = 0;
+                    HealthScore = 100;
+
+                    return;
+                }
+
+                MissingFileCount =
+                    GetCategoryIssueCount(
+                        analysis,
+                        "File Integrity");
+
+                DuplicateFileCount =
+                    GetCategoryIssueCount(
+                        analysis,
+                        "Duplicates");
+
+                MetadataIssueCount =
+                    GetCategoryIssueCount(
+                        analysis,
+                        "Metadata");
+
+                HealthScore =
+                    (int)Math.Round(
+                        analysis.HealthScore,
+                        MidpointRounding.AwayFromZero);
+            });
+        }
+        catch
+        {
+            // ----------------------------------------------------
+            // The Overview must never bring down the application
+            // because a statistics refresh failed.
+            //
+            // The existing values are retained.
+            // ----------------------------------------------------
+        }
     }
 
     // ============================================================
     // Analysis Data
     // ============================================================
-
-    private void RefreshAnalysisData()
-    {
-        var analysis =
-            App.Services.AnalysisRepository.CurrentAnalysis;
-
-        if (analysis is null)
-        {
-            MissingFileCount = 0;
-            DuplicateFileCount = 0;
-            HealthScore = 100;
-
-            return;
-        }
-
-        MissingFileCount =
-            GetCategoryIssueCount(
-                analysis,
-                "File Integrity");
-
-        DuplicateFileCount =
-            GetCategoryIssueCount(
-                analysis,
-                "Duplicates");
-
-        HealthScore =
-            (int)Math.Round(
-                analysis.HealthScore,
-                MidpointRounding.AwayFromZero);
-    }
 
     private static int GetCategoryIssueCount(
         LibraryAnalysisResult analysis,
@@ -182,11 +258,16 @@ public partial class LibraryOverviewViewModel : ViewModelBase
     // Formatting
     // ============================================================
 
-    private static string FormatSize(long bytes)
+    private static string FormatSize(
+        long bytes)
     {
         const double kb = 1024;
         const double mb = kb * 1024;
         const double gb = mb * 1024;
+        const double tb = gb * 1024;
+
+        if (bytes >= tb)
+            return $"{bytes / tb:N2} TB";
 
         if (bytes >= gb)
             return $"{bytes / gb:N2} GB";
