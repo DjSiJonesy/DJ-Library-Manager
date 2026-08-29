@@ -14,6 +14,10 @@
 
     <Grid RowDefinitions="Auto,20,*">
 
+        <!-- ===================================================== -->
+        <!-- Search Header -->
+        <!-- ===================================================== -->
+
         <workflow:WorkflowHeader
             x:Name="SearchHeader"
             Grid.Row="0"
@@ -25,34 +29,87 @@
             NextText="Improve →"
             NextCommand="{Binding NextCommand}"/>
 
-        <Grid Grid.Row="2" RowDefinitions="Auto,20,*">
+        <!-- ===================================================== -->
+        <!-- Search Workspace -->
+        <!-- ===================================================== -->
 
-            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+        <Grid
+            Grid.Row="2"
+            RowDefinitions="Auto,20,*">
 
-                <ItemsControl Grid.Column="0" ItemsSource="{Binding Categories}">
+            <!-- ================================================= -->
+            <!-- Categories / Workspace Action -->
+            <!-- ================================================= -->
+
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="12">
+
+                <!-- Search Categories -->
+
+                <ItemsControl
+                    Grid.Column="0"
+                    ItemsSource="{Binding Categories}">
+
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="12"/>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="12"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
 
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="models:SearchCategoryInfo">
+                        <DataTemplate
+                            x:DataType="models:SearchCategoryInfo">
+
                             <Button
                                 Theme="{StaticResource DJLM.PrimaryButton}"
                                 Padding="12,8"
                                 MinWidth="170"
                                 Command="{Binding $parent[ItemsControl].DataContext.SelectCategoryCommand}"
                                 CommandParameter="{Binding}">
-                                <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
-                                    <TextBlock Grid.Column="0" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" Text="{Binding Icon}"/>
-                                    <TextBlock Grid.Column="1" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding Name}"/>
-                                    <TextBlock Grid.Column="2" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0,0,0" Text="{Binding IssueCount, StringFormat={}{0:N0}}"/>
+
+                                <Grid
+                                    ColumnDefinitions="Auto,*,Auto"
+                                    VerticalAlignment="Center">
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        FontSize="16"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0"
+                                        Text="{Binding Icon}"/>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding Name}"/>
+
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center"
+                                        Margin="12,0,0,0"
+                                        Text="{Binding IssueCount, StringFormat={}{0:N0}}"/>
+
                                 </Grid>
+
                             </Button>
+
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
+
                 </ItemsControl>
+
+                <!-- ================================================= -->
+                <!-- Export Metadata -->
+                <!-- ================================================= -->
 
                 <Button
                     Grid.Column="1"
@@ -60,16 +117,35 @@
                     Padding="12,8"
                     MinHeight="46"
                     VerticalAlignment="Center"
-                    Content="📁 Open DIASISS Duplicates →"
-                    Command="{Binding OpenDuplicatesCommand, ElementName=SearchHeader}"/>
+                    Content="📤 Export Metadata"
+                    Command="{Binding ExportMetadataCommand}"
+                    IsVisible="{Binding HasSelectedMetadataForExport}"
+                    IsEnabled="{Binding !IsSearching}"/>
+
             </Grid>
 
-            <Grid Grid.Row="2" RowDefinitions="Auto,20,*">
+            <!-- ================================================= -->
+            <!-- Category Workspace -->
+            <!-- ================================================= -->
 
-                <Border Grid.Row="0" Classes="card-secondary" Padding="12">
-                    <Grid ColumnDefinitions="*,Auto">
+            <Grid
+                Grid.Row="2"
+                RowDefinitions="Auto,20,*">
 
-                        <StackPanel Spacing="5">
+                <!-- ================================================= -->
+                <!-- Category Information -->
+                <!-- ================================================= -->
+
+                <Border
+                    Grid.Row="0"
+                    Classes="card-secondary"
+                    Padding="12">
+
+                    <Grid
+                        ColumnDefinitions="*,Auto">
+
+                        <StackPanel
+                            Spacing="5">
 
                             <TextBlock
                                 Classes="subheading"
@@ -85,12 +161,17 @@
                                 Classes="caption"
                                 Text="{Binding SearchStatus}"/>
 
+                            <!-- ===================================== -->
                             <!-- Duplicates Search All Progress -->
+                            <!-- ===================================== -->
+
                             <StackPanel
                                 Spacing="5"
                                 IsVisible="{Binding IsDuplicateCategory}">
 
-                                <Grid ColumnDefinitions="*,Auto">
+                                <Grid
+                                    ColumnDefinitions="*,Auto">
+
                                     <TextBlock
                                         FontSize="12"
                                         FontWeight="SemiBold"
@@ -100,6 +181,7 @@
                                         Grid.Column="1"
                                         FontSize="12"
                                         Text="{Binding DuplicateSearchProgress, StringFormat={}{0:F0}%}"/>
+
                                 </Grid>
 
                                 <ProgressBar
@@ -117,12 +199,17 @@
 
                             </StackPanel>
 
+                            <!-- ===================================== -->
                             <!-- Metadata Search All Progress -->
+                            <!-- ===================================== -->
+
                             <StackPanel
                                 Spacing="5"
                                 IsVisible="{Binding IsMetadataCategory}">
 
-                                <Grid ColumnDefinitions="*,Auto">
+                                <Grid
+                                    ColumnDefinitions="*,Auto">
+
                                     <TextBlock
                                         FontSize="12"
                                         FontWeight="SemiBold"
@@ -132,6 +219,7 @@
                                         Grid.Column="1"
                                         FontSize="12"
                                         Text="{Binding MetadataSearchProgress, StringFormat={}{0:F0}%}"/>
+
                                 </Grid>
 
                                 <ProgressBar
@@ -150,6 +238,10 @@
                             </StackPanel>
 
                         </StackPanel>
+
+                        <!-- ========================================= -->
+                        <!-- Search Actions -->
+                        <!-- ========================================= -->
 
                         <StackPanel
                             Grid.Column="1"
@@ -174,21 +266,51 @@
                         </StackPanel>
 
                     </Grid>
+
                 </Border>
 
-                <Grid Grid.Row="2" ColumnDefinitions="*,20,*">
+                <!-- ================================================= -->
+                <!-- Issues / Results -->
+                <!-- ================================================= -->
 
-                    <Border Grid.Column="0" Classes="card-secondary" Padding="12">
-                        <Grid RowDefinitions="Auto,8,Auto,12,*">
+                <Grid
+                    Grid.Row="2"
+                    ColumnDefinitions="*,20,*">
 
-                            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                    <!-- ================================================= -->
+                    <!-- Issues -->
+                    <!-- ================================================= -->
 
-                                <TextBlock Grid.Column="0" Classes="subheading">
+                    <Border
+                        Grid.Column="0"
+                        Classes="card-secondary"
+                        Padding="12">
+
+                        <Grid
+                            RowDefinitions="Auto,8,Auto,12,*">
+
+                            <!-- Issues Header -->
+
+                            <Grid
+                                Grid.Row="0"
+                                ColumnDefinitions="*,Auto"
+                                VerticalAlignment="Center">
+
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Classes="subheading">
+
                                     <Run Text="Issues — "/>
-                                    <Run Text="{Binding SelectedCategory.Name, TargetNullValue=Search}"/>
+
+                                    <Run
+                                        Text="{Binding SelectedCategory.Name, TargetNullValue=Search}"/>
+
                                 </TextBlock>
 
-                                <!-- Duplicates: independent Select All Recommended control -->
+                                <!-- ================================= -->
+                                <!-- Duplicates Select All Recommended -->
+                                <!-- ================================= -->
+
                                 <Button
                                     Grid.Column="1"
                                     Theme="{StaticResource DJLM.SecondaryButton}"
@@ -196,14 +318,38 @@
                                     Command="{Binding SelectAllRecommendedCommand}"
                                     IsVisible="{Binding IsDuplicateCategory}"
                                     IsEnabled="{Binding !IsSearching}">
-                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <TextBlock FontSize="14" VerticalAlignment="Center" Text="☑" IsVisible="{Binding AllRecommendedSelected}"/>
-                                        <TextBlock FontSize="14" VerticalAlignment="Center" Text="☐" IsVisible="{Binding !AllRecommendedSelected}"/>
-                                        <TextBlock FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Text="Select All Recommended"/>
+
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Spacing="6"
+                                        VerticalAlignment="Center">
+
+                                        <TextBlock
+                                            FontSize="14"
+                                            VerticalAlignment="Center"
+                                            Text="☑"
+                                            IsVisible="{Binding AllRecommendedSelected}"/>
+
+                                        <TextBlock
+                                            FontSize="14"
+                                            VerticalAlignment="Center"
+                                            Text="☐"
+                                            IsVisible="{Binding !AllRecommendedSelected}"/>
+
+                                        <TextBlock
+                                            FontSize="11"
+                                            FontWeight="SemiBold"
+                                            VerticalAlignment="Center"
+                                            Text="Select All Recommended"/>
+
                                     </StackPanel>
+
                                 </Button>
 
-                                <!-- Metadata: independent Select All Recommended control -->
+                                <!-- ================================= -->
+                                <!-- Metadata Select All Recommended -->
+                                <!-- ================================= -->
+
                                 <Button
                                     Grid.Column="1"
                                     Theme="{StaticResource DJLM.SecondaryButton}"
@@ -211,14 +357,37 @@
                                     Command="{Binding SelectAllRecommendedMetadataOnlyCommand}"
                                     IsVisible="{Binding IsMetadataCategory}"
                                     IsEnabled="{Binding !IsSearching}">
-                                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                        <TextBlock FontSize="14" VerticalAlignment="Center" Text="☑" IsVisible="{Binding AllRecommendedSelected}"/>
-                                        <TextBlock FontSize="14" VerticalAlignment="Center" Text="☐" IsVisible="{Binding !AllRecommendedSelected}"/>
-                                        <TextBlock FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Text="Select All Recommended"/>
+
+                                    <StackPanel
+                                        Orientation="Horizontal"
+                                        Spacing="6"
+                                        VerticalAlignment="Center">
+
+                                        <TextBlock
+                                            FontSize="14"
+                                            VerticalAlignment="Center"
+                                            Text="☑"
+                                            IsVisible="{Binding AllRecommendedSelected}"/>
+
+                                        <TextBlock
+                                            FontSize="14"
+                                            VerticalAlignment="Center"
+                                            Text="☐"
+                                            IsVisible="{Binding !AllRecommendedSelected}"/>
+
+                                        <TextBlock
+                                            FontSize="11"
+                                            FontWeight="SemiBold"
+                                            VerticalAlignment="Center"
+                                            Text="Select All Recommended"/>
+
                                     </StackPanel>
+
                                 </Button>
 
                             </Grid>
+
+                            <!-- Issue Search -->
 
                             <TextBox
                                 Grid.Row="2"
@@ -227,15 +396,25 @@
                                 Padding="8,6"
                                 HorizontalContentAlignment="Stretch"/>
 
+                            <!-- Issue List -->
+
                             <ListBox
                                 Grid.Row="4"
                                 ItemsSource="{Binding FilteredIssues}"
                                 SelectedItem="{Binding SelectedIssue}">
 
                                 <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="models:SearchIssue">
-                                        <Border Padding="4" Margin="0" CornerRadius="5">
-                                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                    <DataTemplate
+                                        x:DataType="models:SearchIssue">
+
+                                        <Border
+                                            Padding="4"
+                                            Margin="0"
+                                            CornerRadius="5">
+
+                                            <Grid
+                                                ColumnDefinitions="*,Auto"
+                                                RowDefinitions="Auto,Auto">
 
                                                 <TextBlock
                                                     Grid.Row="0"
@@ -262,26 +441,40 @@
                                                     IsVisible="{Binding Type, Converter={StaticResource StringEqualsConverter}, ConverterParameter=DuplicateTrack}"/>
 
                                             </Grid>
+
                                         </Border>
+
                                     </DataTemplate>
                                 </ListBox.ItemTemplate>
 
                             </ListBox>
 
                         </Grid>
+
                     </Border>
 
-                    <Grid Grid.Column="2">
+                    <!-- ================================================= -->
+                    <!-- Search Results -->
+                    <!-- ================================================= -->
+
+                    <Grid
+                        Grid.Column="2">
+
                         <workflow:WorkflowSearchResults
                             Heading="{Binding SelectedCategory.Name}"
                             ResultType="{Binding SelectedCategory.Name}"
                             Issue="{Binding SelectedIssue}"
                             Results="{Binding SelectedIssue.Results}"
                             ResultSelected="WorkflowSearchResults_ResultSelected"/>
+
                     </Grid>
 
                 </Grid>
+
             </Grid>
+
         </Grid>
+
     </Grid>
+
 </UserControl>

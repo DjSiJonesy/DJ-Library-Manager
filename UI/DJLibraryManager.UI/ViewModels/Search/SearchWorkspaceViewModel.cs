@@ -1,4 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
+
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
 using DJLibraryManager.Core.Workflow;
@@ -7,11 +12,13 @@ using DJLibraryManager.UI.Analysis.Models;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Search;
 using DJLibraryManager.UI.Search.Models;
+using DJLibraryManager.UI.Services;
 using DJLibraryManager.UI.ViewModels.Workspace;
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -140,6 +147,71 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         IsMetadataCategory;
 
     /// <summary>
+    /// Indicates whether the selected issue is a Metadata issue.
+    /// </summary>
+    public bool IsMetadataIssue =>
+        SelectedIssue is not null &&
+        string.Equals(
+            SelectedIssue.Category,
+            "Metadata",
+            StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Number of currently selected metadata recommendations
+    /// for the selected issue.
+    /// </summary>
+    public int SelectedMetadataChangeCount =>
+        SelectedIssue?
+            .MetadataRecommendations
+            .Count(
+                recommendation =>
+                    recommendation.IsSelected)
+        ?? 0;
+
+    /// <summary>
+    /// Number of metadata recommendations that can be selected
+    /// for the selected issue.
+    /// </summary>
+    public int ConfirmableMetadataChangeCount =>
+        SelectedIssue?
+            .MetadataRecommendations
+            .Count(
+                recommendation =>
+                    recommendation.IsRecommended &&
+                    recommendation.IsChange)
+        ?? 0;
+
+    public bool HasConfirmableMetadataChanges =>
+        ConfirmableMetadataChangeCount > 0;
+
+    /// <summary>
+    /// Indicates whether at least one Metadata change has been
+    /// selected anywhere in the current Metadata Search workspace.
+    ///
+    /// This is the visibility condition for the Export Metadata
+    /// action.
+    ///
+    /// The selection is evaluated across all Metadata issues rather
+    /// than only the currently selected issue.
+    /// </summary>
+    public bool HasSelectedMetadataForExport =>
+        IsMetadataCategory &&
+        Issues
+            .Where(
+                issue =>
+                    string.Equals(
+                        issue.Category,
+                        "Metadata",
+                        StringComparison.OrdinalIgnoreCase))
+            .SelectMany(
+                issue =>
+                    issue.MetadataRecommendations)
+            .Any(
+                recommendation =>
+                    recommendation.IsSelected &&
+                    recommendation.IsChange);
+
+    /// <summary>
     /// Indicates whether the current workspace contains selections
     /// made by the bulk Select All Recommended operation.
     ///
@@ -193,44 +265,6 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             return false;
         }
     }
-
-    /// <summary>
-    /// Indicates whether the selected issue is a Metadata issue.
-    /// </summary>
-    public bool IsMetadataIssue =>
-        SelectedIssue is not null &&
-        string.Equals(
-            SelectedIssue.Category,
-            "Metadata",
-            StringComparison.OrdinalIgnoreCase);
-
-    /// <summary>
-    /// Number of currently selected metadata recommendations
-    /// for the selected issue.
-    /// </summary>
-    public int SelectedMetadataChangeCount =>
-        SelectedIssue?
-            .MetadataRecommendations
-            .Count(
-                recommendation =>
-                    recommendation.IsSelected)
-        ?? 0;
-
-    /// <summary>
-    /// Number of metadata recommendations that can be selected
-    /// for the selected issue.
-    /// </summary>
-    public int ConfirmableMetadataChangeCount =>
-        SelectedIssue?
-            .MetadataRecommendations
-            .Count(
-                recommendation =>
-                    recommendation.IsRecommended &&
-                    recommendation.IsChange)
-        ?? 0;
-
-    public bool HasConfirmableMetadataChanges =>
-        ConfirmableMetadataChangeCount > 0;
 
     // ============================================================
     // Constructor
@@ -502,12 +536,12 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         foreach (var issue in
                  filtered
-                     .OrderBy(
-                         issue => issue.DisplayName,
-                         StringComparer.OrdinalIgnoreCase)
-                     .ThenBy(
-                         issue => issue.FilePath,
-                         StringComparer.OrdinalIgnoreCase))
+                    .OrderBy(
+                        issue => issue.DisplayName,
+                        StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(
+                        issue => issue.FilePath,
+                        StringComparer.OrdinalIgnoreCase))
         {
             FilteredIssues.Add(
                 issue);
@@ -526,8 +560,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             return;
 
         if (ReferenceEquals(
-                SelectedCategory,
-                category))
+            SelectedCategory,
+            category))
         {
             SelectIssuesForCategory();
 
@@ -633,6 +667,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         SearchStatus =
             GetCategorySearchStatus();
+
+        NotifyMetadataRecommendationProperties();
     }
 
     // ============================================================
@@ -686,7 +722,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                  issue.RelatedFilePaths)
         {
             if (string.IsNullOrWhiteSpace(
-                    relatedPath))
+                relatedPath))
             {
                 continue;
             }
@@ -726,7 +762,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                  saved.RelatedFilePaths)
         {
             if (!string.IsNullOrWhiteSpace(
-                    path))
+                path))
             {
                 target.RelatedFilePaths.Add(
                     path);
@@ -1369,6 +1405,223 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     }
 
     // ============================================================
+    // Export Metadata
+    // ============================================================
+
+    /// <summary>
+    /// Exports only the Metadata changes currently selected by the
+    /// user.
+    ///
+    /// SearchExportService is responsible for extracting the selected
+    /// metadata recommendations from the supplied SearchIssue objects.
+    /// The ViewModel therefore passes SearchIssue objects directly and
+    /// does not create a second export-specific selection model.
+    /// </summary>
+    [RelayCommand]
+    private async Task ExportMetadata()
+    {
+        if (IsSearching ||
+            App.Services.Search.IsSearching)
+        {
+            return;
+        }
+
+        if (!IsMetadataCategory)
+        {
+            return;
+        }
+
+        var metadataIssues =
+            Issues
+                .Where(
+                    issue =>
+                        string.Equals(
+                            issue.Category,
+                            "Metadata",
+                            StringComparison.OrdinalIgnoreCase))
+                .Where(
+                    issue =>
+                        issue.MetadataRecommendations.Any(
+                            recommendation =>
+                                recommendation.IsSelected &&
+                                recommendation.IsChange))
+                .ToList();
+
+        if (metadataIssues.Count == 0)
+        {
+            SearchStatus =
+                "No selected metadata changes to export";
+
+            NotifyMetadataRecommendationProperties();
+
+            return;
+        }
+
+        var application =
+            Avalonia.Application.Current;
+
+        if (application?.ApplicationLifetime
+            is not Avalonia.Controls.ApplicationLifetimes
+                .IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            SearchStatus =
+                "Unable to access application window";
+
+            return;
+        }
+
+        var topLevel =
+            Avalonia.Controls.TopLevel.GetTopLevel(
+                desktop.MainWindow);
+
+        if (topLevel is null)
+        {
+            SearchStatus =
+                "Unable to open Save File dialog";
+
+            return;
+        }
+
+        var storageProvider =
+            topLevel.StorageProvider;
+
+        var file =
+            await storageProvider.SaveFilePickerAsync(
+                new Avalonia.Platform.Storage.FilePickerSaveOptions
+                {
+                    Title =
+                        "Export Selected Metadata",
+
+                    SuggestedFileName =
+                        "DIASISS_Selected_Metadata",
+
+                    DefaultExtension =
+                        "xlsx",
+
+                    FileTypeChoices =
+                        new[]
+                        {
+                        new Avalonia.Platform.Storage.FilePickerFileType(
+                            "Excel Workbook")
+                        {
+                            Patterns =
+                                new[]
+                                {
+                                    "*.xlsx"
+                                }
+                        },
+
+                        new Avalonia.Platform.Storage.FilePickerFileType(
+                            "CSV File")
+                        {
+                            Patterns =
+                                new[]
+                                {
+                                    "*.csv"
+                                }
+                        },
+
+                        new Avalonia.Platform.Storage.FilePickerFileType(
+                            "JSON File")
+                        {
+                            Patterns =
+                                new[]
+                                {
+                                    "*.json"
+                                }
+                        }
+                        }
+                });
+
+        if (file is null)
+        {
+            return;
+        }
+
+        var filePath =
+            file.TryGetLocalPath();
+
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            SearchStatus =
+                "Unable to access selected file";
+
+            return;
+        }
+
+        try
+        {
+            var extension =
+                System.IO.Path
+                    .GetExtension(filePath)
+                    .ToLowerInvariant();
+
+            switch (extension)
+            {
+                case ".xlsx":
+
+                    await App.Services
+                        .SearchExportService
+                        .ExportXlsxAsync(
+                            metadataIssues,
+                            filePath);
+
+                    break;
+
+                case ".csv":
+
+                    await App.Services
+                        .SearchExportService
+                        .ExportCsvAsync(
+                            metadataIssues,
+                            filePath);
+
+                    break;
+
+                case ".json":
+
+                    await App.Services
+                        .SearchExportService
+                        .ExportJsonAsync(
+                            metadataIssues,
+                            filePath);
+
+                    break;
+
+                default:
+
+                    SearchStatus =
+                        "Unsupported export file type";
+
+                    return;
+            }
+
+            SearchStatus =
+                $"{metadataIssues.Sum(issue => issue.MetadataRecommendations.Count(
+                    recommendation =>
+                        recommendation.IsSelected &&
+                        recommendation.IsChange)):N0} metadata changes exported";
+        }
+        catch
+        {
+            SearchStatus =
+                "Metadata export failed";
+
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Represents one metadata recommendation selected for export.
+    ///
+    /// The SearchIssue is retained alongside the recommendation so
+    /// the export service can identify the affected track.
+    /// </summary>
+    private sealed record SelectedMetadataExportItem(
+        SearchIssue Issue,
+        MetadataChangeRecommendation Recommendation);
+
+    // ============================================================
     // Metadata Property Notifications
     // ============================================================
 
@@ -1385,6 +1638,9 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         OnPropertyChanged(
             nameof(HasConfirmableMetadataChanges));
+
+        OnPropertyChanged(
+            nameof(HasSelectedMetadataForExport));
     }
 
     // ============================================================
@@ -1513,7 +1769,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         IsSearching =
             App.Services.Search.IsSearching;
 
-        UpdateSearchProgress(run);
+        UpdateSearchProgress(
+            run);
 
         UpdateSearchRunStatus();
     }
@@ -1713,7 +1970,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         IsSearching =
             App.Services.Search.IsSearching;
 
-        UpdateSearchProgress(run);
+        UpdateSearchProgress(
+            run);
 
         if (run.Status == "Running")
         {
@@ -1735,6 +1993,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         OnPropertyChanged(
             nameof(AllRecommendedSelected));
+
+        NotifyMetadataRecommendationProperties();
     }
 
     // ============================================================
@@ -1748,7 +2008,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         LoadAnalysisSummary();
     }
 
-    // ============================================================
+     // ============================================================
     // Workflow Navigation
     // ============================================================
 

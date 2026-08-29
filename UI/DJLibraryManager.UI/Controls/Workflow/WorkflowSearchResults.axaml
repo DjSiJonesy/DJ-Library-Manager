@@ -446,7 +446,7 @@
                                     Grid.Column="1"
                                     Theme="{StaticResource DJLM.SecondaryButton}"
                                     Padding="8,4"
-                                    Content="↔ Swap Artist / Title"
+                                    Content="🔄 Swap Artist / Title"
                                     Click="SwapArtistTitle_Click"
                                     IsVisible="{Binding IsMetadataResults,
                                                         ElementName=Root}"

@@ -259,7 +259,7 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             "Health Score";
 
         analysisCard.PrimaryStatisticValue =
-            $"{analysis.HealthScore:F1}%";
+            $"{analysis.HealthScore:F0}%";
 
         analysisCard.SecondaryStatisticTitle =
             "Issues Found";

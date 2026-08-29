@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+
 using DJLibraryManager.UI.Models.Search;
 using DJLibraryManager.UI.ViewModels.Search;
 

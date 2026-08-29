@@ -105,6 +105,8 @@ public sealed class ApplicationServices
     /// </summary>
     public SearchService Search { get; }
 
+    public SearchExportService SearchExportService { get; }
+
     public ApplicationServices()
     {
         // ========================================================
@@ -266,5 +268,8 @@ public sealed class ApplicationServices
                 providerSearchService,
                 SearchRepository,
                 AnalysisRepository);
+
+        SearchExportService =
+            new SearchExportService();
     }
 }
