@@ -15,7 +15,8 @@
             Description="Auto-Discovery of your installed DJ software and the route media locations on your computer."
 
             ShowPrevious="False"
-
+            ShowBackupProtection="True"
+            ShowDuplicateProtection="False"
             ShowSecondary="True"
             SecondaryText="↻ Re-Scan"
             SecondaryCommand="{Binding ValidateDiscoveryCommand}"

@@ -2022,6 +2022,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
     [RelayCommand]
     private void Next()
     {
-        // Improve workspace will be connected here.
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Improve);
     }
 }

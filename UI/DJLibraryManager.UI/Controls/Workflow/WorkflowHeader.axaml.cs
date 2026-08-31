@@ -161,6 +161,26 @@ public partial class WorkflowHeader : UserControl
     }
 
     // ============================================================
+    // Backup Protection
+    // ============================================================
+
+    /// <summary>
+    /// Determines whether the Backup Protection notification
+    /// is displayed in the workflow header.
+    /// </summary>
+    public static readonly StyledProperty<bool>
+        ShowBackupProtectionProperty =
+            AvaloniaProperty.Register<WorkflowHeader, bool>(
+                nameof(ShowBackupProtection),
+                false);
+
+    public bool ShowBackupProtection
+    {
+        get => GetValue(ShowBackupProtectionProperty);
+        set => SetValue(ShowBackupProtectionProperty, value);
+    }
+
+    // ============================================================
     // Duplicate Protection
     // ============================================================
 

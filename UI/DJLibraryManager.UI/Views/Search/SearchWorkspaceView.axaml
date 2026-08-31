@@ -23,11 +23,12 @@
             Grid.Row="0"
             Title="Search"
             Description="Find information and potential solutions for issues identified during library analysis."
-            ShowDuplicateProtection="True"
             PreviousText="← Analysis"
             PreviousCommand="{Binding PreviousCommand}"
             NextText="Improve →"
-            NextCommand="{Binding NextCommand}"/>
+            NextCommand="{Binding NextCommand}"
+            ShowBackupProtection="True"
+            ShowDuplicateProtection="True"/>
 
         <!-- ===================================================== -->
         <!-- Search Workspace -->
@@ -120,7 +121,8 @@
                     Content="📤 Export Metadata"
                     Command="{Binding ExportMetadataCommand}"
                     IsVisible="{Binding HasSelectedMetadataForExport}"
-                    IsEnabled="{Binding !IsSearching}"/>
+                    IsEnabled="{Binding !IsSearching}"
+                    ToolTip.Tip="Export the selected metadata changes to an Excel, CSV, or JSON file. Only selected changes will be included. You can then make changes to the data and later import these changes."/>
 
             </Grid>
 

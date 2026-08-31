@@ -1,11 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DJLibraryManager.UI.Models;
 using DJLibraryManager.UI.Models.Import;
-using DJLibraryManager.UI.ViewModels.Analysis;
 using DJLibraryManager.UI.ViewModels.Dashboard;
 using DJLibraryManager.UI.ViewModels.Import;
-using DJLibraryManager.UI.ViewModels.Library;
+using DJLibraryManager.UI.ViewModels.Analysis;
 using DJLibraryManager.UI.ViewModels.Search;
+using DJLibraryManager.UI.ViewModels.Improve;
+
+using DJLibraryManager.UI.ViewModels.Library;
 using DJLibraryManager.UI.ViewModels.Workspace;
 using System;
 
@@ -247,6 +249,27 @@ public partial class MainViewModel : ViewModelBase
 
                     StatusText =
                         "Viewing Search";
+
+                    break;
+                }
+
+            // ====================================================
+            // Improve
+            // ====================================================
+
+            case WorkspaceType.Improve:
+                {
+                    var improveWorkspace =
+                        new ImproveWorkspaceViewModel();
+
+                    CurrentWorkspace =
+                        improveWorkspace;
+
+                    Dashboard.CurrentWorkspace =
+                        improveWorkspace;
+
+                    StatusText =
+                        "Viewing Improve";
 
                     break;
                 }

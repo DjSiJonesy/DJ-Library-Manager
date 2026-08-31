@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using DJLibraryManager.UI.Models.Import;
+using DJLibraryManager.UI.ViewModels.Improve;
 
 namespace DJLibraryManager.UI.ViewModels;
 
@@ -233,12 +234,12 @@ public partial class DashboardViewModel : ViewModelBase
     /// <summary>
     /// Opens the Improve workflow.
     /// </summary>
-    //[RelayCommand]
-    //private void OpenImprove()
-    //{
-    //    App.Services.ApplicationState.NavigateTo(
-    //        WorkspaceType.Improve);
-    //}
+    [RelayCommand]
+    private void OpenImprove()
+    {
+        App.Services.ApplicationState.NavigateTo(
+            WorkspaceType.Improve);
+    }
 
     /// <summary>
     /// Opens the Structure workflow.

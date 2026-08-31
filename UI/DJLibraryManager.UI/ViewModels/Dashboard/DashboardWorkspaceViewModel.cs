@@ -561,32 +561,35 @@ public class DashboardWorkspaceViewModel : WorkspaceViewModel
             });
 
         WorkflowCards.Add(
-            new WorkflowCardViewModel
-            {
-                Definition =
-                    WorkflowDefinitions.Improve,
+    new WorkflowCardViewModel
+    {
+        Definition =
+            WorkflowDefinitions.Improve,
 
-                HoverAction =
-                    stage => Guidance.Show(stage),
+        HoverAction =
+            stage => Guidance.Show(stage),
 
-                Status =
-                    "Waiting",
+        ActionCommand =
+            _dashboard.OpenImproveCommand,
 
-                StatusBrush =
-                    Brushes.Goldenrod,
+        Status =
+            "Waiting",
 
-                PrimaryStatisticTitle =
-                    "Suggestions",
+        StatusBrush =
+            Brushes.Goldenrod,
 
-                PrimaryStatisticValue =
-                    "412",
+        PrimaryStatisticTitle =
+            "Suggestions",
 
-                SecondaryStatisticTitle =
-                    "Auto Fixes",
+        PrimaryStatisticValue =
+            "412",
 
-                SecondaryStatisticValue =
-                    "97"
-            });
+        SecondaryStatisticTitle =
+            "Auto Fixes",
+
+        SecondaryStatisticValue =
+            "97"
+    });
 
         WorkflowCards.Add(
             new WorkflowCardViewModel

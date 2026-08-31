@@ -21,7 +21,9 @@
             NextText="Analysis →"
             NextCommand="{Binding GoAnalysisCommand}"
             ShowPrevious="True"
-            ShowNext="True"/>
+            ShowNext="True"
+            ShowBackupProtection="True"
+            ShowDuplicateProtection="False"/>
 
         <!-- ===================================================== -->
         <!-- Content -->

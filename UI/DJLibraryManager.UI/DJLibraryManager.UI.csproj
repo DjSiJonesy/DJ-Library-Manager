@@ -48,10 +48,8 @@
 	  <Folder Include="Providers\Traktor\Translators\" />
 	  <Folder Include="Providers\Traktor\Services\" />
 	  <Folder Include="ViewModels\Controls\" />
-	  <Folder Include="ViewModels\Improve\" />
 	  <Folder Include="ViewModels\Synchronise\" />
 	  <Folder Include="ViewModels\Structure\" />
-	  <Folder Include="Views\Improve\" />
 	  <Folder Include="Views\Synchronise\" />
 	  <Folder Include="Views\Structure\" />
 	</ItemGroup>

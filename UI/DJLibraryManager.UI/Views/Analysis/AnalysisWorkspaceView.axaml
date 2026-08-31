@@ -21,7 +21,9 @@
             NextText="Search →"
             NextCommand="{Binding NextCommand}"
             ShowPrevious="True"
-            ShowNext="True"/>
+            ShowNext="True"
+            ShowBackupProtection="True"
+            ShowDuplicateProtection="False"/>
 
         <!-- ===================================================== -->
         <!-- Content -->

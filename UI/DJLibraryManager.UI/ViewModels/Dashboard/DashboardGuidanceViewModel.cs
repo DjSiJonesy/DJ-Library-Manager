@@ -101,15 +101,15 @@ public partial class DashboardGuidanceViewModel : ObservableObject
                     "Search your imported music library.",
                     new[]
                     {
-                        "Search every provider",
-                        "Filter large collections",
-                        "Open results instantly"
+                        "Search & select duplicate files to keep",
+                        "View missing files",
+                        "Search for missing metadata"
                     },
                     new[]
                     {
-                        "Search is instant",
-                        "Use multiple filters",
-                        "Results update live"
+                        "Search can take some time",
+                        "Results update live",
+                        "Export metadata results"
                     });
                 break;
 

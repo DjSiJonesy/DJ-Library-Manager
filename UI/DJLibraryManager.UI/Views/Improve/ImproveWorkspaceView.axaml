@@ -1,0 +1,674 @@
+<UserControl
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:DJLibraryManager.UI.ViewModels.Improve"
+    xmlns:models="using:DJLibraryManager.UI.Models.Improve"
+    xmlns:workflow="using:DJLibraryManager.UI.Controls.Workflow"
+    x:Class="DJLibraryManager.UI.Views.Improve.ImproveWorkspaceView"
+    x:DataType="vm:ImproveWorkspaceViewModel">
+
+    <Grid RowDefinitions="Auto,20,*">
+
+        <!-- ===================================================== -->
+        <!-- Improve Header -->
+        <!-- ===================================================== -->
+
+        <workflow:WorkflowHeader
+            Grid.Row="0"
+            Title="Improve"
+            Description="Apply the changes selected during Search to the DIASISS library."
+            PreviousText="← Search"
+            PreviousCommand="{Binding PreviousCommand}"
+            NextText="Structure →"
+            NextCommand="{Binding NextCommand}"
+            ShowPrevious="True"
+            ShowNext="True"
+            ShowDuplicateProtection="True"
+            ShowBackupProtection="False"/>
+
+
+        <!-- ===================================================== -->
+        <!-- Improve Workspace -->
+        <!-- ===================================================== -->
+
+        <Grid
+            Grid.Row="2"
+            RowDefinitions="Auto,20,*">
+
+
+            <!-- ================================================= -->
+            <!-- Category Buttons -->
+            <!-- ================================================= -->
+
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="12">
+
+                <!-- ================================================= -->
+                <!-- Improve Categories -->
+                <!-- ================================================= -->
+
+                <ItemsControl
+                    Grid.Column="0"
+                    ItemsSource="{Binding Categories}">
+
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel
+                                Orientation="Horizontal"
+                                Spacing="12"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+
+                    <ItemsControl.ItemTemplate>
+
+                        <DataTemplate
+                            x:DataType="models:ImproveCategoryInfo">
+
+                            <Button
+                                Theme="{StaticResource DJLM.PrimaryButton}"
+                                Padding="12,8"
+                                MinWidth="170"
+                                Command="{Binding $parent[ItemsControl].DataContext.SelectCategoryCommand}"
+                                CommandParameter="{Binding}">
+
+                                <Grid
+                                    ColumnDefinitions="Auto,*,Auto"
+                                    VerticalAlignment="Center">
+
+                                    <!-- Icon -->
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        FontSize="16"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0"
+                                        Text="{Binding Icon}"/>
+
+                                    <!-- Category Name -->
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        VerticalAlignment="Center"
+                                        Text="{Binding Name}"/>
+
+                                    <!-- Count -->
+
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        FontSize="13"
+                                        FontWeight="SemiBold"
+                                        VerticalAlignment="Center"
+                                        Margin="12,0,0,0"
+                                        Text="{Binding Count, StringFormat={}{0:N0}}"/>
+
+                                </Grid>
+
+                            </Button>
+
+                        </DataTemplate>
+
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+
+                <!-- ================================================= -->
+                <!-- Open DIASISS Duplicates Folder -->
+                <!-- ================================================= -->
+
+                <Button
+                    Grid.Column="1"
+                    Theme="{StaticResource DJLM.SecondaryButton}"
+                    Padding="12,8"
+                    MinHeight="46"
+                    VerticalAlignment="Center"
+                    Content="📂 Open DIASISS Duplicates Folder"
+                    Command="{Binding OpenDuplicatesCommand}"
+                    IsVisible="{Binding IsDuplicatesCategory}"/>
+
+            </Grid>
+
+
+            <!-- ================================================= -->
+            <!-- Single Improve Workspace Card -->
+            <!-- ================================================= -->
+
+            <Border
+                Grid.Row="2"
+                Classes="card-secondary"
+                Padding="20">
+
+                <Grid>
+
+
+                    <!-- ================================================= -->
+                    <!-- DUPLICATES -->
+                    <!-- ================================================= -->
+
+                    <Grid
+                        IsVisible="{Binding IsDuplicatesCategory}"
+                        RowDefinitions="Auto,12,Auto,20,*,20,Auto">
+
+                        <!-- ============================================= -->
+                        <!-- Section Heading -->
+                        <!-- ============================================= -->
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Classes="heading"
+                            HorizontalAlignment="Center"
+                            Text="Duplicate Changes Ready to Apply"/>
+
+
+                        <!-- ============================================= -->
+                        <!-- Description -->
+                        <!-- ============================================= -->
+
+                        <TextBlock
+                            Grid.Row="2"
+                            FontSize="13"
+                            TextAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Text="The selected individual copies will be retained. All other duplicate files will be moved to the DIASISS Duplicates folder."
+                            TextWrapping="Wrap"/>
+
+
+                        <!-- ============================================= -->
+                        <!-- Main Information -->
+                        <!-- ============================================= -->
+
+                        <Grid
+                            Grid.Row="4"
+                            ColumnDefinitions="*,40,*"
+                            VerticalAlignment="Center">
+
+                            <!-- ========================================= -->
+                            <!-- Left Side - Information -->
+                            <!-- ========================================= -->
+
+                            <Border
+                                Grid.Column="0"
+                                Padding="12">
+
+                                <StackPanel
+                                    Spacing="8">
+
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Text="Duplicate Selection"/>
+
+                                    <TextBlock
+                                        Classes="caption"
+                                        Text="The selections made during Search determine which individual copies will be retained and which files will be moved to DIASISS Duplicates."
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        Classes="caption"
+                                        Margin="0,8,0,0"
+                                        Text="These changes are based entirely on the selections made in the Search workspace. Improve will not perform another search."
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Border>
+
+
+                            <!-- ========================================= -->
+                            <!-- Right Side - Summary -->
+                            <!-- ========================================= -->
+
+                            <Border
+                                Grid.Column="2"
+                                Padding="12">
+
+                                <StackPanel
+                                    Spacing="7">
+
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Text="Duplicate Summary"/>
+
+
+                                    <!-- Files with duplicate/multiple copies -->
+
+                                    <Grid
+                                        ColumnDefinitions="*,Auto">
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="13"
+                                            Text="Files with duplicate/multiple copies"
+                                            TextWrapping="Wrap"/>
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontSize="13"
+                                            FontWeight="SemiBold"
+                                            Margin="20,0,0,0"
+                                            Text="{Binding SelectedCategory.Count, StringFormat={}{0:N0}}"/>
+
+                                    </Grid>
+
+
+                                    <!-- Total files -->
+
+                                    <Grid
+                                        ColumnDefinitions="*,Auto">
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="13"
+                                            Text="Total files"/>
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontSize="13"
+                                            FontWeight="SemiBold"
+                                            Margin="20,0,0,0"
+                                            Text="{Binding TotalDuplicates, StringFormat={}{0:N0}}"/>
+
+                                    </Grid>
+
+
+                                    <!-- Individual copies selected -->
+
+                                    <Grid
+                                        ColumnDefinitions="*,Auto">
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="13"
+                                            Text="Individual copies selected to keep"
+                                            TextWrapping="Wrap"/>
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontSize="13"
+                                            FontWeight="SemiBold"
+                                            Margin="20,0,0,0"
+                                            Text="{Binding DuplicatesToKeep, StringFormat={}{0:N0}}"/>
+
+                                    </Grid>
+
+
+                                    <!-- Files to be moved -->
+
+                                    <Grid
+                                        ColumnDefinitions="*,Auto">
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="13"
+                                            Text="Files to be moved to DIASISS Duplicates"
+                                            TextWrapping="Wrap"/>
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontSize="13"
+                                            FontWeight="SemiBold"
+                                            Margin="20,0,0,0"
+                                            Text="{Binding DuplicatesToMove, StringFormat={}{0:N0}}"/>
+
+                                    </Grid>
+
+                                </StackPanel>
+
+                            </Border>
+
+                        </Grid>
+
+
+                        <!-- ============================================= -->
+                        <!-- Actions -->
+                        <!-- ============================================= -->
+
+                        <StackPanel
+                            Grid.Row="6"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Spacing="8">
+
+                            <Button
+                                Theme="{StaticResource DJLM.SecondaryButton}"
+                                Content="Back to Search"
+                                Command="{Binding PreviousCommand}"/>
+
+                            <Button
+                                Theme="{StaticResource DJLM.PrimaryButton}"
+                                Content="Confirm &amp; Apply"
+                                Command="{Binding ConfirmCommand}"/>
+
+                        </StackPanel>
+
+                    </Grid>
+
+
+                    <!-- ================================================= -->
+                    <!-- MISSING FILES -->
+                    <!-- ================================================= -->
+
+                    <Grid
+                        IsVisible="{Binding IsMissingFilesCategory}"
+                        RowDefinitions="Auto,12,Auto,20,*,20,Auto">
+
+                        <!-- ============================================= -->
+                        <!-- Section Heading -->
+                        <!-- ============================================= -->
+
+                        <TextBlock
+                            Grid.Row="0"
+                            Classes="heading"
+                            HorizontalAlignment="Center"
+                            Text="Missing Files Ready to Remove"/>
+
+
+                        <!-- ============================================= -->
+                        <!-- Description -->
+                        <!-- ============================================= -->
+
+                        <TextBlock
+                            Grid.Row="2"
+                            FontSize="13"
+                            TextAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Text="Missing-file records identified during Search will be removed from the relevant Provider data."
+                            TextWrapping="Wrap"/>
+
+
+                        <!-- ============================================= -->
+                        <!-- Main Information -->
+                        <!-- ============================================= -->
+
+                        <Grid
+                            Grid.Row="4"
+                            ColumnDefinitions="*,40,*"
+                            VerticalAlignment="Center">
+
+                            <!-- ========================================= -->
+                            <!-- Left Side -->
+                            <!-- ========================================= -->
+
+                            <Border
+                                Grid.Column="0"
+                                Padding="12">
+
+                                <StackPanel
+                                    Spacing="8">
+
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Text="Missing File Removal"/>
+
+                                    <TextBlock
+                                        Classes="caption"
+                                        Text="Missing-file records identified during Search will be removed from the relevant Provider data."
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        Classes="caption"
+                                        Margin="0,8,0,0"
+                                        Text="Improve will remove the records when the operation is confirmed."
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Border>
+
+
+                            <!-- ========================================= -->
+                            <!-- Right Side - Summary -->
+                            <!-- ========================================= -->
+
+                            <Border
+                                Grid.Column="2"
+                                Padding="12">
+
+                                <StackPanel
+                                    Spacing="7">
+
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Text="Missing File Summary"/>
+
+                                    <Grid
+                                        ColumnDefinitions="*,Auto">
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            FontSize="13"
+                                            Text="Missing files ready to remove"
+                                            TextWrapping="Wrap"/>
+
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            FontSize="13"
+                                            FontWeight="SemiBold"
+                                            Margin="20,0,0,0"
+                                            Text="{Binding SelectedCategory.Count, StringFormat={}{0:N0}}"/>
+
+                                    </Grid>
+
+                                    <TextBlock
+                                        Classes="caption"
+                                        Margin="0,8,0,0"
+                                        Text="These records will be removed from the relevant Provider data when the operation is confirmed."
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Border>
+
+                        </Grid>
+
+
+                        <!-- ============================================= -->
+                        <!-- Actions -->
+                        <!-- ============================================= -->
+
+                        <StackPanel
+                            Grid.Row="6"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Spacing="8">
+
+                            <Button
+                                Theme="{StaticResource DJLM.SecondaryButton}"
+                                Content="Back to Search"
+                                Command="{Binding PreviousCommand}"/>
+
+                            <Button
+                                Theme="{StaticResource DJLM.PrimaryButton}"
+                                Content="Confirm &amp; Apply"
+                                Command="{Binding ConfirmCommand}"/>
+
+                        </StackPanel>
+
+                    </Grid>
+
+
+                    <!-- ================================================= -->
+<!-- Metadata -->
+<!-- ================================================= -->
+
+<Grid
+    IsVisible="{Binding IsMetadataCategory}"
+    RowDefinitions="Auto,12,Auto,20,*,20,Auto">
+
+    <!-- ========================================= -->
+    <!-- Header -->
+    <!-- ========================================= -->
+
+    <TextBlock
+        Grid.Row="0"
+        Classes="heading"
+        HorizontalAlignment="Center"
+        Text="Metadata Changes Ready to Apply"/>
+
+
+    <!-- ========================================= -->
+    <!-- Explanation -->
+    <!-- ========================================= -->
+
+    <TextBlock
+        Grid.Row="2"
+        FontSize="13"
+        TextAlignment="Center"
+        HorizontalAlignment="Center"
+        Text="Apply selected metadata changes from Search or import an edited metadata export file."
+        TextWrapping="Wrap"/>
+
+
+    <!-- ========================================= -->
+    <!-- Metadata Actions -->
+    <!-- ========================================= -->
+
+    <Grid
+        Grid.Row="4"
+        ColumnDefinitions="*,40,*"
+        VerticalAlignment="Center">
+
+        <!-- ===================================== -->
+        <!-- Selected Search Changes -->
+        <!-- ===================================== -->
+
+        <Border
+            Grid.Column="0"
+            Classes="card-secondary"
+            Padding="16">
+
+            <Grid
+                RowDefinitions="*,Auto"
+                RowSpacing="12">
+
+                <!-- ================================= -->
+                <!-- Information -->
+                <!-- ================================= -->
+
+                <StackPanel
+                    Grid.Row="0"
+                    Spacing="10">
+
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Text="Selected Search Changes"/>
+
+                    <TextBlock
+                        Classes="caption"
+                        Text="Use the metadata changes selected in the Search workspace."
+                        TextWrapping="Wrap"/>
+
+                    <TextBlock
+                        Classes="caption"
+                        Margin="0,4,0,0"
+                        Text="{Binding Status}"
+                        TextWrapping="Wrap"/>
+
+                </StackPanel>
+
+
+                <!-- ================================= -->
+                <!-- Action -->
+                <!-- ================================= -->
+
+                <Button
+                    Grid.Row="1"
+                    Theme="{StaticResource DJLM.PrimaryButton}"
+                    Content="Use Selected Changes"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    HorizontalAlignment="Stretch"
+                    Command="{Binding ConfirmCommand}"/>
+
+            </Grid>
+
+        </Border>
+
+
+        <!-- ===================================== -->
+        <!-- Import Edited Metadata -->
+        <!-- ===================================== -->
+
+        <Border
+            Grid.Column="2"
+            Classes="card-secondary"
+            Padding="16">
+
+            <Grid
+                RowDefinitions="*,Auto"
+                RowSpacing="12">
+
+                <!-- ================================= -->
+                <!-- Information -->
+                <!-- ================================= -->
+
+                <StackPanel
+                    Grid.Row="0"
+                    Spacing="10">
+
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Text="Import Edited Metadata"/>
+
+                    <TextBlock
+                        Classes="caption"
+                        Text="Import an edited metadata export after making the required manual changes."
+                        TextWrapping="Wrap"/>
+
+                </StackPanel>
+
+
+                <!-- ================================= -->
+                <!-- Action -->
+                <!-- ================================= -->
+
+                <Button
+                    Grid.Row="1"
+                    Theme="{StaticResource DJLM.SecondaryButton}"
+                    Content="Import Metadata File"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    HorizontalAlignment="Stretch"
+                    Command="{Binding ImportMetadataCommand}"/>
+
+            </Grid>
+
+        </Border>
+
+    </Grid>
+
+
+    <!-- ========================================= -->
+    <!-- Back to Search -->
+    <!-- ========================================= -->
+
+    <StackPanel
+        Grid.Row="6"
+        Orientation="Horizontal"
+        HorizontalAlignment="Center">
+
+        <Button
+            Theme="{StaticResource DJLM.SecondaryButton}"
+            Content="Back to Search"
+            Command="{Binding PreviousCommand}"/>
+
+    </StackPanel>
+
+</Grid>
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</UserControl>
