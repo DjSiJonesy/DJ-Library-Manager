@@ -1605,6 +1605,16 @@ public sealed class LibraryRepository
 
         return new DJLMMediaItem
         {
+            MediaId =
+                reader.GetString(
+                    reader.GetOrdinal(
+                        "MediaId")),
+
+            TrackStatusId =
+                reader.GetInt32(
+                    reader.GetOrdinal(
+                        "TrackStatusId")),
+
             Provider =
                 reader.IsDBNull(providerOrdinal)
                     ? string.Empty

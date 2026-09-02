@@ -1444,6 +1444,9 @@ public sealed class MetadataSearchService : ISearchService
                     Id =
                         Guid.NewGuid().ToString(),
 
+                    MediaId =
+                        issue.MediaId,
+
                     Source =
                         evidence.Source,
 

@@ -45,10 +45,6 @@
                 ColumnDefinitions="*,Auto"
                 ColumnSpacing="12">
 
-                <!-- ================================================= -->
-                <!-- Improve Categories -->
-                <!-- ================================================= -->
-
                 <ItemsControl
                     Grid.Column="0"
                     ItemsSource="{Binding Categories}">
@@ -77,8 +73,6 @@
                                     ColumnDefinitions="Auto,*,Auto"
                                     VerticalAlignment="Center">
 
-                                    <!-- Icon -->
-
                                     <TextBlock
                                         Grid.Column="0"
                                         FontSize="16"
@@ -86,16 +80,12 @@
                                         Margin="0,0,8,0"
                                         Text="{Binding Icon}"/>
 
-                                    <!-- Category Name -->
-
                                     <TextBlock
                                         Grid.Column="1"
                                         FontSize="13"
                                         FontWeight="SemiBold"
                                         VerticalAlignment="Center"
                                         Text="{Binding Name}"/>
-
-                                    <!-- Count -->
 
                                     <TextBlock
                                         Grid.Column="2"
@@ -151,7 +141,7 @@
 
                     <Grid
                         IsVisible="{Binding IsDuplicatesCategory}"
-                        RowDefinitions="Auto,12,Auto,20,*,20,Auto">
+                        RowDefinitions="Auto,12,Auto,16,Auto,16,Auto,*,Auto">
 
                         <!-- ============================================= -->
                         <!-- Section Heading -->
@@ -184,10 +174,10 @@
                         <Grid
                             Grid.Row="4"
                             ColumnDefinitions="*,40,*"
-                            VerticalAlignment="Center">
+                            VerticalAlignment="Top">
 
                             <!-- ========================================= -->
-                            <!-- Left Side - Information -->
+                            <!-- Left Side - Selection -->
                             <!-- ========================================= -->
 
                             <Border
@@ -235,8 +225,6 @@
                                         Text="Duplicate Summary"/>
 
 
-                                    <!-- Files with duplicate/multiple copies -->
-
                                     <Grid
                                         ColumnDefinitions="*,Auto">
 
@@ -256,8 +244,6 @@
                                     </Grid>
 
 
-                                    <!-- Total files -->
-
                                     <Grid
                                         ColumnDefinitions="*,Auto">
 
@@ -275,8 +261,6 @@
 
                                     </Grid>
 
-
-                                    <!-- Individual copies selected -->
 
                                     <Grid
                                         ColumnDefinitions="*,Auto">
@@ -296,8 +280,6 @@
 
                                     </Grid>
 
-
-                                    <!-- Files to be moved -->
 
                                     <Grid
                                         ColumnDefinitions="*,Auto">
@@ -325,11 +307,46 @@
 
 
                         <!-- ============================================= -->
-                        <!-- Actions -->
+                        <!-- Operation Result -->
+                        <!-- ============================================= -->
+
+                        <Border
+                            Grid.Row="6"
+                            Classes="card-secondary"
+                            Padding="12">
+
+                            <StackPanel
+                                Spacing="6">
+
+                                <TextBlock
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Text="Operation Result"/>
+
+                                <TextBlock
+                                    FontSize="13"
+                                    Text="{Binding OperationResult}"
+                                    TextWrapping="Wrap"/>
+
+                            </StackPanel>
+
+                        </Border>
+
+
+                        <!-- ============================================= -->
+                        <!-- Flexible Workspace Space -->
+                        <!-- ============================================= -->
+
+                        <Border
+                            Grid.Row="7"/>
+
+
+                        <!-- ============================================= -->
+                        <!-- Actions - Fixed at Bottom -->
                         <!-- ============================================= -->
 
                         <StackPanel
-                            Grid.Row="6"
+                            Grid.Row="8"
                             Orientation="Horizontal"
                             HorizontalAlignment="Center"
                             Spacing="8">
@@ -355,22 +372,13 @@
 
                     <Grid
                         IsVisible="{Binding IsMissingFilesCategory}"
-                        RowDefinitions="Auto,12,Auto,20,*,20,Auto">
-
-                        <!-- ============================================= -->
-                        <!-- Section Heading -->
-                        <!-- ============================================= -->
+                        RowDefinitions="Auto,12,Auto,16,Auto,20,Auto,*,Auto">
 
                         <TextBlock
                             Grid.Row="0"
                             Classes="heading"
                             HorizontalAlignment="Center"
                             Text="Missing Files Ready to Remove"/>
-
-
-                        <!-- ============================================= -->
-                        <!-- Description -->
-                        <!-- ============================================= -->
 
                         <TextBlock
                             Grid.Row="2"
@@ -380,19 +388,10 @@
                             Text="Missing-file records identified during Search will be removed from the relevant Provider data."
                             TextWrapping="Wrap"/>
 
-
-                        <!-- ============================================= -->
-                        <!-- Main Information -->
-                        <!-- ============================================= -->
-
                         <Grid
                             Grid.Row="4"
                             ColumnDefinitions="*,40,*"
-                            VerticalAlignment="Center">
-
-                            <!-- ========================================= -->
-                            <!-- Left Side -->
-                            <!-- ========================================= -->
+                            VerticalAlignment="Top">
 
                             <Border
                                 Grid.Column="0"
@@ -420,11 +419,6 @@
                                 </StackPanel>
 
                             </Border>
-
-
-                            <!-- ========================================= -->
-                            <!-- Right Side - Summary -->
-                            <!-- ========================================= -->
 
                             <Border
                                 Grid.Column="2"
@@ -469,12 +463,35 @@
                         </Grid>
 
 
-                        <!-- ============================================= -->
-                        <!-- Actions -->
-                        <!-- ============================================= -->
+                        <Border
+                            Grid.Row="6"
+                            Classes="card-secondary"
+                            Padding="12">
+
+                            <StackPanel
+                                Spacing="6">
+
+                                <TextBlock
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    Text="Operation Result"/>
+
+                                <TextBlock
+                                    FontSize="13"
+                                    Text="{Binding Status}"
+                                    TextWrapping="Wrap"/>
+
+                            </StackPanel>
+
+                        </Border>
+
+
+                        <Border
+                            Grid.Row="7"/>
+
 
                         <StackPanel
-                            Grid.Row="6"
+                            Grid.Row="8"
                             Orientation="Horizontal"
                             HorizontalAlignment="Center"
                             Spacing="8">
@@ -495,173 +512,130 @@
 
 
                     <!-- ================================================= -->
-<!-- Metadata -->
-<!-- ================================================= -->
+                    <!-- METADATA -->
+                    <!-- ================================================= -->
 
-<Grid
-    IsVisible="{Binding IsMetadataCategory}"
-    RowDefinitions="Auto,12,Auto,20,*,20,Auto">
+                    <Grid
+                        IsVisible="{Binding IsMetadataCategory}"
+                        RowDefinitions="Auto,12,Auto,20,*,20,Auto">
 
-    <!-- ========================================= -->
-    <!-- Header -->
-    <!-- ========================================= -->
+                        <TextBlock
+                            Grid.Row="0"
+                            Classes="heading"
+                            HorizontalAlignment="Center"
+                            Text="Metadata Changes Ready to Apply"/>
 
-    <TextBlock
-        Grid.Row="0"
-        Classes="heading"
-        HorizontalAlignment="Center"
-        Text="Metadata Changes Ready to Apply"/>
+                        <TextBlock
+                            Grid.Row="2"
+                            FontSize="13"
+                            TextAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Text="Apply selected metadata changes from Search or import an edited metadata export file."
+                            TextWrapping="Wrap"/>
 
+                        <Grid
+                            Grid.Row="4"
+                            ColumnDefinitions="*,40,*"
+                            VerticalAlignment="Center">
 
-    <!-- ========================================= -->
-    <!-- Explanation -->
-    <!-- ========================================= -->
+                            <Border
+                                Grid.Column="0"
+                                Classes="card-secondary"
+                                Padding="16">
 
-    <TextBlock
-        Grid.Row="2"
-        FontSize="13"
-        TextAlignment="Center"
-        HorizontalAlignment="Center"
-        Text="Apply selected metadata changes from Search or import an edited metadata export file."
-        TextWrapping="Wrap"/>
+                                <Grid
+                                    RowDefinitions="*,Auto"
+                                    RowSpacing="12">
 
+                                    <StackPanel
+                                        Grid.Row="0"
+                                        Spacing="10">
 
-    <!-- ========================================= -->
-    <!-- Metadata Actions -->
-    <!-- ========================================= -->
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            Text="Selected Search Changes"/>
 
-    <Grid
-        Grid.Row="4"
-        ColumnDefinitions="*,40,*"
-        VerticalAlignment="Center">
+                                        <TextBlock
+                                            Classes="caption"
+                                            Text="Use the metadata changes selected in the Search workspace."
+                                            TextWrapping="Wrap"/>
 
-        <!-- ===================================== -->
-        <!-- Selected Search Changes -->
-        <!-- ===================================== -->
+                                        <TextBlock
+                                            Classes="caption"
+                                            Margin="0,4,0,0"
+                                            Text="{Binding Status}"
+                                            TextWrapping="Wrap"/>
 
-        <Border
-            Grid.Column="0"
-            Classes="card-secondary"
-            Padding="16">
+                                    </StackPanel>
 
-            <Grid
-                RowDefinitions="*,Auto"
-                RowSpacing="12">
+                                    <Button
+                                        Grid.Row="1"
+                                        Theme="{StaticResource DJLM.PrimaryButton}"
+                                        Content="Use Selected Changes"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        HorizontalAlignment="Stretch"
+                                        Command="{Binding ConfirmCommand}"/>
 
-                <!-- ================================= -->
-                <!-- Information -->
-                <!-- ================================= -->
+                                </Grid>
 
-                <StackPanel
-                    Grid.Row="0"
-                    Spacing="10">
-
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="Selected Search Changes"/>
-
-                    <TextBlock
-                        Classes="caption"
-                        Text="Use the metadata changes selected in the Search workspace."
-                        TextWrapping="Wrap"/>
-
-                    <TextBlock
-                        Classes="caption"
-                        Margin="0,4,0,0"
-                        Text="{Binding Status}"
-                        TextWrapping="Wrap"/>
-
-                </StackPanel>
+                            </Border>
 
 
-                <!-- ================================= -->
-                <!-- Action -->
-                <!-- ================================= -->
+                            <Border
+                                Grid.Column="2"
+                                Classes="card-secondary"
+                                Padding="16">
 
-                <Button
-                    Grid.Row="1"
-                    Theme="{StaticResource DJLM.PrimaryButton}"
-                    Content="Use Selected Changes"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    HorizontalAlignment="Stretch"
-                    Command="{Binding ConfirmCommand}"/>
+                                <Grid
+                                    RowDefinitions="*,Auto"
+                                    RowSpacing="12">
 
-            </Grid>
+                                    <StackPanel
+                                        Grid.Row="0"
+                                        Spacing="10">
 
-        </Border>
+                                        <TextBlock
+                                            FontWeight="SemiBold"
+                                            Text="Import Edited Metadata"/>
 
+                                        <TextBlock
+                                            Classes="caption"
+                                            Text="Import an edited metadata export after making the required manual changes."
+                                            TextWrapping="Wrap"/>
 
-        <!-- ===================================== -->
-        <!-- Import Edited Metadata -->
-        <!-- ===================================== -->
+                                    </StackPanel>
 
-        <Border
-            Grid.Column="2"
-            Classes="card-secondary"
-            Padding="16">
+                                    <Button
+                                        Grid.Row="1"
+                                        Theme="{StaticResource DJLM.SecondaryButton}"
+                                        Content="Import Metadata File"
+                                        HorizontalContentAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        HorizontalAlignment="Stretch"
+                                        Command="{Binding ImportMetadataCommand}"/>
 
-            <Grid
-                RowDefinitions="*,Auto"
-                RowSpacing="12">
+                                </Grid>
 
-                <!-- ================================= -->
-                <!-- Information -->
-                <!-- ================================= -->
+                            </Border>
 
-                <StackPanel
-                    Grid.Row="0"
-                    Spacing="10">
-
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="Import Edited Metadata"/>
-
-                    <TextBlock
-                        Classes="caption"
-                        Text="Import an edited metadata export after making the required manual changes."
-                        TextWrapping="Wrap"/>
-
-                </StackPanel>
+                        </Grid>
 
 
-                <!-- ================================= -->
-                <!-- Action -->
-                <!-- ================================= -->
+                        <StackPanel
+                            Grid.Row="6"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center">
 
-                <Button
-                    Grid.Row="1"
-                    Theme="{StaticResource DJLM.SecondaryButton}"
-                    Content="Import Metadata File"
-                    HorizontalContentAlignment="Center"
-                    VerticalContentAlignment="Center"
-                    HorizontalAlignment="Stretch"
-                    Command="{Binding ImportMetadataCommand}"/>
+                            <Button
+                                Theme="{StaticResource DJLM.SecondaryButton}"
+                                Content="Back to Search"
+                                Command="{Binding PreviousCommand}"/>
 
-            </Grid>
+                        </StackPanel>
 
-        </Border>
+                    </Grid>
 
-    </Grid>
-
-
-    <!-- ========================================= -->
-    <!-- Back to Search -->
-    <!-- ========================================= -->
-
-    <StackPanel
-        Grid.Row="6"
-        Orientation="Horizontal"
-        HorizontalAlignment="Center">
-
-        <Button
-            Theme="{StaticResource DJLM.SecondaryButton}"
-            Content="Back to Search"
-            Command="{Binding PreviousCommand}"/>
-
-    </StackPanel>
-
-</Grid>
 
                 </Grid>
 

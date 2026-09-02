@@ -48,6 +48,8 @@ public sealed class MissingFileSearchService : ISearchService
             {
                 Id = Guid.NewGuid().ToString(),
 
+                MediaId = issue.MediaId,
+
                 Source = "Local Library",
 
                 FilePath = issue.FilePath,

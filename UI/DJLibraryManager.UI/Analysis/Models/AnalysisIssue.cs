@@ -14,6 +14,14 @@ public sealed class AnalysisIssue
     public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>
+    /// The DIASISS GUID identifying the affected media record.
+    /// 
+    /// This is the stable DIASISS media identity and must be used
+    /// when Search needs to associate results with the library record.
+    /// </summary>
+    public string MediaId { get; init; } = string.Empty;
+
+    /// <summary>
     /// Category this issue belongs to.
     /// Example: Metadata, Files, Duplicates.
     /// </summary>

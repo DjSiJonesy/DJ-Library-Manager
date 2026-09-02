@@ -182,6 +182,9 @@ public sealed class FileIntegrityAnalysisModule : IAnalysisModule
 
             Title = title,
 
+            MediaId =
+                media.MediaId,
+
             Description =
                 $"{title}: {media.Artist} - {media.Title}",
 

@@ -211,6 +211,8 @@ public sealed class MetadataAnalysisModule : IAnalysisModule
 
             Title = "Incomplete Metadata",
 
+            MediaId = media.MediaId,
+
             Description =
                 BuildDescription(
                     trackName,

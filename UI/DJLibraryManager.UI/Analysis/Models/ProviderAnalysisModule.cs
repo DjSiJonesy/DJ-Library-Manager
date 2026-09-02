@@ -56,6 +56,7 @@ public sealed class ProviderAnalysisModule : IAnalysisModule
             Category = "Providers",
             Type = type,
             Title = title,
+            MediaId = media.MediaId,
             Description = $"{title}: {media.Artist} - {media.Title}",
             FilePath = media.FilePath,
             CanAutoFix = false

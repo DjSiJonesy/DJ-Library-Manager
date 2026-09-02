@@ -31,6 +31,9 @@ namespace DJLibraryManager.UI.Services;
 ///
 /// The exported data represents what Search has found and
 /// what the user has selected for further processing.
+///
+/// MediaId is the authoritative DIASISS media identity and
+/// is preserved throughout the export pipeline.
 /// </summary>
 public sealed class SearchExportService
 {
@@ -162,10 +165,21 @@ public sealed class SearchExportService
     /// <summary>
     /// Exports ONLY selected metadata changes to CSV.
     ///
-    /// A metadata recommendation is exported only when:
+    /// IMPORTANT:
+    ///
+    /// This is a track-level export.
+    ///
+    /// There is exactly ONE row per SearchIssue / track.
+    ///
+    /// Multiple selected metadata changes are consolidated onto
+    /// that single row.
+    ///
+    /// A metadata recommendation is included only when:
     ///
     ///     IsSelected == true
     ///     IsChange == true
+    ///
+    /// The authoritative DIASISS MediaId comes from SearchIssue.
     ///
     /// SearchResult objects and duplicate information are never
     /// included by this export.
@@ -207,13 +221,10 @@ public sealed class SearchExportService
     /// <summary>
     /// Exports ONLY selected metadata changes to XLSX.
     ///
-    /// A metadata recommendation is exported only when:
+    /// There is exactly ONE row per track.
     ///
-    ///     IsSelected == true
-    ///     IsChange == true
-    ///
-    /// SearchResult objects and duplicate information are never
-    /// included by this export.
+    /// Multiple selected metadata changes are consolidated onto
+    /// that single row.
     /// </summary>
     public async Task ExportSelectedMetadataXlsxAsync(
         IEnumerable<SearchIssue> issues,
@@ -262,13 +273,10 @@ public sealed class SearchExportService
     /// <summary>
     /// Exports ONLY selected metadata changes to JSON.
     ///
-    /// A metadata recommendation is exported only when:
+    /// There is exactly ONE JSON object per track.
     ///
-    ///     IsSelected == true
-    ///     IsChange == true
-    ///
-    /// SearchResult objects and duplicate information are never
-    /// included by this export.
+    /// Multiple selected metadata changes are consolidated into
+    /// that single object.
     /// </summary>
     public async Task ExportSelectedMetadataJsonAsync(
         IEnumerable<SearchIssue> issues,
@@ -295,11 +303,19 @@ public sealed class SearchExportService
     // ============================================================
 
     /// <summary>
-    /// Creates the export representation of the selected
-    /// metadata changes.
+    /// Creates one consolidated export row per track.
     ///
-    /// This is the authoritative filtering point for the
-    /// dedicated Metadata export.
+    /// Every selected metadata recommendation is applied to the
+    /// appropriate field on that single export row.
+    ///
+    /// For example, if Artist, Album, Genre and Year are selected,
+    /// all four changes appear on the same row.
+    ///
+    /// The original value remains available in the Current fields
+    /// and the selected replacement is placed in the corresponding
+    /// Recommended field.
+    ///
+    /// MediaId always comes from SearchIssue.MediaId.
     /// </summary>
     private static List<SelectedMetadataExportRow>
         GetSelectedMetadataRows(
@@ -307,71 +323,177 @@ public sealed class SearchExportService
     {
         ArgumentNullException.ThrowIfNull(issues);
 
-        return issues
-            .Where(
-                issue =>
-                    issue is not null &&
-                    string.Equals(
-                        issue.Category,
-                        "Metadata",
-                        StringComparison.OrdinalIgnoreCase))
-            .SelectMany(
-                issue =>
-                    issue.MetadataRecommendations
-                        .Where(
-                            recommendation =>
-                                recommendation.IsSelected &&
-                                recommendation.IsChange)
-                        .Select(
-                            recommendation =>
-                                new SelectedMetadataExportRow
-                                {
-                                    FilePath =
-                                        issue.FilePath,
+        var rows =
+            new List<SelectedMetadataExportRow>();
 
-                                    Artist =
-                                        issue.Artist,
+        foreach (var issue in
+                 issues.Where(
+                     issue =>
+                         issue is not null &&
+                         string.Equals(
+                             issue.Category,
+                             "Metadata",
+                             StringComparison.OrdinalIgnoreCase)))
+        {
+            var selectedRecommendations =
+                issue.MetadataRecommendations
+                    .Where(
+                        recommendation =>
+                            recommendation.IsSelected &&
+                            recommendation.IsChange)
+                    .ToList();
 
-                                    TrackTitle =
-                                        issue.TrackTitle,
+            if (selectedRecommendations.Count == 0)
+                continue;
 
-                                    Album =
-                                        issue.Album,
+            var row =
+                new SelectedMetadataExportRow
+                {
+                    IssueId =
+                        issue.Id,
 
-                                    Genre =
-                                        issue.Genre,
+                    MediaId =
+                        issue.MediaId,
 
-                                    Field =
-                                        recommendation.Field,
+                    FilePath =
+                        issue.FilePath,
 
-                                    CurrentValue =
-                                        recommendation.CurrentValue,
+                    Artist =
+                        issue.Artist,
 
-                                    RecommendedValue =
-                                        recommendation.RecommendedValue,
+                    ArtistRecommended =
+                        issue.Artist,
 
-                                    AgreementPercentage =
-                                        recommendation
-                                            .AgreementPercentage,
+                    Title =
+                        issue.TrackTitle,
 
-                                    SupportingProviders =
-                                        recommendation
-                                            .SupportingProviders,
+                    TitleRecommended =
+                        issue.TrackTitle,
 
-                                    ProvidersWithValue =
-                                        recommendation
-                                            .ProvidersWithValue,
+                    Album =
+                        issue.Album,
 
-                                    Strength =
-                                        recommendation.Strength,
+                    AlbumRecommended =
+                        issue.Album,
 
-                                    IsUserModified =
-                                        recommendation.IsUserModified,
+                    Genre =
+                        issue.Genre,
 
-                                    Reason =
-                                        recommendation.Reason
-                                }))
-            .ToList();
+                    GenreRecommended =
+                        issue.Genre,
+
+                    Year =
+                        FormatNullable(issue.Year),
+
+                    YearRecommended =
+                        FormatNullable(issue.Year),
+
+                    Bpm =
+                        FormatNullable(issue.Bpm),
+
+                    BpmRecommended =
+                        FormatNullable(issue.Bpm),
+
+                    Key =
+                        issue.Key,
+
+                    KeyRecommended =
+                        issue.Key,
+
+                    Duration =
+                        FormatDuration(issue.Duration),
+
+                    DurationRecommended =
+                        FormatDuration(issue.Duration)
+                };
+
+            foreach (var recommendation in
+                     selectedRecommendations)
+            {
+                ApplyRecommendation(
+                    row,
+                    recommendation);
+            }
+
+            rows.Add(row);
+        }
+
+        return rows;
+    }
+
+    // ============================================================
+    // Apply Metadata Recommendation
+    // ============================================================
+
+    /// <summary>
+    /// Applies one selected recommendation to the corresponding
+    /// consolidated track-level export row.
+    ///
+    /// Only the selected replacement value is written into the
+    /// appropriate Recommended field.
+    ///
+    /// The Current field remains the value held by the SearchIssue.
+    /// </summary>
+    private static void ApplyRecommendation(
+        SelectedMetadataExportRow row,
+        MetadataChangeRecommendation recommendation)
+    {
+        var field =
+            recommendation.Field?.Trim();
+
+        if (string.IsNullOrWhiteSpace(field))
+            return;
+
+        var recommendedValue =
+            recommendation.RecommendedValue
+            ?? string.Empty;
+
+        switch (field.ToLowerInvariant())
+        {
+            case "artist":
+                row.ArtistRecommended =
+                    recommendedValue;
+                break;
+
+            case "title":
+            case "track title":
+            case "tracktitle":
+                row.TitleRecommended =
+                    recommendedValue;
+                break;
+
+            case "album":
+                row.AlbumRecommended =
+                    recommendedValue;
+                break;
+
+            case "genre":
+                row.GenreRecommended =
+                    recommendedValue;
+                break;
+
+            case "year":
+                row.YearRecommended =
+                    recommendedValue;
+                break;
+
+            case "bpm":
+                row.BpmRecommended =
+                    recommendedValue;
+                break;
+
+            case "key":
+            case "musical key":
+            case "musicalkey":
+                row.KeyRecommended =
+                    recommendedValue;
+                break;
+
+            case "duration":
+                row.DurationRecommended =
+                    recommendedValue;
+                break;
+        }
     }
 
     // ============================================================
@@ -385,6 +507,9 @@ public sealed class SearchExportService
         {
             Id =
                 issue.Id,
+
+            MediaId =
+                issue.MediaId,
 
             Category =
                 issue.Category,
@@ -462,6 +587,9 @@ public sealed class SearchExportService
         {
             Id =
                 result.Id,
+
+            MediaId =
+                result.MediaId,
 
             Source =
                 result.Source,
@@ -596,6 +724,7 @@ public sealed class SearchExportService
             new[]
             {
                 "Issue ID",
+                "DIASISS Media ID",
                 "Category",
                 "Issue Type",
                 "Issue Title",
@@ -612,6 +741,7 @@ public sealed class SearchExportService
                 "Missing Fields",
 
                 "Result ID",
+                "Result Media ID",
                 "Result Source",
                 "Match Score",
                 "Recommended Result",
@@ -720,6 +850,7 @@ public sealed class SearchExportService
             new[]
             {
                 issue.Id,
+                issue.MediaId,
                 issue.Category,
                 issue.Type,
                 issue.Title,
@@ -738,6 +869,7 @@ public sealed class SearchExportService
                     issue.MissingFields),
 
                 result?.Id ?? string.Empty,
+                result?.MediaId ?? issue.MediaId ?? string.Empty,
                 result?.Source ?? string.Empty,
                 result is null
                     ? string.Empty
@@ -852,20 +984,33 @@ public sealed class SearchExportService
         var headers =
             new[]
             {
+                "Issue ID",
+                "DIASISS Media ID",
                 "File Path",
+
                 "Artist",
+                "Artist Recommended",
+
                 "Title",
+                "Title Recommended",
+
                 "Album",
+                "Album Recommended",
+
                 "Genre",
-                "Metadata Field",
-                "Current Value",
-                "Recommended Value",
-                "Agreement %",
-                "Supporting Providers",
-                "Providers With Value",
-                "Consensus Strength",
-                "User Modified",
-                "Reason"
+                "Genre Recommended",
+
+                "Year",
+                "Year Recommended",
+
+                "BPM",
+                "BPM Recommended",
+
+                "Key",
+                "Key Recommended",
+
+                "Duration",
+                "Duration Recommended"
             };
 
         builder.AppendLine(
@@ -882,30 +1027,33 @@ public sealed class SearchExportService
         var values =
             new[]
             {
+                row.IssueId,
+                row.MediaId,
                 row.FilePath,
+
                 row.Artist,
-                row.TrackTitle,
+                row.ArtistRecommended,
+
+                row.Title,
+                row.TitleRecommended,
+
                 row.Album,
+                row.AlbumRecommended,
+
                 row.Genre,
-                row.Field,
-                row.CurrentValue,
-                row.RecommendedValue,
+                row.GenreRecommended,
 
-                row.AgreementPercentage.ToString(
-                    "F1",
-                    CultureInfo.InvariantCulture),
+                row.Year,
+                row.YearRecommended,
 
-                row.SupportingProviders.ToString(
-                    CultureInfo.InvariantCulture),
+                row.Bpm,
+                row.BpmRecommended,
 
-                row.ProvidersWithValue.ToString(
-                    CultureInfo.InvariantCulture),
+                row.Key,
+                row.KeyRecommended,
 
-                row.Strength.ToString(),
-
-                row.IsUserModified.ToString(),
-
-                row.Reason
+                row.Duration,
+                row.DurationRecommended
             };
 
         builder.AppendLine(
@@ -926,6 +1074,7 @@ public sealed class SearchExportService
             new[]
             {
                 "Issue ID",
+                "DIASISS Media ID",
                 "Category",
                 "Issue Type",
                 "Issue Title",
@@ -942,6 +1091,7 @@ public sealed class SearchExportService
                 "Missing Fields",
 
                 "Result ID",
+                "Result Media ID",
                 "Result Source",
                 "Match Score",
                 "Recommended Result",
@@ -1066,6 +1216,7 @@ public sealed class SearchExportService
             new object?[]
             {
                 issue.Id,
+                issue.MediaId,
                 issue.Category,
                 issue.Type,
                 issue.Title,
@@ -1084,6 +1235,7 @@ public sealed class SearchExportService
                     issue.MissingFields),
 
                 result?.Id,
+                result?.MediaId ?? issue.MediaId,
                 result?.Source,
                 result?.MatchScore,
                 result?.IsRecommended,
@@ -1147,20 +1299,33 @@ public sealed class SearchExportService
         var headers =
             new[]
             {
+                "Issue ID",
+                "DIASISS Media ID",
                 "File Path",
+
                 "Artist",
+                "Artist Recommended",
+
                 "Title",
+                "Title Recommended",
+
                 "Album",
+                "Album Recommended",
+
                 "Genre",
-                "Metadata Field",
-                "Current Value",
-                "Recommended Value",
-                "Agreement %",
-                "Supporting Providers",
-                "Providers With Value",
-                "Consensus Strength",
-                "User Modified",
-                "Reason"
+                "Genre Recommended",
+
+                "Year",
+                "Year Recommended",
+
+                "BPM",
+                "BPM Recommended",
+
+                "Key",
+                "Key Recommended",
+
+                "Duration",
+                "Duration Recommended"
             };
 
         for (var index = 0;
@@ -1183,20 +1348,33 @@ public sealed class SearchExportService
         var values =
             new object?[]
             {
+                row.IssueId,
+                row.MediaId,
                 row.FilePath,
+
                 row.Artist,
-                row.TrackTitle,
+                row.ArtistRecommended,
+
+                row.Title,
+                row.TitleRecommended,
+
                 row.Album,
+                row.AlbumRecommended,
+
                 row.Genre,
-                row.Field,
-                row.CurrentValue,
-                row.RecommendedValue,
-                row.AgreementPercentage,
-                row.SupportingProviders,
-                row.ProvidersWithValue,
-                row.Strength.ToString(),
-                row.IsUserModified,
-                row.Reason
+                row.GenreRecommended,
+
+                row.Year,
+                row.YearRecommended,
+
+                row.Bpm,
+                row.BpmRecommended,
+
+                row.Key,
+                row.KeyRecommended,
+
+                row.Duration,
+                row.DurationRecommended
             };
 
         for (var index = 0;
@@ -1306,6 +1484,8 @@ public sealed class SearchExportService
     {
         public string Id { get; init; } = string.Empty;
 
+        public string MediaId { get; init; } = string.Empty;
+
         public string Category { get; init; } = string.Empty;
 
         public string Type { get; init; } = string.Empty;
@@ -1350,6 +1530,8 @@ public sealed class SearchExportService
     private sealed class SearchExportResult
     {
         public string Id { get; init; } = string.Empty;
+
+        public string MediaId { get; init; } = string.Empty;
 
         public string Source { get; init; } = string.Empty;
 
@@ -1431,34 +1613,52 @@ public sealed class SearchExportService
     // Selected Metadata Export Model
     // ============================================================
 
+    /// <summary>
+    /// Track-level metadata export row.
+    ///
+    /// One instance represents exactly one track / SearchIssue.
+    ///
+    /// Multiple selected metadata changes are consolidated into
+    /// the corresponding Recommended fields.
+    /// </summary>
     private sealed class SelectedMetadataExportRow
     {
+        public string IssueId { get; init; } = string.Empty;
+
+        public string MediaId { get; init; } = string.Empty;
+
         public string FilePath { get; init; } = string.Empty;
 
         public string Artist { get; init; } = string.Empty;
 
-        public string TrackTitle { get; init; } = string.Empty;
+        public string ArtistRecommended { get; set; } = string.Empty;
+
+        public string Title { get; init; } = string.Empty;
+
+        public string TitleRecommended { get; set; } = string.Empty;
 
         public string Album { get; init; } = string.Empty;
 
+        public string AlbumRecommended { get; set; } = string.Empty;
+
         public string Genre { get; init; } = string.Empty;
 
-        public string Field { get; init; } = string.Empty;
+        public string GenreRecommended { get; set; } = string.Empty;
 
-        public string CurrentValue { get; init; } = string.Empty;
+        public string Year { get; init; } = string.Empty;
 
-        public string RecommendedValue { get; init; } = string.Empty;
+        public string YearRecommended { get; set; } = string.Empty;
 
-        public double AgreementPercentage { get; init; }
+        public string Bpm { get; init; } = string.Empty;
 
-        public int SupportingProviders { get; init; }
+        public string BpmRecommended { get; set; } = string.Empty;
 
-        public int ProvidersWithValue { get; init; }
+        public string Key { get; init; } = string.Empty;
 
-        public MetadataConsensusStrength Strength { get; init; }
+        public string KeyRecommended { get; set; } = string.Empty;
 
-        public bool IsUserModified { get; init; }
+        public string Duration { get; init; } = string.Empty;
 
-        public string Reason { get; init; } = string.Empty;
+        public string DurationRecommended { get; set; } = string.Empty;
     }
 }

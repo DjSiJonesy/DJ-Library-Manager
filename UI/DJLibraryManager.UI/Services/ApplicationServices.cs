@@ -105,6 +105,12 @@ public sealed class ApplicationServices
     /// </summary>
     public SearchService Search { get; }
 
+    /// <summary>
+    /// Stores and retrieves physical file changes made by
+    /// Improve and Structure.
+    /// </summary>
+    public FileChangeRepository FileChangeRepository { get; }
+
     public SearchExportService SearchExportService { get; }
 
     public ApplicationServices()
@@ -154,6 +160,14 @@ public sealed class ApplicationServices
 
         MediaLocationRepository =
             new MediaLocationRepository();
+
+        // ========================================================
+        // File Changes
+        // ========================================================
+
+        FileChangeRepository =
+            new FileChangeRepository(
+                SqliteDatabase);
 
         // ========================================================
         // Discovery

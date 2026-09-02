@@ -85,6 +85,7 @@ public sealed class MusicAnalysisModule : IAnalysisModule
             Category = "Music",
             Type = type,
             Title = title,
+            MediaId = media.MediaId,
             Description = $"{title}: {media.Artist} - {media.Title}",
             FilePath = media.FilePath,
             CanAutoFix = false

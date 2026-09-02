@@ -53,6 +53,10 @@ public sealed class SqliteSchema
                 connection,
                 transaction);
 
+            CreateFileChangesTable(
+                connection,
+                transaction);
+
             transaction.Commit();
         }
         catch
@@ -272,6 +276,77 @@ public sealed class SqliteSchema
     }
 
     // ============================================================
+    // File Changes
+    // ============================================================
+
+    /// <summary>
+    /// Creates the shared FileChanges table.
+    ///
+    /// FileChanges records physical file changes made by workflow
+    /// stages such as Improve and Structure.
+    ///
+    /// Each operation receives its own OperationId and identifies
+    /// the workflow stage which created the change.
+    ///
+    /// MediaId is the authoritative DIASISS GUID for the media
+    /// record and is used to verify that a rollback is acting on
+    /// the correct media item.
+    ///
+    /// OriginalPath and NewPath record the physical movement.
+    ///
+    /// Status records the outcome of the change.
+    /// </summary>
+    private static void CreateFileChangesTable(
+        SqliteConnection connection,
+        SqliteTransaction transaction)
+    {
+        using var command =
+            connection.CreateCommand();
+
+        command.Transaction =
+            transaction;
+
+        command.CommandText =
+            """
+            CREATE TABLE IF NOT EXISTS FileChanges
+            (
+                ChangeId
+                    INTEGER PRIMARY KEY AUTOINCREMENT,
+
+                OperationId
+                    TEXT NOT NULL,
+
+                Stage
+                    TEXT NOT NULL,
+
+                ChangeType
+                    TEXT NOT NULL,
+
+                MediaId
+                    TEXT NOT NULL,
+
+                OriginalPath
+                    TEXT NOT NULL,
+
+                NewPath
+                    TEXT NOT NULL,
+
+                Status
+                    TEXT NOT NULL,
+
+                ChangedDate
+                    TEXT NOT NULL
+            );
+            """;
+
+        command.ExecuteNonQuery();
+
+        CreateFileChangeIndexes(
+            connection,
+            transaction);
+    }
+
+    // ============================================================
     // Media Indexes
     // ============================================================
 
@@ -355,6 +430,56 @@ public sealed class SqliteSchema
             """
             CREATE INDEX IF NOT EXISTS IX_ProviderImports_Provider
                 ON ProviderImports(ProviderId);
+            """;
+
+        command.ExecuteNonQuery();
+    }
+
+    // ============================================================
+    // File Change Indexes
+    // ============================================================
+
+    /// <summary>
+    /// Creates indexes used by Improve and Structure when
+    /// locating and rolling back file changes.
+    /// </summary>
+    private static void CreateFileChangeIndexes(
+        SqliteConnection connection,
+        SqliteTransaction transaction)
+    {
+        using var command =
+            connection.CreateCommand();
+
+        command.Transaction =
+            transaction;
+
+        command.CommandText =
+            """
+            CREATE INDEX IF NOT EXISTS IX_FileChanges_OperationId
+                ON FileChanges(
+                    OperationId
+                );
+
+            CREATE INDEX IF NOT EXISTS IX_FileChanges_Stage
+                ON FileChanges(
+                    Stage
+                );
+
+            CREATE INDEX IF NOT EXISTS IX_FileChanges_MediaId
+                ON FileChanges(
+                    MediaId
+                );
+
+            CREATE INDEX IF NOT EXISTS IX_FileChanges_Status
+                ON FileChanges(
+                    Status
+                );
+
+            CREATE INDEX IF NOT EXISTS IX_FileChanges_Stage_OperationId
+                ON FileChanges(
+                    Stage,
+                    OperationId
+                );
             """;
 
         command.ExecuteNonQuery();

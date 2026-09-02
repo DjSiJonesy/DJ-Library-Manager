@@ -29,6 +29,18 @@ public partial class SearchIssue : ObservableObject
     [ObservableProperty]
     private string id = string.Empty;
 
+    /// <summary>
+    /// GUID of the DIASISS MediaItem that this SearchIssue belongs to.
+    ///
+    /// This is the authoritative library identity created during
+    /// Import and carried through Analysis into Search.
+    ///
+    /// SearchIssue.Id is the identity of the issue itself and must
+    /// remain separate from MediaId.
+    /// </summary>
+    [ObservableProperty]
+    private string mediaId = string.Empty;
+
     // ============================================================
     // Category
     // ============================================================

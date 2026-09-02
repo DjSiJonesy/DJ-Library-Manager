@@ -72,12 +72,16 @@ public sealed class MusicSearchService : ISearchService
         string filePath,
         DJLMMediaItem? media,
         string issueType)
-    {
-        var result =
+            {
+                var result =
             new SearchResult
             {
                 Id =
                     Guid.NewGuid().ToString(),
+
+                MediaId =
+                    media?.MediaId ??
+                    string.Empty,
 
                 Source =
                     "DIASISS Library",

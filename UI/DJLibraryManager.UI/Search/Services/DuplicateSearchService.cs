@@ -183,6 +183,9 @@ public sealed class DuplicateSearchService : ISearchService
                 Id =
                     Guid.NewGuid().ToString(),
 
+                MediaId =
+                    media?.MediaId ?? string.Empty,
+
                 Source =
                     "DIASISS Library",
 

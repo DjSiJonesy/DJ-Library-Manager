@@ -20,6 +20,19 @@ public partial class SearchResult : ObservableObject
     [ObservableProperty]
     private string id = string.Empty;
 
+    /// <summary>
+    /// The authoritative DIASISS MediaId associated with this result.
+    ///
+    /// This is the GUID created by the Import/Library layer and is
+    /// carried through Search into Improve and Structure.
+    ///
+    /// SearchResult.Id remains the identity of the Search result itself
+    /// and must not be used as the DIASISS media identity.
+    /// </summary>
+    [ObservableProperty]
+    private string mediaId = string.Empty;
+
+
     // ============================================================
     // Source
     // ============================================================

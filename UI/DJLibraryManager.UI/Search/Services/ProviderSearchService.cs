@@ -76,6 +76,10 @@ public sealed class ProviderSearchService : ISearchService
                 Id =
                     Guid.NewGuid().ToString(),
 
+                MediaId =
+                media?.MediaId ??
+                string.Empty,
+
                 Source =
                     "DIASISS Library",
 

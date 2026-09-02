@@ -358,6 +358,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
             UpdateCategorySearchAvailability();
 
+            NotifyMetadataRecommendationProperties();
+
             return;
         }
 
@@ -393,6 +395,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 : $"{Issues.Count:N0} issues available";
 
         UpdateCategorySearchAvailability();
+
+        NotifyMetadataRecommendationProperties();
     }
 
     private void UpdateCategoryCounts()
@@ -441,7 +445,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
         return
             category?.Issues.Count
-            ?? 0;
+            ??
+            0;
     }
 
     // ============================================================
@@ -683,6 +688,9 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             {
                 Id =
                     issue.Id.ToString(),
+
+                MediaId =
+                    issue.MediaId,
 
                 Category =
                     issue.Category,
@@ -1021,6 +1029,18 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
             SaveSearchState();
 
+            // ----------------------------------------------------
+            // The metadata recommendations are populated by the
+            // Search service. HasSelectedMetadataForExport is a
+            // calculated property, so explicitly notify the UI
+            // that its underlying state has changed.
+            // ----------------------------------------------------
+
+            OnPropertyChanged(
+                nameof(AllRecommendedSelected));
+
+            NotifyMetadataRecommendationProperties();
+
             SearchStatus =
                 issue.HasResults
                     ? $"{issue.Results.Count:N0} result(s) found"
@@ -1037,6 +1057,13 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         {
             IsSearching =
                 false;
+
+            // ----------------------------------------------------
+            // Ensure the Export Metadata visibility state is
+            // refreshed when an individual search completes.
+            // ----------------------------------------------------
+
+            NotifyMetadataRecommendationProperties();
         }
     }
 
@@ -1501,35 +1528,35 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                     FileTypeChoices =
                         new[]
                         {
-                        new Avalonia.Platform.Storage.FilePickerFileType(
-                            "Excel Workbook")
-                        {
-                            Patterns =
-                                new[]
-                                {
-                                    "*.xlsx"
-                                }
-                        },
+                            new Avalonia.Platform.Storage.FilePickerFileType(
+                                "Excel Workbook")
+                            {
+                                Patterns =
+                                    new[]
+                                    {
+                                        "*.xlsx"
+                                    }
+                            },
 
-                        new Avalonia.Platform.Storage.FilePickerFileType(
-                            "CSV File")
-                        {
-                            Patterns =
-                                new[]
-                                {
-                                    "*.csv"
-                                }
-                        },
+                            new Avalonia.Platform.Storage.FilePickerFileType(
+                                "CSV File")
+                            {
+                                Patterns =
+                                    new[]
+                                    {
+                                        "*.csv"
+                                    }
+                            },
 
-                        new Avalonia.Platform.Storage.FilePickerFileType(
-                            "JSON File")
-                        {
-                            Patterns =
-                                new[]
-                                {
-                                    "*.json"
-                                }
-                        }
+                            new Avalonia.Platform.Storage.FilePickerFileType(
+                                "JSON File")
+                            {
+                                Patterns =
+                                    new[]
+                                    {
+                                        "*.json"
+                                    }
+                            }
                         }
                 });
 
@@ -1562,7 +1589,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
                     await App.Services
                         .SearchExportService
-                        .ExportXlsxAsync(
+                        .ExportSelectedMetadataXlsxAsync(
                             metadataIssues,
                             filePath);
 
@@ -1572,7 +1599,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
                     await App.Services
                         .SearchExportService
-                        .ExportCsvAsync(
+                        .ExportSelectedMetadataCsvAsync(
                             metadataIssues,
                             filePath);
 
@@ -1582,7 +1609,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
 
                     await App.Services
                         .SearchExportService
-                        .ExportJsonAsync(
+                        .ExportSelectedMetadataJsonAsync(
                             metadataIssues,
                             filePath);
 
@@ -1773,6 +1800,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
             run);
 
         UpdateSearchRunStatus();
+
+        NotifyMetadataRecommendationProperties();
     }
 
     private void SetSearchProgressStart(
@@ -1889,6 +1918,8 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
                 $"{run.Category.ToLowerInvariant()} searched • " +
                 $"{run.IssuesWithResults:N0} with results";
         }
+
+        NotifyMetadataRecommendationProperties();
     }
 
     // ============================================================
@@ -2008,7 +2039,7 @@ public partial class SearchWorkspaceViewModel : WorkspaceViewModel
         LoadAnalysisSummary();
     }
 
-     // ============================================================
+    // ============================================================
     // Workflow Navigation
     // ============================================================
 
