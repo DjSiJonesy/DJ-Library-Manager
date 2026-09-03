@@ -141,7 +141,8 @@
 
                     <Grid
                         IsVisible="{Binding IsDuplicatesCategory}"
-                        RowDefinitions="Auto,12,Auto,16,Auto,16,Auto,*,Auto">
+                        RowDefinitions="Auto,12,Auto,16,Auto,Auto,16,*,Auto">
+
 
                         <!-- ============================================= -->
                         <!-- Section Heading -->
@@ -224,75 +225,71 @@
                                         FontWeight="SemiBold"
                                         Text="Duplicate Summary"/>
 
-
                                     <Grid
                                         ColumnDefinitions="*,Auto">
 
                                         <TextBlock
                                             Grid.Column="0"
-                                            FontSize="13"
+                                            FontSize="12"
                                             Text="Files with duplicate/multiple copies"
                                             TextWrapping="Wrap"/>
 
                                         <TextBlock
                                             Grid.Column="1"
-                                            FontSize="13"
+                                            FontSize="12"
                                             FontWeight="SemiBold"
                                             Margin="20,0,0,0"
                                             Text="{Binding SelectedCategory.Count, StringFormat={}{0:N0}}"/>
 
                                     </Grid>
 
-
                                     <Grid
                                         ColumnDefinitions="*,Auto">
 
                                         <TextBlock
                                             Grid.Column="0"
-                                            FontSize="13"
+                                            FontSize="12"
                                             Text="Total files"/>
 
                                         <TextBlock
                                             Grid.Column="1"
-                                            FontSize="13"
+                                            FontSize="12"
                                             FontWeight="SemiBold"
                                             Margin="20,0,0,0"
                                             Text="{Binding TotalDuplicates, StringFormat={}{0:N0}}"/>
 
                                     </Grid>
 
-
                                     <Grid
                                         ColumnDefinitions="*,Auto">
 
                                         <TextBlock
                                             Grid.Column="0"
-                                            FontSize="13"
+                                            FontSize="12"
                                             Text="Individual copies selected to keep"
                                             TextWrapping="Wrap"/>
 
                                         <TextBlock
                                             Grid.Column="1"
-                                            FontSize="13"
+                                            FontSize="12"
                                             FontWeight="SemiBold"
                                             Margin="20,0,0,0"
                                             Text="{Binding DuplicatesToKeep, StringFormat={}{0:N0}}"/>
 
                                     </Grid>
 
-
                                     <Grid
                                         ColumnDefinitions="*,Auto">
 
                                         <TextBlock
                                             Grid.Column="0"
-                                            FontSize="13"
+                                            FontSize="12"
                                             Text="Files to be moved to DIASISS Duplicates"
                                             TextWrapping="Wrap"/>
 
                                         <TextBlock
                                             Grid.Column="1"
-                                            FontSize="13"
+                                            FontSize="12"
                                             FontWeight="SemiBold"
                                             Margin="20,0,0,0"
                                             Text="{Binding DuplicatesToMove, StringFormat={}{0:N0}}"/>
@@ -307,34 +304,157 @@
 
 
                         <!-- ============================================= -->
-                        <!-- Operation Result -->
+                        <!-- Operation Result + Restore Changes -->
+                        <!-- ============================================= -->
+
+                        <Grid
+                            Grid.Row="5"
+                            ColumnDefinitions="*,*"
+                            ColumnSpacing="16">
+
+
+                            <!-- ========================================= -->
+                            <!-- Operation Result -->
+                            <!-- ========================================= -->
+
+                            <Border
+                                Grid.Column="0"
+                                Classes="card-secondary"
+                                Padding="12">
+
+                                <StackPanel
+                                    Spacing="6">
+
+                                    <TextBlock
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Text="Operation Result"/>
+
+                                    <TextBlock
+                                        FontSize="13"
+                                        Text="{Binding OperationResult}"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Border>
+
+
+                            <!-- ========================================= -->
+                            <!-- Restore Changes -->
+                            <!-- ========================================= -->
+
+                            <Border
+                                Grid.Column="1"
+                                Classes="card-secondary"
+                                Padding="12">
+
+                                <Grid
+                                    RowDefinitions="Auto,Auto,Auto,Auto"
+                                    RowSpacing="8">
+
+                                    <!-- Heading -->
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Text="Restore Changes"
+                                        FontSize="14"
+                                        FontWeight="SemiBold"/>
+
+
+                                    <!-- Explanation -->
+
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Text="Select the point in time from which changes should be restored. The selected operation and every operation after it will be restored. Earlier operations will remain unchanged."
+                                        FontSize="11"
+                                        TextWrapping="Wrap"/>
+
+
+                                    <!-- Restore Point -->
+
+                                    <Grid
+                                        Grid.Row="2"
+                                        ColumnDefinitions="Auto,*"
+                                        ColumnSpacing="10">
+
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="Restore from:"
+                                            FontSize="12"
+                                            FontWeight="SemiBold"
+                                            VerticalAlignment="Center"/>
+
+                                        <ComboBox
+                                            Grid.Column="1"
+                                            ItemsSource="{Binding RestorePoints}"
+                                            SelectedItem="{Binding SelectedRestorePoint, Mode=TwoWay}"
+                                            FontSize="12"
+                                            HorizontalAlignment="Stretch">
+
+                                            <ComboBox.ItemTemplate>
+
+                                                <DataTemplate>
+
+                                                    <TextBlock
+                                                        Text="{Binding DisplaySummary}"
+                                                        FontSize="12"/>
+
+                                                </DataTemplate>
+
+                                            </ComboBox.ItemTemplate>
+
+                                        </ComboBox>
+
+                                    </Grid>
+
+
+                                    <!-- Restore Preview -->
+
+                                    <Border
+                                        Grid.Row="3"
+                                        Classes="card-secondary"
+                                        Padding="10"
+                                        MinHeight="60">
+
+                                        <Grid
+                                            RowDefinitions="Auto,Auto"
+                                            RowSpacing="6">
+
+                                            <TextBlock
+                                                Grid.Row="0"
+                                                Text="Changes to be Restored"
+                                                FontSize="12"
+                                                FontWeight="SemiBold"/>
+
+                                            <TextBlock
+                                                Grid.Row="1"
+                                                Text="{Binding SelectedRestorePoint.DisplayRestoreSummary}"
+                                                FontSize="11"
+                                                FontWeight="SemiBold"
+                                                TextWrapping="Wrap"/>
+
+                                        </Grid>
+
+                                    </Border>
+
+                                </Grid>
+
+                            </Border>
+
+                        </Grid>
+
+
+                        <!-- ============================================= -->
+                        <!-- Spacer -->
                         <!-- ============================================= -->
 
                         <Border
-                            Grid.Row="6"
-                            Classes="card-secondary"
-                            Padding="12">
-
-                            <StackPanel
-                                Spacing="6">
-
-                                <TextBlock
-                                    FontSize="14"
-                                    FontWeight="SemiBold"
-                                    Text="Operation Result"/>
-
-                                <TextBlock
-                                    FontSize="13"
-                                    Text="{Binding OperationResult}"
-                                    TextWrapping="Wrap"/>
-
-                            </StackPanel>
-
-                        </Border>
+                            Grid.Row="6"/>
 
 
                         <!-- ============================================= -->
-                        <!-- Flexible Workspace Space -->
+                        <!-- Flexible Space -->
                         <!-- ============================================= -->
 
                         <Border
@@ -358,8 +478,13 @@
 
                             <Button
                                 Theme="{StaticResource DJLM.PrimaryButton}"
-                                Content="Confirm &amp; Apply"
+                                Content="Remove Duplicates"
                                 Command="{Binding ConfirmCommand}"/>
+
+                            <Button
+                                Theme="{StaticResource DJLM.SecondaryButton}"
+                                Content="Restore Selected Changes"
+                                Command="{Binding RestoreSelectedChangesCommand}"/>
 
                         </StackPanel>
 

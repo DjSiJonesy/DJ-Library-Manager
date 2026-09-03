@@ -11,6 +11,7 @@ using DJLibraryManager.UI.Services;
 using DJLibraryManager.UI.ViewModels.Workspace;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -27,6 +28,22 @@ namespace DJLibraryManager.UI.ViewModels.Improve;
 /// </summary>
 public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
 {
+    public event Func<string, string, string, Task<bool>>? ConfirmationRequested;
+
+    private async Task<bool> RequestConfirmationAsync(
+        string title,
+        string message,
+        string confirmButtonText)
+    {
+        if (ConfirmationRequested is null)
+            return false;
+
+        return await ConfirmationRequested(
+            title,
+            message,
+            confirmButtonText);
+    }
+
     public override string Title =>
         "Improve";
 
@@ -59,6 +76,31 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
 
     [ObservableProperty]
     private int duplicatesToMove;
+
+    // ============================================================
+    // Restore Points
+    // ============================================================
+
+    /// <summary>
+    /// Restore points created by completed Improve operations.
+    ///
+    /// The collection is ordered from oldest operation to newest
+    /// operation.
+    /// </summary>
+    public ObservableCollection<RestorePointInfo> RestorePoints { get; }
+        = new();
+
+    /// <summary>
+    /// The restore point currently selected by the user.
+    /// </summary>
+    [ObservableProperty]
+    private RestorePointInfo? selectedRestorePoint;
+
+    /// <summary>
+    /// Indicates whether restore points are currently being loaded.
+    /// </summary>
+    [ObservableProperty]
+    private bool isLoadingRestorePoints;
 
     // ============================================================
     // Workspace State
@@ -115,6 +157,8 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
             Categories.FirstOrDefault();
 
         LoadCurrentSearchState();
+
+        _ = LoadRestorePointsAsync();
     }
 
     // ============================================================
@@ -204,40 +248,23 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
             return;
         }
 
-        // Category counts reflect the latest completed Analysis,
-        // just as they do in the Search Workspace.
         UpdateCategoryCounts();
-
-        // --------------------------------------------------------
-        // Duplicates
-        // --------------------------------------------------------
 
         if (IsDuplicatesCategory)
         {
             LoadDuplicateSummary(search);
-
             return;
         }
-
-        // --------------------------------------------------------
-        // Missing Files
-        // --------------------------------------------------------
 
         if (IsMissingFilesCategory)
         {
             LoadMissingFilesSummary(search);
-
             return;
         }
-
-        // --------------------------------------------------------
-        // Metadata
-        // --------------------------------------------------------
 
         if (IsMetadataCategory)
         {
             LoadMetadataSummary(search);
-
             return;
         }
     }
@@ -246,16 +273,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Category Counts
     // ============================================================
 
-    /// <summary>
-    /// Updates the counts displayed on the Improve category
-    /// buttons using the latest completed Analysis.
-    ///
-    /// This deliberately matches the Search Workspace, where the
-    /// category counts are based on AnalysisRepository.CurrentAnalysis.
-    ///
-    /// SearchState is still used separately for the user's Search
-    /// decisions and selections.
-    /// </summary>
     private void UpdateCategoryCounts()
     {
         var analysis =
@@ -319,20 +336,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Duplicate Summary
     // ============================================================
 
-    /// <summary>
-    /// Builds the Duplicate Improve summary.
-    ///
-    /// A Duplicate issue represents a group of files containing
-    /// duplicate/multiple copies. Each issue can therefore contain
-    /// multiple individual files in its Results collection.
-    ///
-    /// The summary distinguishes between:
-    ///
-    /// - Duplicate/multiple-copy groups
-    /// - Total individual files in those groups
-    /// - Individual files selected to keep
-    /// - Individual files that will be moved to DIASISS Duplicates
-    /// </summary>
     private void LoadDuplicateSummary(
         SearchState search)
     {
@@ -346,36 +349,20 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                             StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-        // ------------------------------------------------------------
-        // Total individual duplicate files
-        // ------------------------------------------------------------
-
         TotalDuplicates =
             duplicateIssues.Sum(
                 issue =>
                     issue.Results.Count);
-
-        // ------------------------------------------------------------
-        // Individual files selected to keep
-        // ------------------------------------------------------------
 
         DuplicatesToKeep =
             duplicateIssues.Sum(
                 issue =>
                     issue.SelectedResultIds.Count);
 
-        // ------------------------------------------------------------
-        // Individual files that will be moved
-        // ------------------------------------------------------------
-
         DuplicatesToMove =
             Math.Max(
                 TotalDuplicates - DuplicatesToKeep,
                 0);
-
-        // ------------------------------------------------------------
-        // No duplicate files
-        // ------------------------------------------------------------
 
         if (duplicateIssues.Count == 0)
         {
@@ -388,10 +375,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
             return;
         }
 
-        // ------------------------------------------------------------
-        // Duplicate summary
-        // ------------------------------------------------------------
-
         Status =
             $"{duplicateIssues.Count:N0} Files with duplicate/multiple copies.\n" +
             $"{TotalDuplicates:N0} Total files.\n" +
@@ -403,12 +386,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Missing Files Summary
     // ============================================================
 
-    /// <summary>
-    /// Builds the Missing Files Improve summary.
-    ///
-    /// Missing Files are represented by the File Integrity
-    /// category in Analysis/Search.
-    /// </summary>
     private void LoadMissingFilesSummary(
         SearchState search)
     {
@@ -428,18 +405,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Metadata Summary
     // ============================================================
 
-    /// <summary>
-    /// Builds the Metadata Improve summary.
-    ///
-    /// The first number is the original number of Metadata
-    /// issues found during Analysis/Search.
-    ///
-    /// The second number is the number of Metadata issues for
-    /// which Search found one or more results.
-    ///
-    /// This deliberately counts issues/tracks rather than
-    /// individual metadata field recommendations.
-    /// </summary>
     private void LoadMetadataSummary(
         SearchState search)
     {
@@ -461,6 +426,111 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
         Status =
             $"{metadataIssues.Count:N0} Metadata issues originally found. Improvements found to " +
             $"{improvementsFound:N0} Tracks.";
+    }
+
+    // ============================================================
+    // Load Restore Points
+    // ============================================================
+
+    private async Task LoadRestorePointsAsync()
+    {
+        try
+        {
+            IsLoadingRestorePoints = true;
+
+            var changes =
+                await App.Services.FileChangeRepository
+                    .GetStageChangesAsync("Improve");
+
+            var completedChanges = changes
+                .Where(c =>
+                    string.Equals(
+                        c.Status,
+                        "Completed",
+                        StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var operationGroups = completedChanges
+                .GroupBy(c => c.OperationId)
+                .Select(group =>
+                {
+                    var orderedChanges = group
+                        .OrderBy(c => GetChangedDate(c.ChangedDate))
+                        .ThenBy(c => c.ChangeId)
+                        .ToList();
+
+                    var firstChange = orderedChanges.First();
+
+                    return new
+                    {
+                        OperationId = group.Key,
+                        ChangedDate =
+                            GetChangedDate(firstChange.ChangedDate),
+                        FirstChangeId = firstChange.ChangeId,
+                        ChangeCount = group.Count()
+                    };
+                })
+                .OrderBy(x => x.ChangedDate)
+                .ThenBy(x => x.FirstChangeId)
+                .ToList();
+
+            RestorePoints.Clear();
+
+            for (int i = 0; i < operationGroups.Count; i++)
+            {
+                var operation = operationGroups[i];
+
+                int changesToRestore =
+                    operationGroups
+                        .Skip(i)
+                        .Sum(x => x.ChangeCount);
+
+                int operationsToRestore =
+                    operationGroups.Count - i;
+
+                RestorePoints.Add(
+                    new RestorePointInfo(
+                        operation.OperationId,
+                        operation.ChangedDate,
+                        operation.ChangeCount,
+                        operationsToRestore,
+                        changesToRestore));
+            }
+
+            SelectedRestorePoint =
+                RestorePoints.FirstOrDefault();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(
+                $"Failed to load restore points: {ex}");
+
+            RestorePoints.Clear();
+            SelectedRestorePoint = null;
+        }
+        finally
+        {
+            IsLoadingRestorePoints = false;
+        }
+    }
+
+    // ============================================================
+    // Parse Changed Date
+    // ============================================================
+
+    private static DateTime GetChangedDate(
+        string changedDate)
+    {
+        if (DateTime.TryParse(
+                changedDate,
+                null,
+                System.Globalization.DateTimeStyles.RoundtripKind,
+                out var parsed))
+        {
+            return parsed;
+        }
+
+        return DateTime.MinValue;
     }
 
     // ============================================================
@@ -497,14 +567,429 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     }
 
     // ============================================================
-    // Open DIASISS Duplicates Folder
+    // Restore Point Selection
+    // ============================================================
+
+    [RelayCommand]
+    private void SelectRestorePoint(
+        RestorePointInfo? restorePoint)
+    {
+        if (restorePoint is null)
+            return;
+
+        SelectedRestorePoint =
+            restorePoint;
+    }
+
+    // ============================================================
+    // Restore Selected Changes
     // ============================================================
 
     /// <summary>
-    /// Opens the DIASISS Duplicates folder.
+    /// Restores the selected Improve operation and every Improve
+    /// operation that occurred after it.
     ///
-    /// The folder is created if it does not already exist.
+    /// Earlier operations are deliberately left untouched.
+    ///
+    /// The restore is recovery-first:
+    ///
+    /// 1. Load all completed Improve changes.
+    /// 2. Determine the selected operation and every later operation.
+    /// 3. Preflight every physical source/destination path.
+    /// 4. Request user confirmation.
+    /// 5. Restore files in reverse operation order.
+    /// 6. Mark successfully restored FileChanges as Restored.
+    /// 7. Refresh Analysis.
+    ///
+    /// No SearchState is modified.
     /// </summary>
+    [RelayCommand]
+    private async Task RestoreSelectedChanges()
+    {
+        if (SelectedRestorePoint is null)
+        {
+            Status =
+                "Select a restore point before restoring changes.";
+
+            return;
+        }
+
+        try
+        {
+            Status =
+                "Preparing restore...";
+
+            var changes =
+                await App.Services
+                    .FileChangeRepository
+                    .GetStageChangesAsync("Improve");
+
+            var completedChanges =
+                changes
+                    .Where(change =>
+                        string.Equals(
+                            change.Status,
+                            "Completed",
+                            StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+            if (completedChanges.Count == 0)
+            {
+                Status =
+                    "There are no completed Improve changes available to restore.";
+
+                return;
+            }
+
+            var operationGroups =
+                completedChanges
+                    .GroupBy(change => change.OperationId)
+                    .Select(group =>
+                    {
+                        var orderedChanges =
+                            group
+                                .OrderBy(change =>
+                                    GetChangedDate(change.ChangedDate))
+                                .ThenBy(change => change.ChangeId)
+                                .ToList();
+
+                        var firstChange =
+                            orderedChanges.First();
+
+                        return new
+                        {
+                            OperationId = group.Key,
+                            ChangedDate =
+                                GetChangedDate(
+                                    firstChange.ChangedDate),
+                            FirstChangeId =
+                                firstChange.ChangeId,
+                            Changes =
+                                orderedChanges
+                        };
+                    })
+                    .OrderBy(operation => operation.ChangedDate)
+                    .ThenBy(operation => operation.FirstChangeId)
+                    .ToList();
+
+            var selectedIndex =
+                operationGroups.FindIndex(
+                    operation =>
+                        string.Equals(
+                            operation.OperationId,
+                            SelectedRestorePoint.OperationId,
+                            StringComparison.OrdinalIgnoreCase));
+
+            if (selectedIndex < 0)
+            {
+                Status =
+                    "The selected restore point is no longer available.";
+
+                return;
+            }
+
+            var operationsToRestore =
+                operationGroups
+                    .Skip(selectedIndex)
+                    .ToList();
+
+            var changesToRestore =
+                operationsToRestore
+                    .SelectMany(operation => operation.Changes)
+                    .ToList();
+
+            if (changesToRestore.Count == 0)
+            {
+                Status =
+                    "There are no completed changes available at the selected restore point.";
+
+                return;
+            }
+
+            // --------------------------------------------------------
+            // PRE-FLIGHT
+            //
+            // Nothing is physically changed until every change has
+            // passed these checks.
+            // --------------------------------------------------------
+
+            var preflightErrors =
+                new List<string>();
+
+            foreach (var change in changesToRestore)
+            {
+                if (string.IsNullOrWhiteSpace(change.MediaId))
+                {
+                    preflightErrors.Add(
+                        $"Change {change.ChangeId}: missing MediaId.");
+
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(change.NewPath))
+                {
+                    preflightErrors.Add(
+                        $"Change {change.ChangeId}: missing NewPath.");
+
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(change.OriginalPath))
+                {
+                    preflightErrors.Add(
+                        $"Change {change.ChangeId}: missing OriginalPath.");
+
+                    continue;
+                }
+
+                if (!File.Exists(change.NewPath))
+                {
+                    preflightErrors.Add(
+                        $"Change {change.ChangeId}: restored file does not exist at '{change.NewPath}'.");
+                }
+
+                if (File.Exists(change.OriginalPath))
+                {
+                    preflightErrors.Add(
+                        $"Change {change.ChangeId}: original path already exists at '{change.OriginalPath}'.");
+                }
+            }
+
+            if (preflightErrors.Count > 0)
+            {
+                Status =
+                    $"Restore cannot proceed. {preflightErrors.Count:N0} pre-flight issue(s) were found.";
+
+                OperationResult =
+                    "No files were restored.\n\n" +
+                    string.Join(
+                        "\n",
+                        preflightErrors.Take(10));
+
+                if (preflightErrors.Count > 10)
+                {
+                    OperationResult +=
+                        $"\n...and {preflightErrors.Count - 10:N0} more.";
+                }
+
+                return;
+            }
+
+            // --------------------------------------------------------
+            // User confirmation.
+            //
+            // All restore validation has passed. No physical files
+            // have been changed at this point.
+            // --------------------------------------------------------
+
+            var selectedRestoreDate =
+                SelectedRestorePoint.DisplayDate;
+
+            var restoreConfirmationMessage =
+                $"Restore from {selectedRestoreDate}?\n\n" +
+                $"{operationsToRestore.Count:N0} Improve operations and " +
+                $"{changesToRestore.Count:N0} files will be restored.\n\n" +
+                "The selected operation and every operation after it will be restored. " +
+                "Earlier operations will remain unchanged.\n\n" +
+                "This will physically move the files back to their original paths " +
+                "and mark the restored FileChanges records as Restored.\n\n" +
+                "Do you want to continue?";
+
+            var confirmed =
+                await RequestConfirmationAsync(
+                    "Restore Selected Changes",
+                    restoreConfirmationMessage,
+                    "Restore Changes");
+
+            if (!confirmed)
+            {
+                Status =
+                    "Restore cancelled.";
+
+                return;
+            }
+
+            // --------------------------------------------------------
+            // Restore newest operation first.
+            // --------------------------------------------------------
+
+            var restoreOrder =
+                operationsToRestore
+                    .AsEnumerable()
+                    .Reverse()
+                    .SelectMany(operation =>
+                        operation.Changes
+                            .OrderByDescending(
+                                change => change.ChangeId))
+                    .ToList();
+
+            var restoredChanges =
+                new List<FileChangeRecord>();
+
+            try
+            {
+                foreach (var change in restoreOrder)
+                {
+                    Status =
+                        $"Restoring {restoredChanges.Count + 1:N0} of {restoreOrder.Count:N0}...";
+
+                    // ------------------------------------------------
+                    // Physical restore:
+                    //
+                    // NewPath -> OriginalPath
+                    // ------------------------------------------------
+
+                    MoveFile(
+                        change.NewPath,
+                        change.OriginalPath);
+
+                    // ------------------------------------------------
+                    // Confirm the physical restore completed.
+                    // ------------------------------------------------
+
+                    if (!File.Exists(change.OriginalPath) ||
+                        File.Exists(change.NewPath))
+                    {
+                        throw new IOException(
+                            $"The restored file could not be verified. " +
+                            $"Original='{change.OriginalPath}', " +
+                            $"New='{change.NewPath}'.");
+                    }
+
+                    // ------------------------------------------------
+                    // Mark the FileChange as Restored.
+                    // ------------------------------------------------
+
+                    try
+                    {
+                        await App.Services
+                            .FileChangeRepository
+                            .UpdateStatusAsync(
+                                change.ChangeId,
+                                "Restored");
+                    }
+                    catch (Exception statusException)
+                    {
+                        try
+                        {
+                            MoveFile(
+                                change.OriginalPath,
+                                change.NewPath);
+                        }
+                        catch (Exception rollbackException)
+                        {
+                            throw new IOException(
+                                $"CRITICAL: FileChange {change.ChangeId} was physically restored " +
+                                $"but its status could not be updated, and physical rollback failed. " +
+                                $"Original='{change.OriginalPath}', " +
+                                $"New='{change.NewPath}'. " +
+                                $"StatusError='{statusException.Message}'. " +
+                                $"RollbackError='{rollbackException.Message}'.",
+                                rollbackException);
+                        }
+
+                        throw new IOException(
+                            $"FileChange {change.ChangeId} could not be marked as Restored. " +
+                            "The physical restore was rolled back.",
+                            statusException);
+                    }
+
+                    restoredChanges.Add(change);
+                }
+            }
+            catch (Exception restoreException)
+            {
+                Debug.WriteLine(
+                    $"Restore operation failed: {restoreException}");
+
+                foreach (
+                    var restoredChange in
+                    restoredChanges.AsEnumerable().Reverse())
+                {
+                    try
+                    {
+                        if (File.Exists(restoredChange.OriginalPath) &&
+                            !File.Exists(restoredChange.NewPath))
+                        {
+                            MoveFile(
+                                restoredChange.OriginalPath,
+                                restoredChange.NewPath);
+                        }
+
+                        await App.Services
+                            .FileChangeRepository
+                            .UpdateStatusAsync(
+                                restoredChange.ChangeId,
+                                "Completed");
+                    }
+                    catch (Exception rollbackException)
+                    {
+                        Debug.WriteLine(
+                            $"CRITICAL: Restore rollback failed for ChangeId={restoredChange.ChangeId}. " +
+                            $"Original='{restoredChange.OriginalPath}', " +
+                            $"New='{restoredChange.NewPath}', " +
+                            $"Error='{rollbackException}'");
+                    }
+                }
+
+                Status =
+                    "Restore failed. The application attempted to roll back the changes already restored.";
+
+                OperationResult =
+                    $"Restore failed after {restoredChanges.Count:N0} of " +
+                    $"{restoreOrder.Count:N0} files.\n\n" +
+                    restoreException.Message;
+
+                return;
+            }
+
+            // --------------------------------------------------------
+            // Successful restore.
+            // --------------------------------------------------------
+
+            OperationResult =
+                $"{restoredChanges.Count:N0} files restored.\n" +
+                $"{operationsToRestore.Count:N0} Improve operations restored.\n" +
+                "Earlier Improve operations were left unchanged.";
+
+            Status =
+                "Restore completed successfully.";
+
+            Debug.WriteLine(
+                $"Improve restore completed successfully. " +
+                $"RestorePoint={SelectedRestorePoint.OperationId}, " +
+                $"OperationsRestored={operationsToRestore.Count}, " +
+                $"ChangesRestored={restoredChanges.Count}.");
+
+            // --------------------------------------------------------
+            // Re-run Analysis against the physically restored library.
+            // --------------------------------------------------------
+
+            await RefreshAnalysisAfterDuplicateOperationAsync();
+
+            // --------------------------------------------------------
+            // Reload restore points.
+            // --------------------------------------------------------
+
+            await LoadRestorePointsAsync();
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine(
+                $"Unexpected Improve restore failure: {exception}");
+
+            Status =
+                "Restore failed.";
+
+            OperationResult =
+                $"Restore failed.\n\n{exception.Message}";
+        }
+    }
+
+    // ============================================================
+    // Open DIASISS Duplicates Folder
+    // ============================================================
+
     [RelayCommand]
     private void OpenDuplicates()
     {
@@ -536,12 +1021,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Import Metadata
     // ============================================================
 
-    /// <summary>
-    /// Placeholder for importing an edited metadata export.
-    ///
-    /// The actual file-picker and metadata import pipeline will be
-    /// implemented when the Metadata Improve functionality is built.
-    /// </summary>
     [RelayCommand]
     private void ImportMetadata()
     {
@@ -631,6 +1110,40 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
             return;
         }
 
+        // --------------------------------------------------------
+        // Number of files the user has asked Improve to move.
+        // --------------------------------------------------------
+
+        var selectedForMove =
+            duplicateIssues.Sum(
+                issue =>
+                    issue.Results.Count -
+                    issue.SelectedResultIds.Count);
+
+        // --------------------------------------------------------
+        // User confirmation BEFORE making any physical changes
+        // or creating the destination folder.
+        // --------------------------------------------------------
+
+        var confirmationMessage =
+            $"{selectedForMove:N0} files are selected to be moved to the DIASISS Duplicates folder.\n\n" +
+            "This will physically move the files and record the changes so they can be restored later.\n\n" +
+            "Do you want to continue?";
+
+        var confirmed =
+            await RequestConfirmationAsync(
+                "Remove Duplicates",
+                confirmationMessage,
+                "Remove Duplicates");
+
+        if (!confirmed)
+        {
+            Status =
+                "Remove Duplicates cancelled.";
+
+            return;
+        }
+
         try
         {
             Directory.CreateDirectory(destination);
@@ -662,27 +1175,8 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
         var failedCount = 0;
         var skippedCount = 0;
 
-        // --------------------------------------------------------
-        // This is the number of files that the user asked Improve
-        // to move before the operation actually starts.
-        //
-        // It is deliberately captured from the existing Improve
-        // selection summary and is not used as the success count.
-        // --------------------------------------------------------
-
-        var selectedForMove =
-            duplicateIssues.Sum(
-                issue =>
-                    issue.Results.Count -
-                    issue.SelectedResultIds.Count);
-
         foreach (var issue in duplicateIssues)
         {
-            // ----------------------------------------------------
-            // SelectedResultIds contains the files the user chose
-            // to KEEP. Everything else is eligible to be moved.
-            // ----------------------------------------------------
-
             var selectedResultIds =
                 issue.SelectedResultIds
                     .ToHashSet(
@@ -698,11 +1192,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                 var sourcePath =
                     result.FilePath;
 
-                // ------------------------------------------------
-                // No source path means the physical file cannot be
-                // located. Treat this as a missing file.
-                // ------------------------------------------------
-
                 if (string.IsNullOrWhiteSpace(sourcePath))
                 {
                     missingCount++;
@@ -712,12 +1201,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
 
                     continue;
                 }
-
-                // ------------------------------------------------
-                // A physical move must never occur unless the
-                // result has a valid DIASISS MediaId that can be
-                // recorded for recovery.
-                // ------------------------------------------------
 
                 if (string.IsNullOrWhiteSpace(result.MediaId))
                 {
@@ -746,11 +1229,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                             destination,
                             Path.GetFileName(sourcePath));
 
-                    // ------------------------------------------------
-                    // If the file is already in the destination folder
-                    // at the same path, there is nothing to do.
-                    // ------------------------------------------------
-
                     if (PathsEqual(
                         sourcePath,
                         destinationPath))
@@ -759,20 +1237,9 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                         continue;
                     }
 
-                    // ------------------------------------------------
-                    // Physical move.
-                    // ------------------------------------------------
-
                     MoveFile(
                         sourcePath,
                         destinationPath);
-
-                    // ------------------------------------------------
-                    // The physical move succeeded.
-                    //
-                    // Record the exact before/after paths together
-                    // with the authoritative DIASISS MediaId.
-                    // ------------------------------------------------
 
                     try
                     {
@@ -789,14 +1256,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                     }
                     catch (Exception recordException)
                     {
-                        // ------------------------------------------------
-                        // The physical change succeeded but the recovery
-                        // record could not be persisted.
-                        //
-                        // Attempt to restore the physical file immediately
-                        // so that we do not leave an unrecorded change.
-                        // ------------------------------------------------
-
                         failedCount++;
 
                         Debug.WriteLine(
@@ -847,10 +1306,7 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
         }
 
         // --------------------------------------------------------
-        // Update the Operation Result with what ACTUALLY happened.
-        //
-        // This is deliberately separate from Status, which contains
-        // the pre-operation Improve summary.
+        // Operation Result
         // --------------------------------------------------------
 
         OperationResult =
@@ -865,12 +1321,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                 $"\n{skippedCount:N0} files were skipped.";
         }
 
-        // --------------------------------------------------------
-        // The physical files have changed, but SearchState remains
-        // the record of the user's Search decisions. Do not rebuild
-        // or overwrite Search results here.
-        // --------------------------------------------------------
-
         Debug.WriteLine(
             $"Duplicate Improve complete. OperationId={operationId}, " +
             $"SelectedForMove={selectedForMove}, " +
@@ -881,15 +1331,15 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
 
         // --------------------------------------------------------
         // Automatic post-operation Analysis refresh.
-        //
-        // The library has now physically changed, so run Analysis
-        // against the current library state.
-        //
-        // This deliberately does NOT replace SearchState.
-        // SearchState remains the user's original Search decisions.
         // --------------------------------------------------------
 
         await RefreshAnalysisAfterDuplicateOperationAsync();
+
+        // --------------------------------------------------------
+        // Refresh restore points.
+        // --------------------------------------------------------
+
+        await LoadRestorePointsAsync();
     }
 
     // ============================================================
@@ -915,30 +1365,11 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                     .Analysis
                     .AnalyseLibraryAsync();
 
-            // --------------------------------------------------------
-            // Persist the newly completed analysis so the rest of the
-            // application has the current library state available.
-            // --------------------------------------------------------
-
             App.Services
                 .AnalysisRepository
                 .Save(analysis);
 
-            // --------------------------------------------------------
-            // Update the Improve category counts from the newly saved
-            // Analysis.
-            //
-            // This is the same source used when Improve is first
-            // opened, and matches the Search Workspace.
-            // --------------------------------------------------------
-
             UpdateCategoryCounts();
-
-            // --------------------------------------------------------
-            // Refresh the current category's displayed state where
-            // the fresh Analysis result can provide an authoritative
-            // current count.
-            // --------------------------------------------------------
 
             var duplicatesAnalysis =
                 analysis.Categories.FirstOrDefault(
@@ -985,15 +1416,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
         }
         catch (Exception exception)
         {
-            // --------------------------------------------------------
-            // The Duplicate operation itself has already completed.
-            //
-            // A failure here must not undo the completed FileChanges
-            // records or physical moves. Report the refresh failure
-            // separately so the user knows the operation succeeded but
-            // the automatic Analysis refresh did not.
-            // --------------------------------------------------------
-
             Debug.WriteLine(
                 $"Automatic Analysis refresh after Duplicate Improve failed: {exception}");
 
@@ -1006,16 +1428,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Get Unique Destination Path
     // ============================================================
 
-    /// <summary>
-    /// Creates a destination path that will not overwrite an
-    /// existing file.
-    ///
-    /// Example:
-    ///
-    /// Track.mp3
-    /// Track (1).mp3
-    /// Track (2).mp3
-    /// </summary>
     private static string GetUniqueDestinationPath(
         string destinationDirectory,
         string fileName)
@@ -1054,20 +1466,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Move File
     // ============================================================
 
-    /// <summary>
-    /// Moves a file to the destination.
-    ///
-    /// File.Move is used first so that files on the same volume
-    /// are moved without an unnecessary copy.
-    ///
-    /// If the move fails because the source and destination are
-    /// on different volumes, the operation falls back to:
-    ///
-    /// Copy -> verify destination -> Delete source
-    ///
-    /// This allows the DIASISS Duplicates folder to reside on a
-    /// different drive from the original music file.
-    /// </summary>
     private static void MoveFile(
         string sourcePath,
         string destinationPath)
@@ -1082,21 +1480,14 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
         }
         catch (IOException)
         {
-            // ----------------------------------------------------
             // File.Move can fail when source and destination are
-            // located on different volumes. Fall through to the
-            // copy/delete implementation.
-            // ----------------------------------------------------
+            // located on different volumes. Fall through to copy/delete.
         }
 
         File.Copy(
             sourcePath,
             destinationPath,
             overwrite: false);
-
-        // --------------------------------------------------------
-        // Verify the destination exists before deleting the source.
-        // --------------------------------------------------------
 
         if (!File.Exists(destinationPath))
         {
@@ -1112,10 +1503,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Compare Paths
     // ============================================================
 
-    /// <summary>
-    /// Determines whether two file paths refer to the same physical
-    /// path.
-    /// </summary>
     private static bool PathsEqual(
         string firstPath,
         string secondPath)
@@ -1152,9 +1539,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Go Back
     // ============================================================
 
-    /// <summary>
-    /// Returns to the Search workspace.
-    /// </summary>
     [RelayCommand]
     private void Previous()
     {
@@ -1168,9 +1552,6 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     // Next
     // ============================================================
 
-    /// <summary>
-    /// Moves to the Structure workflow.
-    /// </summary>
     [RelayCommand]
     private void Next()
     {
@@ -1178,5 +1559,57 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
             .ApplicationState
             .NavigateTo(
                 WorkspaceType.Structure);
+    }
+
+    // ============================================================
+    // Restore Point Model
+    // ============================================================
+
+    /// <summary>
+    /// Represents one completed Improve operation that can be used
+    /// as a Restore Changes point.
+    ///
+    /// RestorePointInfo deliberately contains only information
+    /// needed to identify and display the operation at this stage.
+    /// It does not perform any restore operation itself.
+    /// </summary>
+    public sealed class RestorePointInfo
+    {
+        public string OperationId { get; }
+
+        public DateTime ChangedDate { get; }
+
+        public int ChangeCount { get; }
+
+        public int OperationsToRestore { get; }
+
+        public int ChangesToRestore { get; }
+
+        public string DisplayDate =>
+            ChangedDate == DateTime.MinValue
+                ? "Unknown date"
+                : ChangedDate
+                    .ToLocalTime()
+                    .ToString("dd/MM/yyyy HH:mm:ss");
+
+        public string DisplaySummary =>
+            $"{DisplayDate} — {ChangeCount:N0} changes";
+
+        public string DisplayRestoreSummary =>
+            $"{OperationsToRestore:N0} operations — {ChangesToRestore:N0} changes will be restored";
+
+        public RestorePointInfo(
+            string operationId,
+            DateTime changedDate,
+            int changeCount,
+            int operationsToRestore,
+            int changesToRestore)
+        {
+            OperationId = operationId;
+            ChangedDate = changedDate;
+            ChangeCount = changeCount;
+            OperationsToRestore = operationsToRestore;
+            ChangesToRestore = changesToRestore;
+        }
     }
 }
