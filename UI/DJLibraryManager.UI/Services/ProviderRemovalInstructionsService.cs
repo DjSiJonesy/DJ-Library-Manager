@@ -41,7 +41,8 @@ public sealed class ProviderRemovalInstructionsService
                     "Open Browser Options.",
                     "Select Database.",
                     "Select Remove missing files from Search DB.",
-                    "Return to DIASISS and run Analyse Library again."
+                    "Return to DIASISS and Re-Import Virtual DJ Library again.",
+                    "Re-Run the Analysis within DIASISS."
                 });
         }
 
