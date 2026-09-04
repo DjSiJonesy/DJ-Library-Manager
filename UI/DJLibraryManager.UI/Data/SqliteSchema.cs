@@ -26,6 +26,9 @@ public sealed class SqliteSchema
     /// <summary>
     /// Creates the DIASISS SQLite schema if it does not
     /// already exist.
+    ///
+    /// Existing databases are upgraded in-place where
+    /// required. Existing data is preserved.
     /// </summary>
     public void EnsureCreated()
     {
@@ -54,6 +57,10 @@ public sealed class SqliteSchema
                 transaction);
 
             CreateFileChangesTable(
+                connection,
+                transaction);
+
+            UpgradeFileChangesTable(
                 connection,
                 transaction);
 
@@ -282,19 +289,26 @@ public sealed class SqliteSchema
     /// <summary>
     /// Creates the shared FileChanges table.
     ///
-    /// FileChanges records physical file changes made by workflow
-    /// stages such as Improve and Structure.
+    /// FileChanges records changes made by workflow stages such
+    /// as Improve and Structure.
     ///
-    /// Each operation receives its own OperationId and identifies
-    /// the workflow stage which created the change.
+    /// Physical file changes use:
+    ///
+    ///     OriginalPath
+    ///     NewPath
+    ///
+    /// Provider database changes may additionally use:
+    ///
+    ///     ProviderId
+    ///     ProviderDatabasePath
+    ///     ProviderRecordData
+    ///
+    /// The provider-specific fields are nullable so existing
+    /// physical file-change records remain unchanged.
     ///
     /// MediaId is the authoritative DIASISS GUID for the media
-    /// record and is used to verify that a rollback is acting on
-    /// the correct media item.
-    ///
-    /// OriginalPath and NewPath record the physical movement.
-    ///
-    /// Status records the outcome of the change.
+    /// record and is used to associate a change with the correct
+    /// media item.
     /// </summary>
     private static void CreateFileChangesTable(
         SqliteConnection connection,
@@ -335,15 +349,150 @@ public sealed class SqliteSchema
                     TEXT NOT NULL,
 
                 ChangedDate
-                    TEXT NOT NULL
+                    TEXT NOT NULL,
+
+                ProviderId
+                    INTEGER NULL,
+
+                ProviderDatabasePath
+                    TEXT NULL,
+
+                ProviderRecordData
+                    TEXT NULL
             );
             """;
 
         command.ExecuteNonQuery();
 
+        // Do not create the FileChanges indexes here.
+        //
+        // Existing databases may have an older FileChanges table
+        // without the provider-specific columns. The upgrade must
+        // add those columns before the indexes reference them.
+    }
+
+    // ============================================================
+    // File Changes Upgrade
+    // ============================================================
+
+    /// <summary>
+    /// Upgrades an existing FileChanges table in-place.
+    ///
+    /// The application previously created FileChanges with only
+    /// physical file-change fields. Provider database changes now
+    /// require additional nullable fields.
+    ///
+    /// SQLite cannot add columns through CREATE TABLE IF NOT EXISTS,
+    /// so existing databases are checked and upgraded here.
+    ///
+    /// Existing rows are preserved.
+    /// </summary>
+    private static void UpgradeFileChangesTable(
+        SqliteConnection connection,
+        SqliteTransaction transaction)
+    {
+        if (!ColumnExists(
+                connection,
+                transaction,
+                "FileChanges",
+                "ProviderId"))
+        {
+            AddColumn(
+                connection,
+                transaction,
+                "FileChanges",
+                "ProviderId INTEGER NULL");
+        }
+
+        if (!ColumnExists(
+                connection,
+                transaction,
+                "FileChanges",
+                "ProviderDatabasePath"))
+        {
+            AddColumn(
+                connection,
+                transaction,
+                "FileChanges",
+                "ProviderDatabasePath TEXT NULL");
+        }
+
+        if (!ColumnExists(
+                connection,
+                transaction,
+                "FileChanges",
+                "ProviderRecordData"))
+        {
+            AddColumn(
+                connection,
+                transaction,
+                "FileChanges",
+                "ProviderRecordData TEXT NULL");
+        }
+
+        // The columns now definitely exist, so it is safe to create
+        // the complete FileChanges index set.
         CreateFileChangeIndexes(
             connection,
             transaction);
+    }
+
+    private static bool ColumnExists(
+        SqliteConnection connection,
+        SqliteTransaction transaction,
+        string tableName,
+        string columnName)
+    {
+        using var command =
+            connection.CreateCommand();
+
+        command.Transaction =
+            transaction;
+
+        command.CommandText =
+            $"""
+            PRAGMA table_info({tableName});
+            """;
+
+        using var reader =
+            command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var existingColumnName =
+                reader.GetString(1);
+
+            if (string.Equals(
+                    existingColumnName,
+                    columnName,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void AddColumn(
+        SqliteConnection connection,
+        SqliteTransaction transaction,
+        string tableName,
+        string columnDefinition)
+    {
+        using var command =
+            connection.CreateCommand();
+
+        command.Transaction =
+            transaction;
+
+        command.CommandText =
+            $"""
+            ALTER TABLE {tableName}
+            ADD COLUMN {columnDefinition};
+            """;
+
+        command.ExecuteNonQuery();
     }
 
     // ============================================================
@@ -441,7 +590,7 @@ public sealed class SqliteSchema
 
     /// <summary>
     /// Creates indexes used by Improve and Structure when
-    /// locating and rolling back file changes.
+    /// locating and rolling back changes.
     /// </summary>
     private static void CreateFileChangeIndexes(
         SqliteConnection connection,
@@ -479,6 +628,11 @@ public sealed class SqliteSchema
                 ON FileChanges(
                     Stage,
                     OperationId
+                );
+
+            CREATE INDEX IF NOT EXISTS IX_FileChanges_ProviderId
+                ON FileChanges(
+                    ProviderId
                 );
             """;
 

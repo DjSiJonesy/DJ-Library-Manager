@@ -30,6 +30,17 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
 {
     public event Func<string, string, string, Task<bool>>? ConfirmationRequested;
 
+    /// <summary>
+    /// Raised when the user requests to view the provider-specific
+    /// instructions for cleaning up Missing File records.
+    ///
+    /// This is a read-only operation. DIASISS does not modify
+    /// Provider databases.
+    /// </summary>
+    public event Func<
+        IReadOnlyCollection<ProviderRemovalInstructions>,
+        Task>? RemovalInstructionsRequested;
+
     private async Task<bool> RequestConfirmationAsync(
         string title,
         string message,
@@ -124,6 +135,26 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
     private string operationResult = "No operation has been run.";
 
     // ============================================================
+    // Missing File Provider Instructions
+    // ============================================================
+
+    /// <summary>
+    /// Provider-specific instructions required to remove the missing
+    /// file records identified by Search.
+    ///
+    /// DIASISS does not modify provider databases directly.
+    /// </summary>
+    public ObservableCollection<ProviderRemovalInstructions> ProviderRemovalInstructions { get; }
+        = new();
+
+    /// <summary>
+    /// Indicates whether provider removal instructions are currently
+    /// being prepared.
+    /// </summary>
+    [ObservableProperty]
+    private bool isLoadingProviderRemovalInstructions;
+
+    // ============================================================
     // Category Visibility
     // ============================================================
 
@@ -184,7 +215,7 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                 Name = "Missing Files",
                 Icon = "⚠️",
                 Description =
-                    "Remove missing file records from the relevant Provider data."
+                    "View instructions for removing missing file records from the relevant Provider application."
             });
 
         Categories.Add(
@@ -259,6 +290,7 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
         if (IsMissingFilesCategory)
         {
             LoadMissingFilesSummary(search);
+            _ = LoadMissingFileProviderInstructionsAsync(search);
             return;
         }
 
@@ -398,7 +430,91 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                         StringComparison.OrdinalIgnoreCase));
 
         Status =
-            $"{missingFileCount:N0} Missing files ready to remove.";
+            $"{missingFileCount:N0} Missing files ready for provider cleanup.";
+    }
+
+    // ============================================================
+    // Load Missing File Provider Instructions
+    // ============================================================
+
+    /// <summary>
+    /// Resolves the providers associated with the missing-file Search
+    /// issues and prepares the corresponding provider-specific removal
+    /// instructions.
+    ///
+    /// This is read-only. No provider database is modified.
+    /// </summary>
+    private async Task LoadMissingFileProviderInstructionsAsync(
+        SearchState search)
+    {
+        try
+        {
+            IsLoadingProviderRemovalInstructions = true;
+
+            ProviderRemovalInstructions.Clear();
+
+            var missingFileIssues =
+                search.Issues
+                    .Where(
+                        issue =>
+                            string.Equals(
+                                issue.Category,
+                                "File Integrity",
+                                StringComparison.OrdinalIgnoreCase))
+                    .Where(
+                        issue =>
+                            !string.IsNullOrWhiteSpace(
+                                issue.MediaId))
+                    .ToList();
+
+            var providerNames =
+                new HashSet<string>(
+                    StringComparer.OrdinalIgnoreCase);
+
+            foreach (var issue in missingFileIssues)
+            {
+                var names =
+                    await App.Services.LibraryRepository
+                        .GetProviderNamesForMediaAsync(
+                            issue.MediaId);
+
+                foreach (var providerName in names)
+                {
+                    if (!string.IsNullOrWhiteSpace(providerName))
+                    {
+                        providerNames.Add(providerName);
+                    }
+                }
+            }
+
+            var instructionsService =
+                new ProviderRemovalInstructionsService();
+
+            foreach (var providerName in
+                     providerNames.OrderBy(
+                         name => name,
+                         StringComparer.OrdinalIgnoreCase))
+            {
+                var instructions =
+                    instructionsService.GetInstructions(
+                        providerName);
+
+                if (instructions is not null)
+                {
+                    ProviderRemovalInstructions.Add(
+                        instructions);
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine(
+                $"Failed to load Missing File provider instructions: {exception}");
+        }
+        finally
+        {
+            IsLoadingProviderRemovalInstructions = false;
+        }
     }
 
     // ============================================================
@@ -543,6 +659,8 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
         DuplicatesToKeep = 0;
         DuplicatesToMove = 0;
 
+        ProviderRemovalInstructions.Clear();
+
         foreach (var category in Categories)
         {
             category.Count = 0;
@@ -579,6 +697,46 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
 
         SelectedRestorePoint =
             restorePoint;
+    }
+
+    // ============================================================
+    // View Missing File Removal Instructions
+    // ============================================================
+
+    /// <summary>
+    /// Requests that the Improve view display the provider-specific
+    /// removal instructions for the Missing Files category.
+    ///
+    /// This is a read-only operation. DIASISS does not modify any
+    /// Provider database or remove any Provider records.
+    /// </summary>
+    [RelayCommand]
+    private async Task ViewRemovalInstructions()
+    {
+        if (!IsMissingFilesCategory)
+            return;
+
+        if (IsLoadingProviderRemovalInstructions)
+        {
+            Status =
+                "Provider removal instructions are still being prepared.";
+
+            return;
+        }
+
+        if (ProviderRemovalInstructions.Count == 0)
+        {
+            Status =
+                "No provider-specific removal instructions are currently available.";
+
+            return;
+        }
+
+        if (RemovalInstructionsRequested is null)
+            return;
+
+        await RemovalInstructionsRequested(
+            ProviderRemovalInstructions);
     }
 
     // ============================================================
@@ -1406,7 +1564,7 @@ public partial class ImproveWorkspaceViewModel : WorkspaceViewModel
                 missingFilesAnalysis is not null)
             {
                 Status =
-                    $"{missingFilesAnalysis.IssueCount:N0} Missing files ready to remove.";
+                    $"{missingFilesAnalysis.IssueCount:N0} Missing files ready for provider cleanup.";
             }
 
             Debug.WriteLine(

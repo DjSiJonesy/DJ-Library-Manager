@@ -10,15 +10,23 @@ using Microsoft.Data.Sqlite;
 namespace DJLibraryManager.UI.Services;
 
 /// <summary>
-/// Provides persistence for physical file changes made by the
-/// Improve and Structure workflow stages.
+/// Provides persistence for changes made by the Improve and Structure
+/// workflow stages.
 ///
-/// FileChanges is shared by both workflow stages, but every record
-/// identifies the stage which created it. This allows Improve and
-/// Structure to maintain completely independent rollback operations.
+/// FileChanges can record both:
+///
+///     Physical file changes
+///     Provider database changes
+///
+/// Physical file changes use OriginalPath and NewPath.
+///
+/// Provider database changes additionally record the ProviderId,
+/// ProviderDatabasePath and ProviderRecordData required to identify
+/// and recover the provider database change.
 ///
 /// This repository records and retrieves change information only.
-/// It does not perform physical file operations.
+/// It does not perform physical file operations or provider database
+/// operations.
 /// </summary>
 public sealed class FileChangeRepository
 {
@@ -35,11 +43,14 @@ public sealed class FileChangeRepository
     }
 
     // ============================================================
-    // Record Change
+    // Record Physical File Change
     // ============================================================
 
     /// <summary>
     /// Records a physical file change.
+    ///
+    /// This method is used by operations such as Duplicate removal
+    /// and Structure.
     ///
     /// MediaId is the authoritative DIASISS media GUID.
     ///
@@ -94,6 +105,9 @@ public sealed class FileChangeRepository
                     MediaId,
                     OriginalPath,
                     NewPath,
+                    ProviderId,
+                    ProviderDatabasePath,
+                    ProviderRecordData,
                     Status,
                     ChangedDate
                 )
@@ -105,6 +119,9 @@ public sealed class FileChangeRepository
                     $mediaId,
                     $originalPath,
                     $newPath,
+                    NULL,
+                    NULL,
+                    NULL,
                     $status,
                     $changedDate
                 );
@@ -133,6 +150,144 @@ public sealed class FileChangeRepository
             command.Parameters.AddWithValue(
                 "$newPath",
                 newPath);
+
+            command.Parameters.AddWithValue(
+                "$status",
+                status);
+
+            command.Parameters.AddWithValue(
+                "$changedDate",
+                DateTime.UtcNow.ToString("O"));
+
+            command.ExecuteNonQuery();
+        });
+    }
+
+    // ============================================================
+    // Record Provider Database Change
+    // ============================================================
+
+    /// <summary>
+    /// Records a provider database change.
+    ///
+    /// Provider database changes are separate from physical file
+    /// movements. The provider identity, provider database path and
+    /// original provider record data are retained so the operation
+    /// can be recovered later.
+    /// </summary>
+    public async Task RecordProviderChangeAsync(
+        string operationId,
+        string stage,
+        string changeType,
+        string mediaId,
+        string originalPath,
+        long providerId,
+        string providerDatabasePath,
+        string providerRecordData,
+        string status)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            operationId);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            stage);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            changeType);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            mediaId);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            originalPath);
+
+        if (providerId <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(providerId),
+                "A valid ProviderId is required.");
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            providerDatabasePath);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            providerRecordData);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            status);
+
+        await Task.Run(() =>
+        {
+            using var connection =
+                _database.OpenConnection();
+
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText =
+                """
+                INSERT INTO FileChanges
+                (
+                    OperationId,
+                    Stage,
+                    ChangeType,
+                    MediaId,
+                    OriginalPath,
+                    NewPath,
+                    ProviderId,
+                    ProviderDatabasePath,
+                    ProviderRecordData,
+                    Status,
+                    ChangedDate
+                )
+                VALUES
+                (
+                    $operationId,
+                    $stage,
+                    $changeType,
+                    $mediaId,
+                    $originalPath,
+                    '',
+                    $providerId,
+                    $providerDatabasePath,
+                    $providerRecordData,
+                    $status,
+                    $changedDate
+                );
+                """;
+
+            command.Parameters.AddWithValue(
+                "$operationId",
+                operationId);
+
+            command.Parameters.AddWithValue(
+                "$stage",
+                stage);
+
+            command.Parameters.AddWithValue(
+                "$changeType",
+                changeType);
+
+            command.Parameters.AddWithValue(
+                "$mediaId",
+                mediaId);
+
+            command.Parameters.AddWithValue(
+                "$originalPath",
+                originalPath);
+
+            command.Parameters.AddWithValue(
+                "$providerId",
+                providerId);
+
+            command.Parameters.AddWithValue(
+                "$providerDatabasePath",
+                providerDatabasePath);
+
+            command.Parameters.AddWithValue(
+                "$providerRecordData",
+                providerRecordData);
 
             command.Parameters.AddWithValue(
                 "$status",
@@ -178,6 +333,9 @@ public sealed class FileChangeRepository
                     MediaId,
                     OriginalPath,
                     NewPath,
+                    ProviderId,
+                    ProviderDatabasePath,
+                    ProviderRecordData,
                     Status,
                     ChangedDate
 
@@ -232,6 +390,9 @@ public sealed class FileChangeRepository
                     MediaId,
                     OriginalPath,
                     NewPath,
+                    ProviderId,
+                    ProviderDatabasePath,
+                    ProviderRecordData,
                     Status,
                     ChangedDate
 
@@ -285,6 +446,9 @@ public sealed class FileChangeRepository
                     MediaId,
                     OriginalPath,
                     NewPath,
+                    ProviderId,
+                    ProviderDatabasePath,
+                    ProviderRecordData,
                     Status,
                     ChangedDate
 
@@ -341,6 +505,9 @@ public sealed class FileChangeRepository
                     MediaId,
                     OriginalPath,
                     NewPath,
+                    ProviderId,
+                    ProviderDatabasePath,
+                    ProviderRecordData,
                     Status,
                     ChangedDate
 
@@ -372,9 +539,6 @@ public sealed class FileChangeRepository
 
     /// <summary>
     /// Updates the status of an existing change.
-    ///
-    /// This is useful when a change initially needs to be recorded
-    /// and its final outcome is determined afterwards.
     /// </summary>
     public async Task UpdateStatusAsync(
         long changeId,
@@ -483,6 +647,18 @@ public sealed class FileChangeRepository
     private static FileChangeRecord ReadChange(
         SqliteDataReader reader)
     {
+        var providerIdOrdinal =
+            reader.GetOrdinal(
+                "ProviderId");
+
+        var providerDatabasePathOrdinal =
+            reader.GetOrdinal(
+                "ProviderDatabasePath");
+
+        var providerRecordDataOrdinal =
+            reader.GetOrdinal(
+                "ProviderRecordData");
+
         return new FileChangeRecord
         {
             ChangeId =
@@ -519,6 +695,27 @@ public sealed class FileChangeRepository
                 reader.GetString(
                     reader.GetOrdinal(
                         "NewPath")),
+
+            ProviderId =
+                reader.IsDBNull(
+                    providerIdOrdinal)
+                    ? null
+                    : reader.GetInt64(
+                        providerIdOrdinal),
+
+            ProviderDatabasePath =
+                reader.IsDBNull(
+                    providerDatabasePathOrdinal)
+                    ? null
+                    : reader.GetString(
+                        providerDatabasePathOrdinal),
+
+            ProviderRecordData =
+                reader.IsDBNull(
+                    providerRecordDataOrdinal)
+                    ? null
+                    : reader.GetString(
+                        providerRecordDataOrdinal),
 
             Status =
                 reader.GetString(

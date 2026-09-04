@@ -312,7 +312,6 @@
                             ColumnDefinitions="*,*"
                             ColumnSpacing="16">
 
-
                             <!-- ========================================= -->
                             <!-- Operation Result -->
                             <!-- ========================================= -->
@@ -353,25 +352,17 @@
                                     RowDefinitions="Auto,Auto,Auto,Auto"
                                     RowSpacing="8">
 
-                                    <!-- Heading -->
-
                                     <TextBlock
                                         Grid.Row="0"
                                         Text="Restore Changes"
                                         FontSize="14"
                                         FontWeight="SemiBold"/>
 
-
-                                    <!-- Explanation -->
-
                                     <TextBlock
                                         Grid.Row="1"
                                         Text="Select the point in time from which changes should be restored. The selected operation and every operation after it will be restored. Earlier operations will remain unchanged."
                                         FontSize="11"
                                         TextWrapping="Wrap"/>
-
-
-                                    <!-- Restore Point -->
 
                                     <Grid
                                         Grid.Row="2"
@@ -407,9 +398,6 @@
                                         </ComboBox>
 
                                     </Grid>
-
-
-                                    <!-- Restore Preview -->
 
                                     <Border
                                         Grid.Row="3"
@@ -503,14 +491,14 @@
                             Grid.Row="0"
                             Classes="heading"
                             HorizontalAlignment="Center"
-                            Text="Missing Files Ready to Remove"/>
+                            Text="Missing Files Found"/>
 
                         <TextBlock
                             Grid.Row="2"
                             FontSize="13"
                             TextAlignment="Center"
                             HorizontalAlignment="Center"
-                            Text="Missing-file records identified during Search will be removed from the relevant Provider data."
+                            Text="DIASISS has identified provider records for files that are no longer present at their recorded locations."
                             TextWrapping="Wrap"/>
 
                         <Grid
@@ -528,17 +516,17 @@
                                     <TextBlock
                                         FontSize="14"
                                         FontWeight="SemiBold"
-                                        Text="Missing File Removal"/>
+                                        Text="Provider Cleanup"/>
 
                                     <TextBlock
                                         Classes="caption"
-                                        Text="Missing-file records identified during Search will be removed from the relevant Provider data."
+                                        Text="DIASISS does not modify Provider databases. The missing-file records must be removed using the originating DJ application's own database tools."
                                         TextWrapping="Wrap"/>
 
                                     <TextBlock
                                         Classes="caption"
                                         Margin="0,8,0,0"
-                                        Text="Improve will remove the records when the operation is confirmed."
+                                        Text="Select View Removal Instructions to see the procedure for each affected Provider."
                                         TextWrapping="Wrap"/>
 
                                 </StackPanel>
@@ -563,7 +551,7 @@
                                         <TextBlock
                                             Grid.Column="0"
                                             FontSize="13"
-                                            Text="Missing files ready to remove"
+                                            Text="Missing files identified"
                                             TextWrapping="Wrap"/>
 
                                         <TextBlock
@@ -578,7 +566,7 @@
                                     <TextBlock
                                         Classes="caption"
                                         Margin="0,8,0,0"
-                                        Text="These records will be removed from the relevant Provider data when the operation is confirmed."
+                                        Text="The affected Provider records can be cleaned up using their own database tools."
                                         TextWrapping="Wrap"/>
 
                                 </StackPanel>
@@ -599,12 +587,46 @@
                                 <TextBlock
                                     FontSize="14"
                                     FontWeight="SemiBold"
-                                    Text="Operation Result"/>
+                                    Text="Provider Cleanup Instructions"/>
 
                                 <TextBlock
                                     FontSize="13"
                                     Text="{Binding Status}"
                                     TextWrapping="Wrap"/>
+
+                                <ItemsControl
+                                    Margin="0,8,0,0"
+                                    ItemsSource="{Binding ProviderRemovalInstructions}"
+                                    IsVisible="{Binding ProviderRemovalInstructions.Count}">
+
+                                    <ItemsControl.ItemTemplate>
+
+                                        <DataTemplate>
+
+                                            <Grid
+                                                ColumnDefinitions="Auto,*"
+                                                ColumnSpacing="10"
+                                                Margin="0,2">
+
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    FontSize="12"
+                                                    FontWeight="SemiBold"
+                                                    Text="•"/>
+
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    FontSize="12"
+                                                    TextWrapping="Wrap"
+                                                    Text="{Binding ProviderName}"/>
+
+                                            </Grid>
+
+                                        </DataTemplate>
+
+                                    </ItemsControl.ItemTemplate>
+
+                                </ItemsControl>
 
                             </StackPanel>
 
@@ -628,8 +650,8 @@
 
                             <Button
                                 Theme="{StaticResource DJLM.PrimaryButton}"
-                                Content="Confirm &amp; Apply"
-                                Command="{Binding ConfirmCommand}"/>
+                                Content="View Removal Instructions"
+                                Command="{Binding ViewRemovalInstructionsCommand}"/>
 
                         </StackPanel>
 

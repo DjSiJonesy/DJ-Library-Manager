@@ -1,0 +1,140 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DJLibraryManager.UI.Views.Dialogs"
+    xmlns:improve="using:DJLibraryManager.UI.Models.Improve"
+    x:Class="DJLibraryManager.UI.Views.Dialogs.ProviderRemovalInstructionsDialog"
+    x:DataType="local:ProviderRemovalInstructionsDialog"
+    Width="620"
+    MinWidth="520"
+    SizeToContent="Height"
+    MaxHeight="700"
+    CanResize="True"
+    WindowStartupLocation="CenterOwner"
+    ShowInTaskbar="False">
+
+    <Border
+        Padding="24"
+        Background="{DynamicResource Brush.Background}">
+
+        <Grid
+            RowDefinitions="Auto,Auto,Auto,Auto"
+            RowSpacing="18">
+
+            <TextBlock
+                Grid.Row="0"
+                Text="{Binding DialogTitle}"
+                FontSize="18"
+                FontWeight="SemiBold"
+                TextWrapping="Wrap" />
+
+            <TextBlock
+                Grid.Row="1"
+                Text="{Binding DialogDescription}"
+                FontSize="13"
+                TextWrapping="Wrap"
+                MaxWidth="560" />
+
+            <ScrollViewer
+                Grid.Row="2"
+                MaxHeight="500"
+                VerticalScrollBarVisibility="Auto">
+
+                <ItemsControl
+                    ItemsSource="{Binding Instructions}">
+
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate
+                            x:DataType="improve:ProviderRemovalInstructions">
+
+                            <Border
+                                Margin="0,0,0,16"
+                                Padding="16"
+                                Classes="card-secondary">
+
+                                <StackPanel
+                                    Spacing="10">
+
+                                    <TextBlock
+                                        Text="{Binding Title}"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap" />
+
+                                    <TextBlock
+                                        Text="{Binding ProviderName}"
+                                        FontSize="13"
+                                        FontWeight="SemiBold" />
+
+                                    <TextBlock
+                                        Text="{Binding Description}"
+                                        FontSize="13"
+                                        TextWrapping="Wrap" />
+
+                                    <TextBlock
+                                        Text="Steps"
+                                        FontSize="14"
+                                        FontWeight="SemiBold"
+                                        Margin="0,4,0,0" />
+
+                                    <ItemsControl
+                                        ItemsSource="{Binding Steps}">
+
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+
+                                                <Grid
+                                                    ColumnDefinitions="Auto,*"
+                                                    ColumnSpacing="10"
+                                                    Margin="0,2">
+
+                                                    <TextBlock
+                                                        Grid.Column="0"
+                                                        Text="•"
+                                                        FontSize="13" />
+
+                                                    <TextBlock
+                                                        Grid.Column="1"
+                                                        Text="{Binding}"
+                                                        FontSize="13"
+                                                        TextWrapping="Wrap" />
+
+                                                </Grid>
+
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+
+                                    </ItemsControl>
+
+                                </StackPanel>
+
+                            </Border>
+
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+
+                </ItemsControl>
+
+            </ScrollViewer>
+
+            <Grid
+                Grid.Row="3"
+                ColumnDefinitions="*,Auto"
+                ColumnSpacing="10">
+
+                <Button
+                    Grid.Column="1"
+                    Content="Close"
+                    MinWidth="90"
+                    HorizontalContentAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    IsDefault="True"
+                    Click="Close_Click" />
+
+            </Grid>
+
+        </Grid>
+
+    </Border>
+
+</Window>

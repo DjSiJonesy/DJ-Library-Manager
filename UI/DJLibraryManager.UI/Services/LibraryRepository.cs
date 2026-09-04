@@ -435,6 +435,74 @@ public sealed class LibraryRepository
         });
     }
 
+
+    // ============================================================
+    // Get Providers For Media
+    // ============================================================
+
+    /// <summary>
+    /// Returns every provider associated with the specified DIASISS
+    /// MediaId.
+    ///
+    /// MediaId is the authoritative DIASISS media identity. Provider
+    /// relationships are resolved through MediaProviderIdentities and
+    /// Providers.
+    ///
+    /// This method is read-only and does not modify the library.
+    /// </summary>
+    public async Task<IReadOnlyList<string>> GetProviderNamesForMediaAsync(
+        string mediaId)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(
+            mediaId);
+
+        return await Task.Run(() =>
+        {
+            using var connection =
+                _database.OpenConnection();
+
+            using var command =
+                connection.CreateCommand();
+
+            command.CommandText =
+                """
+            SELECT DISTINCT
+                p.Name
+            FROM MediaProviderIdentities mpi
+            INNER JOIN Providers p
+                ON p.ProviderId = mpi.ProviderId
+            WHERE mpi.MediaId = $mediaId
+            ORDER BY p.Name;
+            """;
+
+            command.Parameters.AddWithValue(
+                "$mediaId",
+                mediaId);
+
+            using var reader =
+                command.ExecuteReader();
+
+            var providers =
+                new List<string>();
+
+            while (reader.Read())
+            {
+                if (!reader.IsDBNull(0))
+                {
+                    var providerName =
+                        reader.GetString(0);
+
+                    if (!string.IsNullOrWhiteSpace(providerName))
+                    {
+                        providers.Add(providerName);
+                    }
+                }
+            }
+
+            return (IReadOnlyList<string>)providers;
+        });
+    }
+
     // ============================================================
     // Add Media
     // ============================================================
